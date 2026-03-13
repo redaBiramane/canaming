@@ -141,7 +141,7 @@ export interface ParsedSql {
 export function parseSqlCreateTable(sql: string): ParsedSql | null {
   // Match CREATE TABLE name (...);
   const match = sql.match(
-    /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)\s*\(([\s\S]*?)\)\s*;?/i
+    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+(?:\.\w+)?)\s*\(([\s\S]*?)\)\s*;?/i
   );
   
   let tableName: string;
