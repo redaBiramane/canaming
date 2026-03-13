@@ -51,7 +51,7 @@ export default function HistoryPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Historique des modifications</h1>
-        <p className="text-muted-foreground mt-1">{history.length} entrée(s) dans l'historique</p>
+        <p className="text-muted-foreground mt-1">{filteredHistory.length} entrée(s) dans l'historique</p>
       </div>
 
       {history.length === 0 ? (
