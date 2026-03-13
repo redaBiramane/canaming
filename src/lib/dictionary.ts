@@ -16,7 +16,7 @@ export interface HistoryEntry {
   id: string;
   date: string;
   auteur: string;
-  action: "ajout" | "modification" | "suppression" | "import";
+  action: "ajout" | "modification" | "suppression" | "import" | "transformation" | "analyse_sql" | "signalement";
   terme: string;
   ancienne_valeur?: string;
   nouvelle_valeur?: string;
