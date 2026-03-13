@@ -163,6 +163,12 @@ export default function SignalementsPage() {
             <SelectItem value="rejeté">Rejetés</SelectItem>
           </SelectContent>
         </Select>
+        <Button variant="outline" size="sm" className="gap-1" onClick={() => exportSignalements("xlsx")}>
+          <Download className="h-3.5 w-3.5" /> Excel
+        </Button>
+        <Button variant="outline" size="sm" className="gap-1" onClick={() => exportSignalements("csv")}>
+          <Download className="h-3.5 w-3.5" /> CSV
+        </Button>
       </motion.div>
 
       {/* Table */}
