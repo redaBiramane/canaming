@@ -99,7 +99,7 @@ export default function AdminPage() {
 
   const handleDelete = (id: string) => {
     if (confirm("Supprimer ce terme du dictionnaire ?")) {
-      deleteEntry(id, "admin");
+      deleteEntry(id, user?.email || "admin");
       toast.success("Terme supprimé");
     }
   };
