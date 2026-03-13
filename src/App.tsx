@@ -43,6 +43,7 @@ function AppRoutes() {
         <Route path="/rename" element={<RenamePage />} />
         <Route path="/sql" element={<SqlPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/signalements" element={<SignalementsPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFound />} />

@@ -22,6 +22,7 @@ const mainItems = [
 
 const adminItems = [
   { title: "Dictionnaire", url: "/admin", icon: BookOpen },
+  { title: "Signalements", url: "/signalements", icon: Flag },
   { title: "Historique", url: "/history", icon: History },
   { title: "Paramètres", url: "/settings", icon: Settings },
 ];
