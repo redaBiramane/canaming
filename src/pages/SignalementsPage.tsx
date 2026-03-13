@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Flag, Plus, XCircle, CheckCircle2, Clock, Search, Filter, Check,
+  Flag, Plus, XCircle, CheckCircle2, Clock, Search, Filter, Check, Download,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -105,6 +106,21 @@ export default function SignalementsPage() {
     toast.info(`Signalement de "${mot}" rejeté`);
   };
 
+  const exportSignalements = (format: "xlsx" | "csv") => {
+    const data = filtered.map((s) => ({
+      Mot: s.mot,
+      Contexte: s.contexte,
+      "Signalé par": s.auteur,
+      Date: new Date(s.date).toLocaleDateString("fr-FR"),
+      Statut: statusConfig[s.statut]?.label || s.statut,
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Signalements");
+    XLSX.writeFile(wb, `signalements.${format === "csv" ? "csv" : "xlsx"}`, { bookType: format === "csv" ? "csv" : "xlsx" });
+    toast.success(`Export ${format.toUpperCase()} téléchargé`);
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
@@ -162,6 +178,12 @@ export default function SignalementsPage() {
             <SelectItem value="rejeté">Rejetés</SelectItem>
           </SelectContent>
         </Select>
+        <Button variant="outline" size="sm" className="gap-1" onClick={() => exportSignalements("xlsx")}>
+          <Download className="h-3.5 w-3.5" /> Excel
+        </Button>
+        <Button variant="outline" size="sm" className="gap-1" onClick={() => exportSignalements("csv")}>
+          <Download className="h-3.5 w-3.5" /> CSV
+        </Button>
       </motion.div>
 
       {/* Table */}
