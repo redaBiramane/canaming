@@ -119,7 +119,7 @@ export default function AdminPage() {
       if (result.warnings.length > 0) {
         result.warnings.forEach((w) => toast.warning(w));
       }
-      importDictionary(result.entries, "admin");
+      importDictionary(result.entries, user?.email || "admin");
       toast.success(`${result.entries.length} termes importés`);
     };
     input.click();
