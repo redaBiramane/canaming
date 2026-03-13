@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import logoCA from "@/assets/logo-ca.png";
 
 const mainItems = [
   { title: "Accueil", url: "/", icon: Home },
@@ -35,13 +36,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">CA</span>
-          </div>
+          <img src={logoCA} alt="CA Personal Finance & Mobility" className="h-8 w-auto flex-shrink-0" />
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-sidebar-foreground truncate">CA Naming Studio</p>
-              <p className="text-xs text-muted-foreground truncate">Normalisation SQL</p>
+              <p className="text-xs text-muted-foreground truncate">Naming Studio</p>
             </div>
           )}
           {!collapsed && (
