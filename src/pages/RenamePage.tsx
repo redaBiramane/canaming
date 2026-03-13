@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus, Trash2, CheckCircle2, AlertTriangle, HelpCircle, ArrowRight, Copy, Download } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, AlertTriangle, HelpCircle, ArrowRight, Copy, Download, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/useStore";
@@ -32,7 +32,7 @@ const statusBadge = {
 };
 
 export default function RenamePage() {
-  const { dictionary, incrementTransformations, addHistoryEntry } = useAppStore();
+  const { dictionary, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
   const { user } = useAuth();
   const [columns, setColumns] = useState<string[]>([""]);
   const [results, setResults] = useState<TransformResult[]>([]);
@@ -163,6 +163,7 @@ export default function RenamePage() {
                   <th className="text-left p-3 font-medium text-muted-foreground">Statut</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">Confiance</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">Détail</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -194,6 +195,22 @@ export default function RenamePage() {
                           {d.original}→{d.transformed}
                         </span>
                       ))}
+                    </td>
+                    <td className="p-3">
+                      {r.details.some((d) => d.status === "inconnu") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 gap-1 text-xs"
+                          onClick={() => {
+                            const unknowns = r.details.filter((d) => d.status === "inconnu");
+                            unknowns.forEach((d) => signalerMot(d.original, r.original, user?.email || "utilisateur"));
+                            toast.success(`${unknowns.length} mot(s) signalé(s)`);
+                          }}
+                        >
+                          <Flag className="h-3 w-3" /> Signaler
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
