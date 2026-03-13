@@ -11,6 +11,7 @@ import SqlPage from "./pages/SqlPage";
 import AdminPage from "./pages/AdminPage";
 import HistoryPage from "./pages/HistoryPage";
 import SettingsPage from "./pages/SettingsPage";
+import SignalementsPage from "./pages/SignalementsPage";
 import DashboardPage from "./pages/DashboardPage";
 import NotFound from "./pages/NotFound";
 
