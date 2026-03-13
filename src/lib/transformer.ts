@@ -147,7 +147,7 @@ export function transformColumn(
   else if (hasUnknown) status = "inconnu";
   else if (hasAmbiguous) status = "ambigu";
 
-  return { original: columnName, transformed, status, details: mappings, confidence };
+  return { original: cleanName, transformed, status, details: mappings, confidence };
 }
 
 /**
