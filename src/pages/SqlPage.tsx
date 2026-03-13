@@ -47,7 +47,7 @@ export default function SqlPage() {
     const unknowns = res.filter((r) => r.status === "inconnu").length;
     incrementTransformations(res.length, unknowns);
     addHistoryEntry({
-      auteur: "utilisateur",
+      auteur: user?.email || "utilisateur",
       action: "analyse_sql",
       terme: `Table ${p.tableName} (${p.columns.length} col.)`,
       nouvelle_valeur: `${p.columns.length - unknowns} OK, ${unknowns} inconnu(s)`,

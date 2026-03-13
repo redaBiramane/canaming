@@ -90,7 +90,7 @@ export default function AdminPage() {
         synonymes,
         categorie: form.categorie,
         actif: true,
-        auteur: "admin",
+        auteur: user?.email || "admin",
       });
       toast.success("Terme ajouté");
     }

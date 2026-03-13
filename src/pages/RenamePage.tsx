@@ -61,7 +61,7 @@ export default function RenamePage() {
     const unknowns = res.filter((r) => r.status === "inconnu" || r.status === "partiel").length;
     incrementTransformations(res.length, unknowns);
     addHistoryEntry({
-      auteur: "utilisateur",
+      auteur: user?.email || "utilisateur",
       action: "transformation",
       terme: `${res.length} colonne(s)`,
       nouvelle_valeur: `${res.filter((r) => r.status === "ok").length} OK, ${unknowns} à revoir`,
