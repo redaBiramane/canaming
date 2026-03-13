@@ -21,7 +21,7 @@ const EXAMPLE_SQL = `CREATE TABLE salaire_client (
 );`;
 
 export default function SqlPage() {
-  const { dictionary, signalements, incrementTransformations, signalerMot } = useAppStore();
+  const { dictionary, signalements, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
   const [sql, setSql] = useState("");
   const [parsed, setParsed] = useState<ParsedSql | null>(null);
   const [results, setResults] = useState<TransformResult[]>([]);
@@ -44,6 +44,12 @@ export default function SqlPage() {
     setTransformedSql(generateTransformedSql(p, res));
     const unknowns = res.filter((r) => r.status === "inconnu").length;
     incrementTransformations(res.length, unknowns);
+    addHistoryEntry({
+      auteur: "utilisateur",
+      action: "analyse_sql",
+      terme: `Table ${p.tableName} (${p.columns.length} col.)`,
+      nouvelle_valeur: `${p.columns.length - unknowns} OK, ${unknowns} inconnu(s)`,
+    });
     toast.success(`${p.columns.length} colonnes détectées et transformées`);
   };
 
