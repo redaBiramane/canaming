@@ -54,7 +54,7 @@ export default function HistoryPage() {
         <p className="text-muted-foreground mt-1">{filteredHistory.length} entrée(s) dans l'historique</p>
       </div>
 
-      {history.length === 0 ? (
+      {filteredHistory.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="ca-card p-12 text-center">
           <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">Aucune modification enregistrée pour le moment.</p>
