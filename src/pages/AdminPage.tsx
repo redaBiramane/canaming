@@ -80,7 +80,7 @@ export default function AdminPage() {
         description: form.description,
         synonymes,
         categorie: form.categorie,
-      }, "admin");
+      }, user?.email || "admin");
       toast.success("Terme modifié");
     } else {
       addEntry({
