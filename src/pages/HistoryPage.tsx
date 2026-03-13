@@ -1,7 +1,8 @@
 import { Fragment, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/hooks/useStore";
-import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, ChevronDown, ChevronRight } from "lucide-react";
+import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, Eye, X, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const actionIcons: Record<string, JSX.Element> = {
   ajout: <Plus className="h-3.5 w-3.5 text-success" />,
