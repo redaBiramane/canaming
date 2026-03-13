@@ -161,4 +161,34 @@ export const store = {
     };
     notify();
   },
+
+  signalerMot: (mot: string, contexte: string, auteur: string = "utilisateur") => {
+    // Don't duplicate
+    if (state.signalements.some((s) => s.mot === mot && s.statut === "en_attente")) return;
+    state = {
+      ...state,
+      signalements: [
+        {
+          id: generateId(),
+          mot,
+          contexte,
+          date: new Date().toISOString(),
+          auteur,
+          statut: "en_attente",
+        },
+        ...state.signalements,
+      ],
+    };
+    notify();
+  },
+
+  updateSignalement: (id: string, statut: Signalement["statut"]) => {
+    state = {
+      ...state,
+      signalements: state.signalements.map((s) =>
+        s.id === id ? { ...s, statut } : s
+      ),
+    };
+    notify();
+  },
 };
