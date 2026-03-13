@@ -66,8 +66,8 @@ export default function HistoryPage() {
                     {new Date(h.date).toLocaleString("fr-FR")}
                   </td>
                   <td className="p-3">
-                    <span className={`inline-flex items-center gap-1.5 ${actionBadge[h.action]}`}>
-                      {actionIcons[h.action]} {h.action}
+                    <span className={`inline-flex items-center gap-1.5 ${actionBadge[h.action] || "ca-badge-unknown"}`}>
+                      {actionIcons[h.action]} {actionLabels[h.action] || h.action}
                     </span>
                   </td>
                   <td className="p-3 font-medium text-foreground">{h.terme}</td>
