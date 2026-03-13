@@ -245,19 +245,36 @@ export function parseSqlCreateTable(sql: string): ParsedSql | null {
 
 /**
  * Generate a transformed SQL CREATE TABLE statement
+ * Preserves all original syntax (COMMENT, WITH TAG, constraints, etc.)
+ * by doing column name replacement in the original SQL text
  */
 export function generateTransformedSql(
   parsed: ParsedSql,
   results: TransformResult[]
 ): string {
-  const columnLines = parsed.columns.map((col, i) => {
-    const result = results[i];
-    const newName = result ? result.transformed : col.name;
-    const constraints = col.constraints ? ` ${col.constraints}` : "";
-    return `    ${newName} ${col.type}${constraints}`;
-  });
+  let output = parsed.originalSql;
 
-  return `CREATE TABLE ${parsed.tableName} (\n${columnLines.join(",\n")}\n);`;
+  // Replace each column name in the original SQL
+  // We go in reverse order of appearance to avoid index shifting
+  for (let i = parsed.columns.length - 1; i >= 0; i--) {
+    const col = parsed.columns[i];
+    const result = results[i];
+    if (!result || result.transformed === col.name) continue;
+
+    // Replace only the column definition name (word boundary match)
+    // Match the column name that appears at the start of a line/after whitespace, followed by the type
+    const regex = new RegExp(
+      `(^|[\\s,(])${escapeRegex(col.name)}(\\s+${escapeRegex(col.type.split("(")[0])})`,
+      "gmi"
+    );
+    output = output.replace(regex, `$1${result.transformed}$2`);
+  }
+
+  return output;
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
