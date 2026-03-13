@@ -44,6 +44,12 @@ export default function SqlPage() {
     setTransformedSql(generateTransformedSql(p, res));
     const unknowns = res.filter((r) => r.status === "inconnu").length;
     incrementTransformations(res.length, unknowns);
+    addHistoryEntry({
+      auteur: "utilisateur",
+      action: "analyse_sql",
+      terme: `Table ${p.tableName} (${p.columns.length} col.)`,
+      nouvelle_valeur: `${p.columns.length - unknowns} OK, ${unknowns} inconnu(s)`,
+    });
     toast.success(`${p.columns.length} colonnes détectées et transformées`);
   };
 

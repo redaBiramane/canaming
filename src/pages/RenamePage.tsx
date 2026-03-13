@@ -58,6 +58,12 @@ export default function RenamePage() {
     setEditOverrides({});
     const unknowns = res.filter((r) => r.status === "inconnu" || r.status === "partiel").length;
     incrementTransformations(res.length, unknowns);
+    addHistoryEntry({
+      auteur: "utilisateur",
+      action: "transformation",
+      terme: `${res.length} colonne(s)`,
+      nouvelle_valeur: res.map((r) => `${r.original}→${r.transformed}`).join(", "),
+    });
     toast.success(`${res.length} colonne(s) transformée(s)`);
   };
 
