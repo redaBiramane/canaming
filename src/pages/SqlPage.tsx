@@ -49,6 +49,17 @@ export default function SqlPage() {
       action: "analyse_sql",
       terme: `Table ${p.tableName} (${p.columns.length} col.)`,
       nouvelle_valeur: `${p.columns.length - unknowns} OK, ${unknowns} inconnu(s)`,
+      details: p.columns.map((col, idx) => {
+        const r = res[idx];
+        return {
+          original: col.name,
+          transformed: r.transformed,
+          status: r.status,
+          confidence: r.confidence,
+          mapping: r.details.map((d) => `${d.original}→${d.transformed}`).join(", "),
+          type: col.type,
+        };
+      }),
     });
     toast.success(`${p.columns.length} colonnes détectées et transformées`);
   };

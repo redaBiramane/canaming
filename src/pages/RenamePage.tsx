@@ -62,7 +62,14 @@ export default function RenamePage() {
       auteur: "utilisateur",
       action: "transformation",
       terme: `${res.length} colonne(s)`,
-      nouvelle_valeur: res.map((r) => `${r.original}→${r.transformed}`).join(", "),
+      nouvelle_valeur: `${res.filter((r) => r.status === "ok").length} OK, ${unknowns} à revoir`,
+      details: res.map((r) => ({
+        original: r.original,
+        transformed: r.transformed,
+        status: r.status,
+        confidence: r.confidence,
+        mapping: r.details.map((d) => `${d.original}→${d.transformed}`).join(", "),
+      })),
     });
     toast.success(`${res.length} colonne(s) transformée(s)`);
   };

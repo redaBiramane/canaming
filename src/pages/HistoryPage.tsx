@@ -1,6 +1,7 @@
+import { Fragment, useState } from "react";
 import { motion } from "framer-motion";
 import { useAppStore } from "@/hooks/useStore";
-import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag } from "lucide-react";
+import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, ChevronDown, ChevronRight } from "lucide-react";
 
 const actionIcons: Record<string, JSX.Element> = {
   ajout: <Plus className="h-3.5 w-3.5 text-success" />,
@@ -34,9 +35,14 @@ const actionBadge: Record<string, string> = {
 
 export default function HistoryPage() {
   const { history } = useAppStore();
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const toggleExpanded = (id: string) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Historique des modifications</h1>
         <p className="text-muted-foreground mt-1">{history.length} entrée(s) dans l'historique</p>
@@ -61,23 +67,74 @@ export default function HistoryPage() {
             </thead>
             <tbody>
               {history.map((h) => (
-                <tr key={h.id} className="border-t">
-                  <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(h.date).toLocaleString("fr-FR")}
-                  </td>
-                  <td className="p-3">
-                    <span className={`inline-flex items-center gap-1.5 ${actionBadge[h.action] || "ca-badge-unknown"}`}>
-                      {actionIcons[h.action]} {actionLabels[h.action] || h.action}
-                    </span>
-                  </td>
-                  <td className="p-3 font-medium text-foreground">{h.terme}</td>
-                  <td className="p-3 text-xs text-muted-foreground">
-                    {h.ancienne_valeur && <span className="line-through mr-2">{h.ancienne_valeur}</span>}
-                    {h.nouvelle_valeur && <span className="font-medium text-primary">{h.nouvelle_valeur}</span>}
-                    {h.champ && <span className="ml-1 text-muted-foreground">({h.champ})</span>}
-                  </td>
-                  <td className="p-3 text-muted-foreground">{h.auteur}</td>
-                </tr>
+                <Fragment key={h.id}>
+                  <tr className="border-t">
+                    <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(h.date).toLocaleString("fr-FR")}
+                    </td>
+                    <td className="p-3">
+                      <span className={`inline-flex items-center gap-1.5 ${actionBadge[h.action] || "ca-badge-unknown"}`}>
+                        {actionIcons[h.action]} {actionLabels[h.action] || h.action}
+                      </span>
+                    </td>
+                    <td className="p-3 font-medium text-foreground">{h.terme}</td>
+                    <td className="p-3 text-xs text-muted-foreground space-y-1">
+                      <div>
+                        {h.ancienne_valeur && <span className="line-through mr-2">{h.ancienne_valeur}</span>}
+                        {h.nouvelle_valeur && <span className="font-medium text-primary">{h.nouvelle_valeur}</span>}
+                        {h.champ && <span className="ml-1 text-muted-foreground">({h.champ})</span>}
+                      </div>
+                      {h.details && h.details.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpanded(h.id)}
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                        >
+                          {expanded[h.id] ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                          {expanded[h.id] ? "Masquer détails" : `Voir détails (${h.details.length} colonnes)`}
+                        </button>
+                      )}
+                    </td>
+                    <td className="p-3 text-muted-foreground">{h.auteur}</td>
+                  </tr>
+
+                  {expanded[h.id] && h.details && h.details.length > 0 && (
+                    <tr className="border-t bg-muted/30">
+                      <td colSpan={5} className="p-3">
+                        <div className="rounded-lg border overflow-hidden bg-background">
+                          <table className="w-full text-xs">
+                            <thead className="bg-muted">
+                              <tr>
+                                <th className="text-left p-2 font-medium text-muted-foreground">Original</th>
+                                <th className="text-left p-2 font-medium text-muted-foreground">Transformé</th>
+                                <th className="text-left p-2 font-medium text-muted-foreground">Statut</th>
+                                <th className="text-left p-2 font-medium text-muted-foreground">Confiance</th>
+                                <th className="text-left p-2 font-medium text-muted-foreground">Type</th>
+                                <th className="text-left p-2 font-medium text-muted-foreground">Mapping</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {h.details.map((detail, idx) => (
+                                <tr key={`${h.id}-${idx}`} className="border-t">
+                                  <td className="p-2 font-mono text-foreground">{detail.original}</td>
+                                  <td className="p-2 font-mono font-semibold text-primary">{detail.transformed}</td>
+                                  <td className="p-2">
+                                    <span className={detail.status === "ok" ? "ca-badge-ok" : detail.status === "ambigu" || detail.status === "partiel" ? "ca-badge-warning" : "ca-badge-error"}>
+                                      {detail.status}
+                                    </span>
+                                  </td>
+                                  <td className="p-2 text-muted-foreground">{detail.confidence}%</td>
+                                  <td className="p-2 text-muted-foreground">{detail.type || "—"}</td>
+                                  <td className="p-2 text-muted-foreground">{detail.mapping}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -86,3 +143,4 @@ export default function HistoryPage() {
     </div>
   );
 }
+
