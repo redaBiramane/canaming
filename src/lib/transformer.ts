@@ -75,11 +75,38 @@ function findMatch(
 /**
  * Transform a single column name using the dictionary
  */
+// Common SQL types to strip from column input
+const SQL_TYPES = new Set([
+  "int", "integer", "bigint", "smallint", "tinyint", "mediumint",
+  "float", "double", "decimal", "numeric", "real", "number",
+  "char", "varchar", "varchar2", "nvarchar", "nchar", "text", "clob", "nclob", "blob",
+  "string", "str",
+  "date", "datetime", "timestamp", "time", "year", "interval",
+  "boolean", "bool", "bit",
+  "binary", "varbinary", "raw", "long",
+  "json", "jsonb", "xml", "uuid", "array",
+]);
+
+function stripSqlType(input: string): { columnName: string; sqlType: string | null } {
+  const parts = input.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    const lastPart = parts[parts.length - 1].toLowerCase().replace(/\([^)]*\)/, "");
+    if (SQL_TYPES.has(lastPart)) {
+      return {
+        columnName: parts.slice(0, -1).join(" "),
+        sqlType: parts[parts.length - 1],
+      };
+    }
+  }
+  return { columnName: input, sqlType: null };
+}
+
 export function transformColumn(
   columnName: string,
   dictionary: DictionaryEntry[]
 ): TransformResult {
-  const words = splitWords(columnName);
+  const { columnName: cleanName } = stripSqlType(columnName);
+  const words = splitWords(cleanName);
   const mappings: WordMapping[] = [];
   let hasUnknown = false;
   let hasAmbiguous = false;
