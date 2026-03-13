@@ -37,8 +37,15 @@ const actionBadge: Record<string, string> = {
 
 export default function HistoryPage() {
   const { history, deleteHistoryEntry } = useAppStore();
+  const { user, role } = useAuth();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selectedEntry = history.find((h) => h.id === selectedId);
+
+  const filteredHistory = useMemo(() => {
+    if (role === "admin") return history;
+    return history.filter((h) => h.auteur === user?.email);
+  }, [history, role, user?.email]);
+
+  const selectedEntry = filteredHistory.find((h) => h.id === selectedId);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
