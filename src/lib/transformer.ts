@@ -143,10 +143,23 @@ export function parseSqlCreateTable(sql: string): ParsedSql | null {
   const match = sql.match(
     /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)\s*\(([\s\S]*?)\)\s*;?/i
   );
-  if (!match) return null;
-
-  const tableName = match[1];
-  const body = match[2];
+  
+  let tableName: string;
+  let body: string;
+  
+  if (match) {
+    tableName = match[1];
+    body = match[2];
+  } else {
+    // Fallback: try to parse as raw column definitions (no CREATE TABLE wrapper)
+    // Remove surrounding parentheses and semicolons if present
+    let raw = sql.trim().replace(/^\(/, "").replace(/\)\s*;?\s*$/, "").trim();
+    if (!raw) return null;
+    // Check if it looks like column definitions (word followed by a type)
+    if (!/^\w+\s+\w+/m.test(raw)) return null;
+    tableName = "table_name";
+    body = raw;
+  }
 
   // Split by commas, but respect parentheses (for types like NUMBER(10,2))
   const columnDefs: string[] = [];
