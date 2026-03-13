@@ -106,6 +106,21 @@ export default function SignalementsPage() {
     toast.info(`Signalement de "${mot}" rejeté`);
   };
 
+  const exportSignalements = (format: "xlsx" | "csv") => {
+    const data = filtered.map((s) => ({
+      Mot: s.mot,
+      Contexte: s.contexte,
+      "Signalé par": s.auteur,
+      Date: new Date(s.date).toLocaleDateString("fr-FR"),
+      Statut: statusConfig[s.statut]?.label || s.statut,
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Signalements");
+    XLSX.writeFile(wb, `signalements.${format === "csv" ? "csv" : "xlsx"}`, { bookType: format === "csv" ? "csv" : "xlsx" });
+    toast.success(`Export ${format.toUpperCase()} téléchargé`);
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
