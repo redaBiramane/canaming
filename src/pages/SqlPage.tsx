@@ -21,7 +21,7 @@ const EXAMPLE_SQL = `CREATE TABLE salaire_client (
 );`;
 
 export default function SqlPage() {
-  const { dictionary, incrementTransformations } = useAppStore();
+  const { dictionary, signalements, incrementTransformations, signalerMot } = useAppStore();
   const [sql, setSql] = useState("");
   const [parsed, setParsed] = useState<ParsedSql | null>(null);
   const [results, setResults] = useState<TransformResult[]>([]);
