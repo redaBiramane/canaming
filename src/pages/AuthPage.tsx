@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Columns3, LogIn, UserPlus } from "lucide-react";
+import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
+import logoCA from "@/assets/logo-ca.png";
 
 export default function AuthPage() {
   const { signIn, signUp } = useAuth();
@@ -14,6 +15,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,10 +48,8 @@ export default function AuthPage() {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground text-xl font-bold mb-4">
-            CA
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">CA Naming Studio</h1>
+          <img src={logoCA} alt="CA Personal Finance & Mobility" className="h-16 w-auto mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-foreground">Naming Studio</h1>
           <p className="text-muted-foreground mt-1">Normalisation SQL • Crédit Agricole</p>
         </div>
 
@@ -101,15 +101,25 @@ export default function AuthPage() {
             </div>
             <div>
               <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <Button type="submit" className="w-full gap-2" disabled={loading}>
               {mode === "login" ? (
