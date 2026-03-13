@@ -162,8 +162,18 @@ export const store = {
     notify();
   },
 
+  addHistoryEntry: (entry: Omit<HistoryEntry, "id" | "date">) => {
+    state = {
+      ...state,
+      history: [
+        { ...entry, id: generateId(), date: new Date().toISOString() },
+        ...state.history,
+      ],
+    };
+    notify();
+  },
+
   signalerMot: (mot: string, contexte: string, auteur: string = "utilisateur") => {
-    // Don't duplicate
     if (state.signalements.some((s) => s.mot === mot && s.statut === "en_attente")) return;
     state = {
       ...state,
@@ -177,6 +187,17 @@ export const store = {
           statut: "en_attente",
         },
         ...state.signalements,
+      ],
+      history: [
+        {
+          id: generateId(),
+          date: new Date().toISOString(),
+          auteur,
+          action: "signalement",
+          terme: mot,
+          nouvelle_valeur: `Contexte: ${contexte}`,
+        },
+        ...state.history,
       ],
     };
     notify();
