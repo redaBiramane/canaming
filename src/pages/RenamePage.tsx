@@ -123,7 +123,7 @@ export default function RenamePage() {
             <Input
               value={col}
               onChange={(e) => updateColumn(i, e.target.value)}
-              placeholder="ex: code_salaire_montant"
+              placeholder="ex: code_salaire_montant (séparez par virgule ou tabulation)"
               className="font-mono"
               onKeyDown={(e) => e.key === "Enter" && transform()}
             />
