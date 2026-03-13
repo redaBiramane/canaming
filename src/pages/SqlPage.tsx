@@ -134,13 +134,41 @@ export default function SqlPage() {
                           </span>
                         </td>
                         <td className="p-3 text-xs text-muted-foreground">
-                          {r.details.map((d, j) => (
-                            <span key={j} className={`inline-block mr-1 px-1.5 py-0.5 rounded ${
-                              d.status === "ok" ? "bg-success/10" : d.status === "ambigu" ? "bg-warning/10" : "bg-destructive/10"
-                            }`}>
-                              {d.original}→{d.transformed}
-                            </span>
-                          ))}
+                          <div className="flex flex-wrap items-center gap-1">
+                            {r.details.map((d, j) => (
+                              <span key={j} className={`inline-block px-1.5 py-0.5 rounded ${
+                                d.status === "ok" ? "bg-success/10" : d.status === "ambigu" ? "bg-warning/10" : "bg-destructive/10"
+                              }`}>
+                                {d.original}→{d.transformed}
+                              </span>
+                            ))}
+                            {r.details.some((d) => d.status === "inconnu") && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 px-2 text-xs text-destructive hover:text-destructive gap-1"
+                                      onClick={() => {
+                                        const unknowns = r.details.filter((d) => d.status === "inconnu");
+                                        unknowns.forEach((d) => signalerMot(d.original, r.original));
+                                        toast.success(`${unknowns.length} mot(s) signalé(s) à l'équipe Data Quality`);
+                                      }}
+                                      disabled={r.details
+                                        .filter((d) => d.status === "inconnu")
+                                        .every((d) => signalements.some((s) => s.mot === d.original && s.statut === "en_attente"))
+                                      }
+                                    >
+                                      <Flag className="h-3 w-3" />
+                                      Signaler
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Signaler les mots inconnus à l'admin pour ajout au dictionnaire</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
