@@ -31,7 +31,7 @@ const statusBadge = {
 };
 
 export default function RenamePage() {
-  const { dictionary, incrementTransformations } = useAppStore();
+  const { dictionary, incrementTransformations, addHistoryEntry } = useAppStore();
   const [columns, setColumns] = useState<string[]>([""]);
   const [results, setResults] = useState<TransformResult[]>([]);
   const [editOverrides, setEditOverrides] = useState<Record<number, string>>({});
