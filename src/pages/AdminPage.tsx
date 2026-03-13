@@ -31,7 +31,7 @@ interface FormData {
 const emptyForm: FormData = { terme_source: "", abreviation: "", description: "", synonymes: "", categorie: "Général" };
 
 export default function AdminPage() {
-  const { dictionary, role, addEntry, updateEntry, deleteEntry, importDictionary } = useAppStore();
+  const { dictionary, role, signalements, addEntry, updateEntry, deleteEntry, importDictionary, updateSignalement } = useAppStore();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
