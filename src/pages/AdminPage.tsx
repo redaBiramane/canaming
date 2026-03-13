@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Plus, Pencil, Trash2, Search, Upload, Download, X, Check, Filter,
+  Plus, Pencil, Trash2, Search, Upload, Download, X, Check, Filter, Flag, CheckCircle2, XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/useStore";
 import { DictionaryEntry } from "@/lib/dictionary";
@@ -30,7 +31,7 @@ interface FormData {
 const emptyForm: FormData = { terme_source: "", abreviation: "", description: "", synonymes: "", categorie: "Général" };
 
 export default function AdminPage() {
-  const { dictionary, role, addEntry, updateEntry, deleteEntry, importDictionary } = useAppStore();
+  const { dictionary, role, signalements, addEntry, updateEntry, deleteEntry, importDictionary, updateSignalement } = useAppStore();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -175,6 +176,56 @@ export default function AdminPage() {
           </SelectContent>
         </Select>
       </motion.div>
+
+      {/* Signalements */}
+      {isAdmin && signalements.filter((s) => s.statut === "en_attente").length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card p-5 border-l-4 border-l-warning">
+          <h2 className="font-semibold text-foreground flex items-center gap-2 mb-3">
+            <Flag className="h-4 w-4 text-warning" />
+            Mots signalés par les utilisateurs
+            <Badge variant="secondary" className="ml-1">{signalements.filter((s) => s.statut === "en_attente").length}</Badge>
+          </h2>
+          <div className="space-y-2">
+            {signalements
+              .filter((s) => s.statut === "en_attente")
+              .map((s) => (
+                <div key={s.id} className="flex items-center justify-between bg-muted/50 rounded-lg px-4 py-2">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono font-semibold text-foreground">{s.mot}</span>
+                    <span className="text-xs text-muted-foreground">dans « {s.contexte} »</span>
+                    <span className="text-xs text-muted-foreground">• {new Date(s.date).toLocaleDateString("fr-FR")}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 gap-1 text-xs"
+                      onClick={() => {
+                        setForm({ ...emptyForm, terme_source: s.mot, abreviation: s.mot.toUpperCase().slice(0, 3) });
+                        setEditingId(null);
+                        setDialogOpen(true);
+                        updateSignalement(s.id, "traité");
+                      }}
+                    >
+                      <Plus className="h-3 w-3" /> Ajouter au dictionnaire
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs text-destructive"
+                      onClick={() => {
+                        updateSignalement(s.id, "rejeté");
+                        toast.info(`Signalement de "${s.mot}" rejeté`);
+                      }}
+                    >
+                      <XCircle className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Table */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-hidden">

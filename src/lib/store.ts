@@ -4,9 +4,19 @@ import { DictionaryEntry, HistoryEntry, DEFAULT_DICTIONARY, generateId } from '.
 // Simple zustand-like store using vanilla JS + events
 type Listener = () => void;
 
+export interface Signalement {
+  id: string;
+  mot: string;
+  contexte: string; // column name where it was found
+  date: string;
+  auteur: string;
+  statut: "en_attente" | "traité" | "rejeté";
+}
+
 interface AppState {
   dictionary: DictionaryEntry[];
   history: HistoryEntry[];
+  signalements: Signalement[];
   transformationCount: number;
   unknownWordsCount: number;
   role: "admin" | "user";
@@ -29,6 +39,7 @@ function getDefaultState(): AppState {
   return {
     dictionary: DEFAULT_DICTIONARY,
     history: [],
+    signalements: [],
     transformationCount: 0,
     unknownWordsCount: 0,
     role: "admin",
@@ -147,6 +158,36 @@ export const store = {
       ...state,
       transformationCount: state.transformationCount + count,
       unknownWordsCount: state.unknownWordsCount + unknowns,
+    };
+    notify();
+  },
+
+  signalerMot: (mot: string, contexte: string, auteur: string = "utilisateur") => {
+    // Don't duplicate
+    if (state.signalements.some((s) => s.mot === mot && s.statut === "en_attente")) return;
+    state = {
+      ...state,
+      signalements: [
+        {
+          id: generateId(),
+          mot,
+          contexte,
+          date: new Date().toISOString(),
+          auteur,
+          statut: "en_attente",
+        },
+        ...state.signalements,
+      ],
+    };
+    notify();
+  },
+
+  updateSignalement: (id: string, statut: Signalement["statut"]) => {
+    state = {
+      ...state,
+      signalements: state.signalements.map((s) =>
+        s.id === id ? { ...s, statut } : s
+      ),
     };
     notify();
   },
