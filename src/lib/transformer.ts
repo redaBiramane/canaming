@@ -166,20 +166,21 @@ export interface ParsedSql {
 }
 
 export function parseSqlCreateTable(sql: string): ParsedSql | null {
-  // Match CREATE TABLE name ( ... ) ; — use greedy match and find last closing paren
+  // Match CREATE TABLE with optional OR REPLACE, schema.name, etc.
   const headerMatch = sql.match(
-    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+(?:\.\w+)?)\s*\(/i
+    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s*\(/i
   );
   
   let tableName: string;
   let body: string;
   
   if (headerMatch) {
-    tableName = headerMatch[1];
+    // Clean up quoted identifiers
+    tableName = headerMatch[1].replace(/"/g, "");
     // Extract body: everything after the opening ( up to the last )
     const startIdx = headerMatch.index! + headerMatch[0].length;
     const remaining = sql.substring(startIdx);
-    // Find the last closing parenthesis
+    // Find the last closing parenthesis (before WITH/COMMENT or end)
     let depth = 1;
     let endIdx = -1;
     for (let i = 0; i < remaining.length; i++) {
@@ -199,11 +200,16 @@ export function parseSqlCreateTable(sql: string): ParsedSql | null {
     body = raw;
   }
 
-  // Split by commas, but respect parentheses (for types like NUMBER(10,2))
+  // Split by commas, but respect parentheses and single-quoted strings
   const columnDefs: string[] = [];
   let depth = 0;
+  let inQuote = false;
   let current = "";
-  for (const ch of body) {
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (ch === "'" && !inQuote) { inQuote = true; current += ch; continue; }
+    if (ch === "'" && inQuote) { inQuote = false; current += ch; continue; }
+    if (inQuote) { current += ch; continue; }
     if (ch === "(") depth++;
     else if (ch === ")") depth--;
     if (ch === "," && depth === 0) {
@@ -217,10 +223,14 @@ export function parseSqlCreateTable(sql: string): ParsedSql | null {
 
   const columns: SqlColumn[] = [];
   for (const def of columnDefs) {
-    // Skip constraints like PRIMARY KEY, FOREIGN KEY, etc.
+    // Skip constraints like PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, CONSTRAINT, INDEX
     if (/^\s*(PRIMARY|FOREIGN|UNIQUE|CHECK|CONSTRAINT|INDEX)/i.test(def)) continue;
 
-    const colMatch = def.match(/^(\w+)\s+(\w+(?:\([^)]*\))?)\s*(.*)?$/);
+    // Parse column: name TYPE[(size)] [COMMENT '...'] [other constraints]
+    // Strip COMMENT 'xxx' first to simplify parsing
+    const withoutComment = def.replace(/\s+COMMENT\s+'[^']*'/gi, "");
+    
+    const colMatch = withoutComment.match(/^(\w+)\s+(\w+(?:\([^)]*\))?)\s*(.*)?$/);
     if (colMatch) {
       columns.push({
         name: colMatch[1],
