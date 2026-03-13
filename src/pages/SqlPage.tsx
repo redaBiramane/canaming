@@ -4,6 +4,7 @@ import { Code2, Copy, Download, ArrowRight, FileDown, CheckCircle2, AlertTriangl
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/hooks/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { parseSqlCreateTable, transformColumn, generateTransformedSql, type ParsedSql } from "@/lib/transformer";
 import { TransformResult } from "@/lib/dictionary";
 import { toast } from "sonner";
@@ -22,6 +23,7 @@ const EXAMPLE_SQL = `CREATE TABLE salaire_client (
 
 export default function SqlPage() {
   const { dictionary, signalements, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
+  const { user } = useAuth();
   const [sql, setSql] = useState("");
   const [parsed, setParsed] = useState<ParsedSql | null>(null);
   const [results, setResults] = useState<TransformResult[]>([]);
@@ -45,7 +47,7 @@ export default function SqlPage() {
     const unknowns = res.filter((r) => r.status === "inconnu").length;
     incrementTransformations(res.length, unknowns);
     addHistoryEntry({
-      auteur: "utilisateur",
+      auteur: user?.email || "utilisateur",
       action: "analyse_sql",
       terme: `Table ${p.tableName} (${p.columns.length} col.)`,
       nouvelle_valeur: `${p.columns.length - unknowns} OK, ${unknowns} inconnu(s)`,

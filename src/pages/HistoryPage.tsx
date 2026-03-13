@@ -1,6 +1,7 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/hooks/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, Eye, X, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -36,17 +37,24 @@ const actionBadge: Record<string, string> = {
 
 export default function HistoryPage() {
   const { history, deleteHistoryEntry } = useAppStore();
+  const { user, role } = useAuth();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selectedEntry = history.find((h) => h.id === selectedId);
+
+  const filteredHistory = useMemo(() => {
+    if (role === "admin") return history;
+    return history.filter((h) => h.auteur === user?.email);
+  }, [history, role, user?.email]);
+
+  const selectedEntry = filteredHistory.find((h) => h.id === selectedId);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Historique des modifications</h1>
-        <p className="text-muted-foreground mt-1">{history.length} entrée(s) dans l'historique</p>
+        <p className="text-muted-foreground mt-1">{filteredHistory.length} entrée(s) dans l'historique</p>
       </div>
 
-      {history.length === 0 ? (
+      {filteredHistory.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="ca-card p-12 text-center">
           <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">Aucune modification enregistrée pour le moment.</p>
@@ -65,7 +73,7 @@ export default function HistoryPage() {
               </tr>
             </thead>
             <tbody>
-              {history.map((h) => (
+              {filteredHistory.map((h) => (
                 <tr key={h.id} className="border-t hover:bg-muted/50 transition-colors">
                   <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
                     {new Date(h.date).toLocaleString("fr-FR")}

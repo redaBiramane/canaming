@@ -4,6 +4,7 @@ import { Plus, Trash2, CheckCircle2, AlertTriangle, HelpCircle, ArrowRight, Copy
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { transformColumn } from "@/lib/transformer";
 import { TransformResult } from "@/lib/dictionary";
 import { exportResultsToExcel } from "@/lib/excel";
@@ -32,6 +33,7 @@ const statusBadge = {
 
 export default function RenamePage() {
   const { dictionary, incrementTransformations, addHistoryEntry } = useAppStore();
+  const { user } = useAuth();
   const [columns, setColumns] = useState<string[]>([""]);
   const [results, setResults] = useState<TransformResult[]>([]);
   const [editOverrides, setEditOverrides] = useState<Record<number, string>>({});
@@ -59,7 +61,7 @@ export default function RenamePage() {
     const unknowns = res.filter((r) => r.status === "inconnu" || r.status === "partiel").length;
     incrementTransformations(res.length, unknowns);
     addHistoryEntry({
-      auteur: "utilisateur",
+      auteur: user?.email || "utilisateur",
       action: "transformation",
       terme: `${res.length} colonne(s)`,
       nouvelle_valeur: `${res.filter((r) => r.status === "ok").length} OK, ${unknowns} à revoir`,

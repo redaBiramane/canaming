@@ -33,7 +33,7 @@ const emptyForm: FormData = { terme_source: "", abreviation: "", description: ""
 
 export default function AdminPage() {
   const { dictionary, signalements, addEntry, updateEntry, deleteEntry, importDictionary, updateSignalement } = useAppStore();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -80,7 +80,7 @@ export default function AdminPage() {
         description: form.description,
         synonymes,
         categorie: form.categorie,
-      }, "admin");
+      }, user?.email || "admin");
       toast.success("Terme modifié");
     } else {
       addEntry({
@@ -90,7 +90,7 @@ export default function AdminPage() {
         synonymes,
         categorie: form.categorie,
         actif: true,
-        auteur: "admin",
+        auteur: user?.email || "admin",
       });
       toast.success("Terme ajouté");
     }
@@ -99,7 +99,7 @@ export default function AdminPage() {
 
   const handleDelete = (id: string) => {
     if (confirm("Supprimer ce terme du dictionnaire ?")) {
-      deleteEntry(id, "admin");
+      deleteEntry(id, user?.email || "admin");
       toast.success("Terme supprimé");
     }
   };
@@ -119,7 +119,7 @@ export default function AdminPage() {
       if (result.warnings.length > 0) {
         result.warnings.forEach((w) => toast.warning(w));
       }
-      importDictionary(result.entries, "admin");
+      importDictionary(result.entries, user?.email || "admin");
       toast.success(`${result.entries.length} termes importés`);
     };
     input.click();
