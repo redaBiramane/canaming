@@ -1,19 +1,35 @@
 import { motion } from "framer-motion";
 import { useAppStore } from "@/hooks/useStore";
-import { Clock, Edit, Plus, Trash2, Upload } from "lucide-react";
+import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag } from "lucide-react";
 
-const actionIcons = {
+const actionIcons: Record<string, JSX.Element> = {
   ajout: <Plus className="h-3.5 w-3.5 text-success" />,
   modification: <Edit className="h-3.5 w-3.5 text-warning" />,
   suppression: <Trash2 className="h-3.5 w-3.5 text-destructive" />,
   import: <Upload className="h-3.5 w-3.5 text-primary" />,
+  transformation: <ArrowRight className="h-3.5 w-3.5 text-primary" />,
+  analyse_sql: <Code2 className="h-3.5 w-3.5 text-primary" />,
+  signalement: <Flag className="h-3.5 w-3.5 text-warning" />,
 };
 
-const actionBadge = {
+const actionLabels: Record<string, string> = {
+  ajout: "Ajout",
+  modification: "Modification",
+  suppression: "Suppression",
+  import: "Import",
+  transformation: "Renommage",
+  analyse_sql: "Analyse SQL",
+  signalement: "Signalement",
+};
+
+const actionBadge: Record<string, string> = {
   ajout: "ca-badge-ok",
   modification: "ca-badge-warning",
   suppression: "ca-badge-error",
   import: "ca-badge-unknown",
+  transformation: "ca-badge-ok",
+  analyse_sql: "ca-badge-ok",
+  signalement: "ca-badge-warning",
 };
 
 export default function HistoryPage() {
