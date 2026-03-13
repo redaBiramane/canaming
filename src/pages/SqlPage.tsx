@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Code2, Copy, Download, ArrowRight, FileDown, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
+import { Code2, Copy, Download, ArrowRight, FileDown, CheckCircle2, AlertTriangle, HelpCircle, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/hooks/useStore";
 import { parseSqlCreateTable, transformColumn, generateTransformedSql, type ParsedSql } from "@/lib/transformer";
 import { TransformResult } from "@/lib/dictionary";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 const EXAMPLE_SQL = `CREATE TABLE salaire_client (
     code_salaire_montant NUMBER,
