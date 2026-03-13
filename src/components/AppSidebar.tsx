@@ -29,7 +29,7 @@ export function AppSidebar() {
   const { state: sidebarState, toggleSidebar } = useSidebar();
   const collapsed = sidebarState === "collapsed";
   const location = useLocation();
-  const { role } = useAppStore();
+  const { user, role, signOut } = useAuth();
 
   return (
     <Sidebar collapsible="icon">
