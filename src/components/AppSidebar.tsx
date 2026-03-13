@@ -92,17 +92,25 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xs font-medium text-primary">
-                {role === "admin" ? "A" : "U"}
-              </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xs font-medium text-primary">
+                  {role === "admin" ? "A" : "U"}
+                </span>
+              </div>
+              <div className="text-xs">
+                <p className="font-medium text-sidebar-foreground truncate max-w-[120px]">
+                  {user?.email?.split("@")[0]}
+                </p>
+                <p className="text-muted-foreground">
+                  {role === "admin" ? "Admin" : "Utilisateur"}
+                </p>
+              </div>
             </div>
-            <div className="text-xs">
-              <p className="font-medium text-sidebar-foreground">
-                {role === "admin" ? "Administrateur" : "Utilisateur"}
-              </p>
-            </div>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={signOut} title="Déconnexion">
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
           </div>
         )}
       </SidebarFooter>
