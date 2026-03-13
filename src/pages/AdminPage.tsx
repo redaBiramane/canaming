@@ -177,6 +177,56 @@ export default function AdminPage() {
         </Select>
       </motion.div>
 
+      {/* Signalements */}
+      {isAdmin && signalements.filter((s) => s.statut === "en_attente").length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card p-5 border-l-4 border-l-warning">
+          <h2 className="font-semibold text-foreground flex items-center gap-2 mb-3">
+            <Flag className="h-4 w-4 text-warning" />
+            Mots signalés par les utilisateurs
+            <Badge variant="secondary" className="ml-1">{signalements.filter((s) => s.statut === "en_attente").length}</Badge>
+          </h2>
+          <div className="space-y-2">
+            {signalements
+              .filter((s) => s.statut === "en_attente")
+              .map((s) => (
+                <div key={s.id} className="flex items-center justify-between bg-muted/50 rounded-lg px-4 py-2">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono font-semibold text-foreground">{s.mot}</span>
+                    <span className="text-xs text-muted-foreground">dans « {s.contexte} »</span>
+                    <span className="text-xs text-muted-foreground">• {new Date(s.date).toLocaleDateString("fr-FR")}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 gap-1 text-xs"
+                      onClick={() => {
+                        setForm({ ...emptyForm, terme_source: s.mot, abreviation: s.mot.toUpperCase().slice(0, 3) });
+                        setEditingId(null);
+                        setDialogOpen(true);
+                        updateSignalement(s.id, "traité");
+                      }}
+                    >
+                      <Plus className="h-3 w-3" /> Ajouter au dictionnaire
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs text-destructive"
+                      onClick={() => {
+                        updateSignalement(s.id, "rejeté");
+                        toast.info(`Signalement de "${s.mot}" rejeté`);
+                      }}
+                    >
+                      <XCircle className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Table */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-hidden">
         <div className="overflow-x-auto">
