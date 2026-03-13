@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import logoCA from "@/assets/logo-ca.png";
 
 const mainItems = [
   { title: "Accueil", url: "/", icon: Home },
