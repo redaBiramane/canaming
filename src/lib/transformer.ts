@@ -139,23 +139,34 @@ export interface ParsedSql {
 }
 
 export function parseSqlCreateTable(sql: string): ParsedSql | null {
-  // Match CREATE TABLE name (...);
-  const match = sql.match(
-    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+(?:\.\w+)?)\s*\(([\s\S]*?)\)\s*;?/i
+  // Match CREATE TABLE name ( ... ) ; — use greedy match and find last closing paren
+  const headerMatch = sql.match(
+    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+(?:\.\w+)?)\s*\(/i
   );
   
   let tableName: string;
   let body: string;
   
-  if (match) {
-    tableName = match[1];
-    body = match[2];
+  if (headerMatch) {
+    tableName = headerMatch[1];
+    // Extract body: everything after the opening ( up to the last )
+    const startIdx = headerMatch.index! + headerMatch[0].length;
+    const remaining = sql.substring(startIdx);
+    // Find the last closing parenthesis
+    let depth = 1;
+    let endIdx = -1;
+    for (let i = 0; i < remaining.length; i++) {
+      if (remaining[i] === "(") depth++;
+      else if (remaining[i] === ")") {
+        depth--;
+        if (depth === 0) { endIdx = i; break; }
+      }
+    }
+    body = endIdx >= 0 ? remaining.substring(0, endIdx) : remaining.replace(/\)\s*;?\s*$/, "");
   } else {
-    // Fallback: try to parse as raw column definitions (no CREATE TABLE wrapper)
-    // Remove surrounding parentheses and semicolons if present
+    // Fallback: try to parse as raw column definitions
     let raw = sql.trim().replace(/^\(/, "").replace(/\)\s*;?\s*$/, "").trim();
     if (!raw) return null;
-    // Check if it looks like column definitions (word followed by a type)
     if (!/^\w+\s+\w+/m.test(raw)) return null;
     tableName = "table_name";
     body = raw;
