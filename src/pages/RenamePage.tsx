@@ -163,6 +163,7 @@ export default function RenamePage() {
                   <th className="text-left p-3 font-medium text-muted-foreground">Statut</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">Confiance</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">Détail</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
