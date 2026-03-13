@@ -47,7 +47,12 @@ export default function SignalementsPage() {
 
   const isAdmin = role === "admin";
 
-  const filtered = signalements.filter((s) => {
+  // Users see only their own, admins see all
+  const visibleSignalements = isAdmin
+    ? signalements
+    : signalements.filter((s) => s.auteur === user?.email);
+
+  const filtered = visibleSignalements.filter((s) => {
     const matchSearch = !search ||
       s.mot.toLowerCase().includes(search.toLowerCase()) ||
       s.contexte.toLowerCase().includes(search.toLowerCase()) ||
@@ -57,9 +62,9 @@ export default function SignalementsPage() {
   });
 
   const counts = {
-    en_attente: signalements.filter((s) => s.statut === "en_attente").length,
-    traité: signalements.filter((s) => s.statut === "traité").length,
-    rejeté: signalements.filter((s) => s.statut === "rejeté").length,
+    en_attente: visibleSignalements.filter((s) => s.statut === "en_attente").length,
+    traité: visibleSignalements.filter((s) => s.statut === "traité").length,
+    rejeté: visibleSignalements.filter((s) => s.statut === "rejeté").length,
   };
 
   const handleAddToDictionary = (s: Signalement) => {
