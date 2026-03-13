@@ -44,6 +44,16 @@ export default function RenamePage() {
     setColumns(next.length === 0 ? [""] : next);
   };
   const updateColumn = (i: number, val: string) => {
+    // Check if pasted/typed value contains commas or tabs → split into multiple columns
+    if (val.includes(",") || val.includes("\t")) {
+      const parts = val.split(/[,\t]+/).map((s) => s.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        const next = [...columns];
+        next.splice(i, 1, ...parts);
+        setColumns(next);
+        return;
+      }
+    }
     const next = [...columns];
     next[i] = val;
     setColumns(next);
@@ -113,7 +123,7 @@ export default function RenamePage() {
             <Input
               value={col}
               onChange={(e) => updateColumn(i, e.target.value)}
-              placeholder="ex: code_salaire_montant"
+              placeholder="ex: code_salaire_montant (séparez par virgule ou tabulation)"
               className="font-mono"
               onKeyDown={(e) => e.key === "Enter" && transform()}
             />
