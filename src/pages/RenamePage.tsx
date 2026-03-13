@@ -134,9 +134,16 @@ export default function RenamePage() {
             )}
           </div>
         ))}
-        <Button onClick={transform} className="gap-2 mt-2">
-          Transformer <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2 mt-2">
+          <Button onClick={transform} className="gap-2">
+            Transformer <ArrowRight className="h-4 w-4" />
+          </Button>
+          {(results.length > 0 || columns.some(c => c.trim())) && (
+            <Button variant="outline" onClick={() => { setColumns([""]); setResults([]); setEditOverrides({}); }} className="gap-2">
+              <RotateCcw className="h-4 w-4" /> Remise à zéro
+            </Button>
+          )}
+        </div>
       </motion.div>
 
       {/* Results */}

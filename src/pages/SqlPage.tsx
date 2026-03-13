@@ -116,9 +116,16 @@ export default function SqlPage() {
           placeholder="CREATE TABLE ... ;"
           className="font-mono min-h-[200px] text-sm"
         />
-        <Button onClick={analyze} className="gap-2">
-          Analyser et transformer <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={analyze} className="gap-2">
+            Analyser et transformer <ArrowRight className="h-4 w-4" />
+          </Button>
+          {(parsed || sql) && (
+            <Button variant="outline" onClick={() => { setSql(""); setParsed(null); setResults([]); setTransformedSql(""); }} className="gap-2">
+              <RotateCcw className="h-4 w-4" /> Remise à zéro
+            </Button>
+          )}
+        </div>
       </motion.div>
 
       {/* Diff Viewer */}
