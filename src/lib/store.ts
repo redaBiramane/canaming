@@ -4,9 +4,19 @@ import { DictionaryEntry, HistoryEntry, DEFAULT_DICTIONARY, generateId } from '.
 // Simple zustand-like store using vanilla JS + events
 type Listener = () => void;
 
+export interface Signalement {
+  id: string;
+  mot: string;
+  contexte: string; // column name where it was found
+  date: string;
+  auteur: string;
+  statut: "en_attente" | "traité" | "rejeté";
+}
+
 interface AppState {
   dictionary: DictionaryEntry[];
   history: HistoryEntry[];
+  signalements: Signalement[];
   transformationCount: number;
   unknownWordsCount: number;
   role: "admin" | "user";
