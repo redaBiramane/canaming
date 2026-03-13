@@ -1,7 +1,8 @@
 import { Fragment, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/hooks/useStore";
-import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, ChevronDown, ChevronRight } from "lucide-react";
+import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, Eye, X, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const actionIcons: Record<string, JSX.Element> = {
   ajout: <Plus className="h-3.5 w-3.5 text-success" />,
@@ -35,11 +36,8 @@ const actionBadge: Record<string, string> = {
 
 export default function HistoryPage() {
   const { history } = useAppStore();
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-
-  const toggleExpanded = (id: string) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedEntry = history.find((h) => h.id === selectedId);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -63,83 +61,112 @@ export default function HistoryPage() {
                 <th className="text-left p-3 font-medium text-muted-foreground">Terme</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Détail</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Auteur</th>
+                <th className="text-left p-3 font-medium text-muted-foreground w-12"></th>
               </tr>
             </thead>
             <tbody>
               {history.map((h) => (
-                <Fragment key={h.id}>
-                  <tr className="border-t">
-                    <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(h.date).toLocaleString("fr-FR")}
-                    </td>
-                    <td className="p-3">
-                      <span className={`inline-flex items-center gap-1.5 ${actionBadge[h.action] || "ca-badge-unknown"}`}>
-                        {actionIcons[h.action]} {actionLabels[h.action] || h.action}
-                      </span>
-                    </td>
-                    <td className="p-3 font-medium text-foreground">{h.terme}</td>
-                    <td className="p-3 text-xs text-muted-foreground space-y-1">
-                      <div>
-                        {h.ancienne_valeur && <span className="line-through mr-2">{h.ancienne_valeur}</span>}
-                        {h.nouvelle_valeur && <span className="font-medium text-primary">{h.nouvelle_valeur}</span>}
-                        {h.champ && <span className="ml-1 text-muted-foreground">({h.champ})</span>}
-                      </div>
-                      {h.details && h.details.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => toggleExpanded(h.id)}
-                          className="inline-flex items-center gap-1 text-primary hover:underline"
-                        >
-                          {expanded[h.id] ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                          {expanded[h.id] ? "Masquer détails" : `Voir détails (${h.details.length} colonnes)`}
-                        </button>
-                      )}
-                    </td>
-                    <td className="p-3 text-muted-foreground">{h.auteur}</td>
-                  </tr>
-
-                  {expanded[h.id] && h.details && h.details.length > 0 && (
-                    <tr className="border-t bg-muted/30">
-                      <td colSpan={5} className="p-3">
-                        <div className="rounded-lg border overflow-hidden bg-background">
-                          <table className="w-full text-xs">
-                            <thead className="bg-muted">
-                              <tr>
-                                <th className="text-left p-2 font-medium text-muted-foreground">Original</th>
-                                <th className="text-left p-2 font-medium text-muted-foreground">Transformé</th>
-                                <th className="text-left p-2 font-medium text-muted-foreground">Statut</th>
-                                <th className="text-left p-2 font-medium text-muted-foreground">Confiance</th>
-                                <th className="text-left p-2 font-medium text-muted-foreground">Type</th>
-                                <th className="text-left p-2 font-medium text-muted-foreground">Mapping</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {h.details.map((detail, idx) => (
-                                <tr key={`${h.id}-${idx}`} className="border-t">
-                                  <td className="p-2 font-mono text-foreground">{detail.original}</td>
-                                  <td className="p-2 font-mono font-semibold text-primary">{detail.transformed}</td>
-                                  <td className="p-2">
-                                    <span className={detail.status === "ok" ? "ca-badge-ok" : detail.status === "ambigu" || detail.status === "partiel" ? "ca-badge-warning" : "ca-badge-error"}>
-                                      {detail.status}
-                                    </span>
-                                  </td>
-                                  <td className="p-2 text-muted-foreground">{detail.confidence}%</td>
-                                  <td className="p-2 text-muted-foreground">{detail.type || "—"}</td>
-                                  <td className="p-2 text-muted-foreground">{detail.mapping}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
+                <tr key={h.id} className="border-t hover:bg-muted/50 transition-colors">
+                  <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(h.date).toLocaleString("fr-FR")}
+                  </td>
+                  <td className="p-3">
+                    <span className={`inline-flex items-center gap-1.5 ${actionBadge[h.action] || "ca-badge-unknown"}`}>
+                      {actionIcons[h.action]} {actionLabels[h.action] || h.action}
+                    </span>
+                  </td>
+                  <td className="p-3 font-medium text-foreground">{h.terme}</td>
+                  <td className="p-3 text-xs text-muted-foreground">
+                    {h.ancienne_valeur && <span className="line-through mr-2">{h.ancienne_valeur}</span>}
+                    {h.nouvelle_valeur && <span className="font-medium text-primary">{h.nouvelle_valeur}</span>}
+                    {h.champ && <span className="ml-1 text-muted-foreground">({h.champ})</span>}
+                  </td>
+                  <td className="p-3 text-muted-foreground">{h.auteur}</td>
+                  <td className="p-3">
+                    {h.details && h.details.length > 0 && (
+                      <button
+                        onClick={() => setSelectedId(h.id)}
+                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
+                        title="Voir le détail"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    )}
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>
         </motion.div>
       )}
+
+      {/* Detail Dialog */}
+      <Dialog open={!!selectedEntry} onOpenChange={() => setSelectedId(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedEntry && actionIcons[selectedEntry.action]}
+              {selectedEntry && (actionLabels[selectedEntry.action] || selectedEntry.action)} — {selectedEntry?.terme}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              {selectedEntry && new Date(selectedEntry.date).toLocaleString("fr-FR")} • {selectedEntry?.auteur}
+            </p>
+          </DialogHeader>
+
+          {selectedEntry?.details && (
+            <div className="rounded-lg border overflow-hidden mt-4">
+              <table className="w-full text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Colonne originale</th>
+                    {selectedEntry.details.some((d) => d.type) && (
+                      <th className="text-left p-3 font-medium text-muted-foreground">Type</th>
+                    )}
+                    <th className="text-left p-3 font-medium text-muted-foreground">Colonne transformée</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Statut</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Confiance</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Mapping mot par mot</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedEntry.details.map((detail, idx) => (
+                    <tr key={idx} className="border-t">
+                      <td className="p-3 font-mono text-foreground">{detail.original}</td>
+                      {selectedEntry.details!.some((d) => d.type) && (
+                        <td className="p-3 text-muted-foreground text-xs">{detail.type || "—"}</td>
+                      )}
+                      <td className="p-3 font-mono font-semibold text-primary">{detail.transformed}</td>
+                      <td className="p-3">
+                        <span className={
+                          detail.status === "ok" ? "ca-badge-ok" :
+                          detail.status === "inconnu" ? "ca-badge-error" : "ca-badge-warning"
+                        }>
+                          {detail.status === "ok" ? "OK" : detail.status === "inconnu" ? "Inconnu" : detail.status === "ambigu" ? "Ambigu" : "Partiel"}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <span className={`font-medium ${detail.confidence >= 80 ? 'text-success' : detail.confidence >= 50 ? 'text-warning' : 'text-destructive'}`}>
+                          {detail.confidence}%
+                        </span>
+                      </td>
+                      <td className="p-3 text-xs text-muted-foreground">
+                        {detail.mapping.split(", ").map((m, j) => {
+                          const isOk = !m.includes("→" + m.split("→")[0]?.toUpperCase());
+                          return (
+                            <span key={j} className="inline-block mr-1 mb-0.5 px-1.5 py-0.5 rounded bg-muted">
+                              {m}
+                            </span>
+                          );
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
