@@ -37,7 +37,7 @@ export function AppSidebar() {
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <img src={logoCA} alt="CA Personal Finance & Mobility" className="h-8 w-auto flex-shrink-0" />
+            <img src={logoCA} alt="CA Personal Finance & Mobility" className="h-16 w-auto flex-shrink-0" />
           </div>
           {!collapsed && (
             <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-7 w-7 flex-shrink-0">
