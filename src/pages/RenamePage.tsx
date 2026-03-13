@@ -196,6 +196,22 @@ export default function RenamePage() {
                         </span>
                       ))}
                     </td>
+                    <td className="p-3">
+                      {r.details.some((d) => d.status === "inconnu") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 gap-1 text-xs"
+                          onClick={() => {
+                            const unknowns = r.details.filter((d) => d.status === "inconnu");
+                            unknowns.forEach((d) => signalerMot(d.original, r.original, user?.email || "utilisateur"));
+                            toast.success(`${unknowns.length} mot(s) signalé(s)`);
+                          }}
+                        >
+                          <Flag className="h-3 w-3" /> Signaler
+                        </Button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
