@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Plus, Pencil, Trash2, Search, Upload, Download, X, Check, Filter,
+  Plus, Pencil, Trash2, Search, Upload, Download, X, Check, Filter, Flag, CheckCircle2, XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/useStore";
 import { DictionaryEntry } from "@/lib/dictionary";
