@@ -4,6 +4,7 @@ import { Code2, Copy, Download, ArrowRight, FileDown, CheckCircle2, AlertTriangl
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/hooks/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { parseSqlCreateTable, transformColumn, generateTransformedSql, type ParsedSql } from "@/lib/transformer";
 import { TransformResult } from "@/lib/dictionary";
 import { toast } from "sonner";

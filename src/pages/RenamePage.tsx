@@ -4,6 +4,7 @@ import { Plus, Trash2, CheckCircle2, AlertTriangle, HelpCircle, ArrowRight, Copy
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { transformColumn } from "@/lib/transformer";
 import { TransformResult } from "@/lib/dictionary";
 import { exportResultsToExcel } from "@/lib/excel";
