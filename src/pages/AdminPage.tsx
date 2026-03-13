@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { DictionaryEntry } from "@/lib/dictionary";
 import { importFromExcel, exportToExcel } from "@/lib/excel";
 import { toast } from "sonner";
@@ -31,7 +32,8 @@ interface FormData {
 const emptyForm: FormData = { terme_source: "", abreviation: "", description: "", synonymes: "", categorie: "Général" };
 
 export default function AdminPage() {
-  const { dictionary, role, signalements, addEntry, updateEntry, deleteEntry, importDictionary, updateSignalement } = useAppStore();
+  const { dictionary, signalements, addEntry, updateEntry, deleteEntry, importDictionary, updateSignalement } = useAppStore();
+  const { role } = useAuth();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
