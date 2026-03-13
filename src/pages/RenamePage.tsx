@@ -32,7 +32,7 @@ const statusBadge = {
 };
 
 export default function RenamePage() {
-  const { dictionary, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
+  const { dictionary, signalements, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
   const { user } = useAuth();
   const [columns, setColumns] = useState<string[]>([""]);
   const [results, setResults] = useState<TransformResult[]>([]);
