@@ -171,7 +171,7 @@ export default function SqlPage() {
                                       className="h-6 px-2 text-xs text-destructive hover:text-destructive gap-1"
                                       onClick={() => {
                                         const unknowns = r.details.filter((d) => d.status === "inconnu");
-                                        unknowns.forEach((d) => signalerMot(d.original, r.original));
+                                        unknowns.forEach((d) => signalerMot(d.original, r.original, user?.email || "utilisateur"));
                                         toast.success(`${unknowns.length} mot(s) signalé(s) à l'équipe Data Quality`);
                                       }}
                                       disabled={r.details
