@@ -12,6 +12,15 @@ export interface DictionaryEntry {
   auteur: string;
 }
 
+export interface HistoryDetail {
+  original: string;
+  transformed: string;
+  status: "ok" | "ambigu" | "inconnu" | "partiel";
+  confidence: number;
+  mapping: string;
+  type?: string;
+}
+
 export interface HistoryEntry {
   id: string;
   date: string;
@@ -21,6 +30,7 @@ export interface HistoryEntry {
   ancienne_valeur?: string;
   nouvelle_valeur?: string;
   champ?: string;
+  details?: HistoryDetail[];
 }
 
 export interface TransformResult {
