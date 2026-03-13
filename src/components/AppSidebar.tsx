@@ -46,7 +46,7 @@ export function AppSidebar() {
           )}
         </div>
         {!collapsed && (
-          <p className="text-sm font-bold text-foreground tracking-wide text-center mt-1">Naming Studio</p>
+          <p className="text-sm font-normal text-foreground tracking-wide text-center mt-1">Naming Studio</p>
         )}
       </SidebarHeader>
 
