@@ -52,8 +52,6 @@ export default function AuthPage() {
           <h1 className="text-2xl font-bold text-foreground">Naming Studio</h1>
           <p className="text-muted-foreground mt-1">Normalisation SQL • Crédit Agricole</p>
         </div>
-          <p className="text-muted-foreground mt-1">Normalisation SQL • Crédit Agricole</p>
-        </div>
 
         {/* Card */}
         <div className="ca-card p-6 space-y-6">
