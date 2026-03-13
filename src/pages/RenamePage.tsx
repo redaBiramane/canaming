@@ -152,6 +152,28 @@ export default function RenamePage() {
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-foreground">Résultats</h2>
             <div className="flex gap-2">
+              {results.some((r) => r.details.some((d) => d.status === "inconnu")) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1 text-destructive hover:text-destructive"
+                  onClick={() => {
+                    const allUnknowns: { word: string; context: string }[] = [];
+                    results.forEach((r) => {
+                      r.details.filter((d) => d.status === "inconnu").forEach((d) => {
+                        if (!signalements.some((s: any) => s.mot === d.original && s.statut === "en_attente")) {
+                          allUnknowns.push({ word: d.original, context: r.original });
+                        }
+                      });
+                    });
+                    allUnknowns.forEach((u) => signalerMot(u.word, u.context, user?.email || "utilisateur"));
+                    if (allUnknowns.length > 0) toast.success(`${allUnknowns.length} mot(s) signalé(s)`);
+                    else toast.info("Tous les mots inconnus ont déjà été signalés");
+                  }}
+                >
+                  <Flag className="h-3.5 w-3.5" /> Signaler tout
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={copyResults} className="gap-1">
                 <Copy className="h-3.5 w-3.5" /> Copier
               </Button>
