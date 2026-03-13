@@ -173,6 +173,14 @@ export const store = {
     notify();
   },
 
+  deleteHistoryEntry: (id: string) => {
+    state = {
+      ...state,
+      history: state.history.filter((h) => h.id !== id),
+    };
+    notify();
+  },
+
   signalerMot: (mot: string, contexte: string, auteur: string = "utilisateur") => {
     if (state.signalements.some((s) => s.mot === mot && s.statut === "en_attente")) return;
     state = {

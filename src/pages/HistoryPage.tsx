@@ -83,15 +83,26 @@ export default function HistoryPage() {
                   </td>
                   <td className="p-3 text-muted-foreground">{h.auteur}</td>
                   <td className="p-3">
-                    {h.details && h.details.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      {h.details && h.details.length > 0 && (
+                        <button
+                          onClick={() => setSelectedId(h.id)}
+                          className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
+                          title="Voir le détail"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                      )}
                       <button
-                        onClick={() => setSelectedId(h.id)}
-                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
-                        title="Voir le détail"
+                        onClick={() => {
+                          deleteHistoryEntry(h.id);
+                        }}
+                        className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                        title="Supprimer"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
