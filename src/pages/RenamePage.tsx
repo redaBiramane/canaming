@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus, Trash2, CheckCircle2, AlertTriangle, HelpCircle, ArrowRight, Copy, Download } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, AlertTriangle, HelpCircle, ArrowRight, Copy, Download, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/useStore";
