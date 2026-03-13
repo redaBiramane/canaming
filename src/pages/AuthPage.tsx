@@ -48,10 +48,10 @@ export default function AuthPage() {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground text-xl font-bold mb-4">
-            CA
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">CA Naming Studio</h1>
+          <img src={logoCA} alt="CA Personal Finance & Mobility" className="h-16 w-auto mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-foreground">Naming Studio</h1>
+          <p className="text-muted-foreground mt-1">Normalisation SQL • Crédit Agricole</p>
+        </div>
           <p className="text-muted-foreground mt-1">Normalisation SQL • Crédit Agricole</p>
         </div>
 
