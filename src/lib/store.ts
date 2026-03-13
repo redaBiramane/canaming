@@ -1,5 +1,4 @@
-// Global state management using React context + localStorage persistence
-import { create } from 'zustand';
+// Global state management using vanilla store + localStorage persistence
 import { DictionaryEntry, HistoryEntry, DEFAULT_DICTIONARY, generateId } from './dictionary';
 
 // Simple zustand-like store using vanilla JS + events
