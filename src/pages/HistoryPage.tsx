@@ -35,7 +35,7 @@ const actionBadge: Record<string, string> = {
 };
 
 export default function HistoryPage() {
-  const { history } = useAppStore();
+  const { history, deleteHistoryEntry } = useAppStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedEntry = history.find((h) => h.id === selectedId);
 
