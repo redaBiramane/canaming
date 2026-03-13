@@ -13,8 +13,8 @@ import { useAppStore } from "@/hooks/useStore";
 import { Button } from "@/components/ui/button";
 
 const mainItems = [
-  { title: "Accueil", url: "/", icon: LayoutDashboard },
-  { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Accueil", url: "/", icon: Home },
+  { title: "Tableau de bord", url: "/dashboard", icon: BarChart3 },
   { title: "Renommer des colonnes", url: "/rename", icon: TextCursorInput },
   { title: "Analyse SQL", url: "/sql", icon: Code2 },
 ];
