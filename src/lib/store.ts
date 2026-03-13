@@ -39,6 +39,7 @@ function getDefaultState(): AppState {
   return {
     dictionary: DEFAULT_DICTIONARY,
     history: [],
+    signalements: [],
     transformationCount: 0,
     unknownWordsCount: 0,
     role: "admin",
