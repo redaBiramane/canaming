@@ -133,7 +133,31 @@ export default function SqlPage() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           {/* Column mapping table */}
           <div className="ca-card p-5">
-            <h2 className="font-semibold text-foreground mb-3">Mapping des colonnes</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold text-foreground">Mapping des colonnes</h2>
+              {results.some((r) => r.details.some((d) => d.status === "inconnu")) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1 text-destructive hover:text-destructive"
+                  onClick={() => {
+                    const allUnknowns: { word: string; context: string }[] = [];
+                    results.forEach((r) => {
+                      r.details.filter((d) => d.status === "inconnu").forEach((d) => {
+                        if (!signalements.some((s) => s.mot === d.original && s.statut === "en_attente")) {
+                          allUnknowns.push({ word: d.original, context: r.original });
+                        }
+                      });
+                    });
+                    allUnknowns.forEach((u) => signalerMot(u.word, u.context, user?.email || "utilisateur"));
+                    if (allUnknowns.length > 0) toast.success(`${allUnknowns.length} mot(s) signalé(s)`);
+                    else toast.info("Tous les mots inconnus ont déjà été signalés");
+                  }}
+                >
+                  <Flag className="h-3.5 w-3.5" /> Signaler tout
+                </Button>
+              )}
+            </div>
             <div className="border rounded-lg overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
