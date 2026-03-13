@@ -73,7 +73,7 @@ export default function HistoryPage() {
               </tr>
             </thead>
             <tbody>
-              {history.map((h) => (
+              {filteredHistory.map((h) => (
                 <tr key={h.id} className="border-t hover:bg-muted/50 transition-colors">
                   <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
                     {new Date(h.date).toLocaleString("fr-FR")}
