@@ -35,17 +35,19 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <div className="flex flex-col items-center gap-1">
-          <img src={logoCA} alt="CA Personal Finance & Mobility" className="h-10 w-auto" />
-          {!collapsed && (
-            <p className="text-[10px] font-medium text-muted-foreground tracking-wide">Naming Studio</p>
-          )}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src={logoCA} alt="CA Personal Finance & Mobility" className="h-8 w-auto flex-shrink-0" />
+          </div>
           {!collapsed && (
             <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-7 w-7 flex-shrink-0">
               <ChevronLeft className="h-4 w-4" />
             </Button>
           )}
         </div>
+        {!collapsed && (
+          <p className="text-[10px] font-medium text-muted-foreground tracking-wide text-center mt-1">Naming Studio</p>
+        )}
       </SidebarHeader>
 
       <SidebarContent>
