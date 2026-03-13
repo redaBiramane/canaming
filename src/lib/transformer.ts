@@ -276,7 +276,6 @@ export function generateTransformedSql(
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
-}
 
 /**
  * Get autocomplete suggestions for a partial word
