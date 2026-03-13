@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, TextCursorInput, Code2, BookOpen, 
-  History, Settings, ChevronLeft, Home, BarChart3, LogOut
+  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -22,6 +22,7 @@ const mainItems = [
 
 const adminItems = [
   { title: "Dictionnaire", url: "/admin", icon: BookOpen },
+  { title: "Signalements", url: "/signalements", icon: Flag },
   { title: "Historique", url: "/history", icon: History },
   { title: "Paramètres", url: "/settings", icon: Settings },
 ];
