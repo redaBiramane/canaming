@@ -239,6 +239,7 @@ function AdminGuide() {
 
 export default function DocumentationPage() {
   const { role } = useAuth();
+  const isAdmin = role === "admin";
   const [tab, setTab] = useState("user");
 
   return (
@@ -248,20 +249,24 @@ export default function DocumentationPage() {
         <p className="text-muted-foreground mt-1">Guide d'utilisation de Naming Studio</p>
       </div>
 
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="user">Guide Utilisateur</TabsTrigger>
-          <TabsTrigger value="admin">Guide Administrateur</TabsTrigger>
-        </TabsList>
+      {isAdmin ? (
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList>
+            <TabsTrigger value="user">Guide Utilisateur</TabsTrigger>
+            <TabsTrigger value="admin">Guide Administrateur</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="user" className="mt-4">
-          <UserGuide />
-        </TabsContent>
+          <TabsContent value="user" className="mt-4">
+            <UserGuide />
+          </TabsContent>
 
-        <TabsContent value="admin" className="mt-4">
-          <AdminGuide />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="admin" className="mt-4">
+            <AdminGuide />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <UserGuide />
+      )}
     </div>
   );
 }
