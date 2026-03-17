@@ -78,13 +78,13 @@ export default function SignalementsPage() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.terme_source.trim() || !form.abreviation.trim()) {
       toast.error("Terme et abréviation requis");
       return;
     }
     const synonymes = form.synonymes.split(",").map((s) => s.trim()).filter(Boolean);
-    addEntry({
+    await addEntry({
       terme_source: form.terme_source.toLowerCase(),
       abreviation: form.abreviation.toUpperCase(),
       description: form.description,
@@ -94,15 +94,15 @@ export default function SignalementsPage() {
       auteur: user?.email || "admin",
     });
     if (currentSignalementId) {
-      updateSignalement(currentSignalementId, "traité");
+      await updateSignalement(currentSignalementId, "traité");
     }
     toast.success(`"${form.terme_source}" ajouté au dictionnaire`);
     setDialogOpen(false);
     setCurrentSignalementId(null);
   };
 
-  const handleReject = (id: string, mot: string) => {
-    updateSignalement(id, "rejeté");
+  const handleReject = async (id: string, mot: string) => {
+    await updateSignalement(id, "rejeté");
     toast.info(`Signalement de "${mot}" rejeté`);
   };
 

@@ -14,6 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_stats: {
+        Row: {
+          id: string
+          transformation_count: number
+          unknown_words_count: number
+        }
+        Insert: {
+          id?: string
+          transformation_count?: number
+          unknown_words_count?: number
+        }
+        Update: {
+          id?: string
+          transformation_count?: number
+          unknown_words_count?: number
+        }
+        Relationships: []
+      }
+      dictionary: {
+        Row: {
+          abreviation: string
+          actif: boolean
+          auteur: string
+          categorie: string
+          created_at: string
+          date_maj: string
+          description: string
+          id: string
+          synonymes: string[]
+          terme_source: string
+        }
+        Insert: {
+          abreviation: string
+          actif?: boolean
+          auteur?: string
+          categorie?: string
+          created_at?: string
+          date_maj?: string
+          description?: string
+          id?: string
+          synonymes?: string[]
+          terme_source: string
+        }
+        Update: {
+          abreviation?: string
+          actif?: boolean
+          auteur?: string
+          categorie?: string
+          created_at?: string
+          date_maj?: string
+          description?: string
+          id?: string
+          synonymes?: string[]
+          terme_source?: string
+        }
+        Relationships: []
+      }
+      history: {
+        Row: {
+          action: string
+          ancienne_valeur: string | null
+          auteur: string
+          champ: string | null
+          date: string
+          details: Json | null
+          id: string
+          nouvelle_valeur: string | null
+          terme: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          ancienne_valeur?: string | null
+          auteur: string
+          champ?: string | null
+          date?: string
+          details?: Json | null
+          id?: string
+          nouvelle_valeur?: string | null
+          terme?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          ancienne_valeur?: string | null
+          auteur?: string
+          champ?: string | null
+          date?: string
+          details?: Json | null
+          id?: string
+          nouvelle_valeur?: string | null
+          terme?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -38,6 +134,36 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      signalements: {
+        Row: {
+          auteur: string
+          contexte: string
+          date: string
+          id: string
+          mot: string
+          statut: string
+          user_id: string | null
+        }
+        Insert: {
+          auteur: string
+          contexte?: string
+          date?: string
+          id?: string
+          mot: string
+          statut?: string
+          user_id?: string | null
+        }
+        Update: {
+          auteur?: string
+          contexte?: string
+          date?: string
+          id?: string
+          mot?: string
+          statut?: string
+          user_id?: string | null
         }
         Relationships: []
       }

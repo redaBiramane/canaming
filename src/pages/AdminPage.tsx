@@ -67,14 +67,14 @@ export default function AdminPage() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.terme_source.trim() || !form.abreviation.trim()) {
       toast.error("Terme et abréviation requis");
       return;
     }
     const synonymes = form.synonymes.split(",").map((s) => s.trim()).filter(Boolean);
     if (editingId) {
-      updateEntry(editingId, {
+      await updateEntry(editingId, {
         terme_source: form.terme_source.toLowerCase(),
         abreviation: form.abreviation.toUpperCase(),
         description: form.description,
@@ -83,7 +83,7 @@ export default function AdminPage() {
       }, user?.email || "admin");
       toast.success("Terme modifié");
     } else {
-      addEntry({
+      await addEntry({
         terme_source: form.terme_source.toLowerCase(),
         abreviation: form.abreviation.toUpperCase(),
         description: form.description,
@@ -97,14 +97,14 @@ export default function AdminPage() {
     setDialogOpen(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Supprimer ce terme du dictionnaire ?")) {
-      deleteEntry(id, user?.email || "admin");
+      await deleteEntry(id, user?.email || "admin");
       toast.success("Terme supprimé");
     }
   };
 
-  const handleImport = async () => {
+  const handleImport = () => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".xlsx,.xls";
@@ -119,7 +119,7 @@ export default function AdminPage() {
       if (result.warnings.length > 0) {
         result.warnings.forEach((w) => toast.warning(w));
       }
-      importDictionary(result.entries, user?.email || "admin");
+      await importDictionary(result.entries, user?.email || "admin");
       toast.success(`${result.entries.length} termes importés`);
     };
     input.click();
