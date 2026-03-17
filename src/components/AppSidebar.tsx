@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, TextCursorInput, Code2, BookOpen, 
-  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag
+  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
