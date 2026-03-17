@@ -18,8 +18,17 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contact", "Géographie", "Structure", "Juridique", "Technique"];
+
+interface UserWithRole {
+  user_id: string;
+  email: string | null;
+  display_name: string | null;
+  role: "admin" | "user";
+}
 
 interface FormData {
   terme_source: string;
