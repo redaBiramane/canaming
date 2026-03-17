@@ -48,6 +48,7 @@ function AppRoutes() {
         <Route path="/signalements" element={<SignalementsPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
