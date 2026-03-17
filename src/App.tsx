@@ -13,6 +13,7 @@ import HistoryPage from "./pages/HistoryPage";
 import SettingsPage from "./pages/SettingsPage";
 import SignalementsPage from "./pages/SignalementsPage";
 import DashboardPage from "./pages/DashboardPage";
+import DocumentationPage from "./pages/DocumentationPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ function AppRoutes() {
         <Route path="/signalements" element={<SignalementsPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
