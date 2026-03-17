@@ -193,176 +193,171 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Administration</h1>
-        <p className="text-muted-foreground mt-1">Gestion du dictionnaire et des utilisateurs</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Dictionnaire de nommage</h1>
+          <p className="text-muted-foreground mt-1">{dictionary.length} termes • {filtered.length} affichés</p>
+        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <Button variant="destructive" size="sm" onClick={handleDeleteAll} className="gap-1" disabled={dictionary.length === 0}>
+              <AlertTriangle className="h-3.5 w-3.5" /> Tout supprimer
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleImport} className="gap-1">
+              <Upload className="h-3.5 w-3.5" /> Importer Excel
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} className="gap-1">
+              <Download className="h-3.5 w-3.5" /> Exporter Excel
+            </Button>
+            <Button size="sm" onClick={openAdd} className="gap-1">
+              <Plus className="h-3.5 w-3.5" /> Ajouter un terme
+            </Button>
+          </div>
+        )}
       </div>
 
-      <Tabs defaultValue="dictionary">
-        <TabsList>
-          <TabsTrigger value="dictionary" className="gap-1.5"><Filter className="h-3.5 w-3.5" /> Dictionnaire</TabsTrigger>
-          {isAdmin && <TabsTrigger value="users" className="gap-1.5"><Users className="h-3.5 w-3.5" /> Utilisateurs</TabsTrigger>}
-        </TabsList>
+      {/* Filters */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un terme, abréviation ou synonyme..."
+            className="pl-9"
+          />
+        </div>
+        <Select value={catFilter} onValueChange={setCatFilter}>
+          <SelectTrigger className="w-48">
+            <Filter className="h-3.5 w-3.5 mr-1" />
+            <SelectValue placeholder="Catégorie" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes les catégories</SelectItem>
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </motion.div>
 
-        <TabsContent value="dictionary" className="space-y-6 mt-4">
+      {/* Dictionary Table */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted">
+              <tr>
+                <th className="text-left p-3 font-medium text-muted-foreground">Terme source</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">Abréviation</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">Description</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">Synonymes</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">Catégorie</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">Mise à jour</th>
+                {isAdmin && <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((entry) => (
+                <tr key={entry.id} className="border-t hover:bg-muted/50 transition-colors">
+                  <td className="p-3 font-medium text-foreground">{entry.terme_source}</td>
+                  <td className="p-3 font-mono font-semibold text-primary">{entry.abreviation}</td>
+                  <td className="p-3 text-muted-foreground">{entry.description}</td>
+                  <td className="p-3">
+                    {entry.synonymes.map((s, i) => (
+                      <span key={i} className="inline-block bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded mr-1 mb-0.5">
+                        {s}
+                      </span>
+                    ))}
+                  </td>
+                  <td className="p-3">
+                    <span className="ca-badge-ok">{entry.categorie}</span>
+                  </td>
+                  <td className="p-3 text-xs text-muted-foreground">{entry.date_maj}</td>
+                  {isAdmin && (
+                    <td className="p-3">
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(entry)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(entry.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+
+      {/* User Management Section - Admin only */}
+      {isAdmin && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-muted-foreground">{dictionary.length} termes • {filtered.length} affichés</p>
-            {isAdmin && (
-              <div className="flex gap-2">
-                <Button variant="destructive" size="sm" onClick={handleDeleteAll} className="gap-1" disabled={dictionary.length === 0}>
-                  <AlertTriangle className="h-3.5 w-3.5" /> Tout supprimer
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleImport} className="gap-1">
-                  <Upload className="h-3.5 w-3.5" /> Importer Excel
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleExport} className="gap-1">
-                  <Download className="h-3.5 w-3.5" /> Exporter Excel
-                </Button>
-                <Button size="sm" onClick={openAdd} className="gap-1">
-                  <Plus className="h-3.5 w-3.5" /> Ajouter un terme
-                </Button>
-              </div>
-            )}
+            <div>
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Users className="h-5 w-5" /> Gestion des utilisateurs
+              </h2>
+              <p className="text-muted-foreground mt-1">{usersWithRoles.length} utilisateurs inscrits</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loadingUsers}>
+              Rafraîchir
+            </Button>
           </div>
 
-          {/* Filters */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un terme, abréviation ou synonyme..."
-                className="pl-9"
-              />
-            </div>
-            <Select value={catFilter} onValueChange={setCatFilter}>
-              <SelectTrigger className="w-48">
-                <Filter className="h-3.5 w-3.5 mr-1" />
-                <SelectValue placeholder="Catégorie" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes les catégories</SelectItem>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </motion.div>
-
-          {/* Table */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-hidden">
+          <div className="ca-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Terme source</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Abréviation</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Description</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Synonymes</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Catégorie</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Mise à jour</th>
-                    {isAdmin && <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>}
+                    <th className="text-left p-3 font-medium text-muted-foreground">Utilisateur</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Rôle</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((entry) => (
-                    <tr key={entry.id} className="border-t hover:bg-muted/50 transition-colors">
-                      <td className="p-3 font-medium text-foreground">{entry.terme_source}</td>
-                      <td className="p-3 font-mono font-semibold text-primary">{entry.abreviation}</td>
-                      <td className="p-3 text-muted-foreground">{entry.description}</td>
-                      <td className="p-3">
-                        {entry.synonymes.map((s, i) => (
-                          <span key={i} className="inline-block bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded mr-1 mb-0.5">
-                            {s}
+                  {usersWithRoles.map((u) => (
+                    <tr key={u.user_id} className="border-t hover:bg-muted/50 transition-colors">
+                      <td className="p-3 font-medium text-foreground flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-xs font-medium text-primary">
+                            {(u.display_name || u.email || "?")[0].toUpperCase()}
                           </span>
-                        ))}
+                        </div>
+                        {u.display_name || "—"}
+                      </td>
+                      <td className="p-3 text-muted-foreground">{u.email}</td>
+                      <td className="p-3">
+                        <Badge variant={u.role === "admin" ? "default" : "secondary"} className="gap-1">
+                          {u.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
+                          {u.role === "admin" ? "Admin" : "Utilisateur"}
+                        </Badge>
                       </td>
                       <td className="p-3">
-                        <span className="ca-badge-ok">{entry.categorie}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleRole(u.user_id, u.role)}
+                          className="gap-1"
+                        >
+                          {u.role === "admin" ? (
+                            <><User className="h-3.5 w-3.5" /> Rétrograder</>
+                          ) : (
+                            <><Shield className="h-3.5 w-3.5" /> Promouvoir admin</>
+                          )}
+                        </Button>
                       </td>
-                      <td className="p-3 text-xs text-muted-foreground">{entry.date_maj}</td>
-                      {isAdmin && (
-                        <td className="p-3">
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(entry)}>
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(entry.id)}>
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        </td>
-                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </motion.div>
-        </TabsContent>
-
-        {isAdmin && (
-          <TabsContent value="users" className="space-y-6 mt-4">
-            <div className="flex items-center justify-between">
-              <p className="text-muted-foreground">{usersWithRoles.length} utilisateurs inscrits</p>
-              <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loadingUsers}>
-                Rafraîchir
-              </Button>
-            </div>
-
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="text-left p-3 font-medium text-muted-foreground">Utilisateur</th>
-                      <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
-                      <th className="text-left p-3 font-medium text-muted-foreground">Rôle</th>
-                      <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {usersWithRoles.map((u) => (
-                      <tr key={u.user_id} className="border-t hover:bg-muted/50 transition-colors">
-                        <td className="p-3 font-medium text-foreground flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="text-xs font-medium text-primary">
-                              {(u.display_name || u.email || "?")[0].toUpperCase()}
-                            </span>
-                          </div>
-                          {u.display_name || "—"}
-                        </td>
-                        <td className="p-3 text-muted-foreground">{u.email}</td>
-                        <td className="p-3">
-                          <Badge variant={u.role === "admin" ? "default" : "secondary"} className="gap-1">
-                            {u.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                            {u.role === "admin" ? "Admin" : "Utilisateur"}
-                          </Badge>
-                        </td>
-                        <td className="p-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleRole(u.user_id, u.role)}
-                            className="gap-1"
-                          >
-                            {u.role === "admin" ? (
-                              <><User className="h-3.5 w-3.5" /> Rétrograder</>
-                            ) : (
-                              <><Shield className="h-3.5 w-3.5" /> Promouvoir admin</>
-                            )}
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-          </TabsContent>
-        )}
-      </Tabs>
+          </div>
+        </motion.div>
+      )}
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
