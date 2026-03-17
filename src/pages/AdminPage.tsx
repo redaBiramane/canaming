@@ -97,9 +97,9 @@ export default function AdminPage() {
     setDialogOpen(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Supprimer ce terme du dictionnaire ?")) {
-      deleteEntry(id, user?.email || "admin");
+      await deleteEntry(id, user?.email || "admin");
       toast.success("Terme supprimé");
     }
   };
