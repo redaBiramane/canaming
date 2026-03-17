@@ -246,72 +246,8 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
         </div>
       </motion.div>
 
-      {/* User Management Section - Admin only */}
-      {isAdmin && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                <Users className="h-5 w-5" /> Gestion des utilisateurs
-              </h2>
-              <p className="text-muted-foreground mt-1">{usersWithRoles.length} utilisateurs inscrits</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loadingUsers}>
-              Rafraîchir
-            </Button>
-          </div>
 
-          <div className="ca-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Utilisateur</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Rôle</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {usersWithRoles.map((u) => (
-                    <tr key={u.user_id} className="border-t hover:bg-muted/50 transition-colors">
-                      <td className="p-3 font-medium text-foreground flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-xs font-medium text-primary">
-                            {(u.display_name || u.email || "?")[0].toUpperCase()}
-                          </span>
-                        </div>
-                        {u.display_name || "—"}
-                      </td>
-                      <td className="p-3 text-muted-foreground">{u.email}</td>
-                      <td className="p-3">
-                        <Badge variant={u.role === "admin" ? "default" : "secondary"} className="gap-1">
-                          {u.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                          {u.role === "admin" ? "Admin" : "Utilisateur"}
-                        </Badge>
-                      </td>
-                      <td className="p-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleRole(u.user_id, u.role)}
-                          className="gap-1"
-                        >
-                          {u.role === "admin" ? (
-                            <><User className="h-3.5 w-3.5" /> Rétrograder</>
-                          ) : (
-                            <><Shield className="h-3.5 w-3.5" /> Promouvoir admin</>
-                          )}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </motion.div>
-      )}
+
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
