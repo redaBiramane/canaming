@@ -153,6 +153,9 @@ export default function AdminPage() {
         </div>
         {isAdmin && (
           <div className="flex gap-2">
+            <Button variant="destructive" size="sm" onClick={handleDeleteAll} className="gap-1" disabled={dictionary.length === 0}>
+              <AlertTriangle className="h-3.5 w-3.5" /> Tout supprimer
+            </Button>
             <Button variant="outline" size="sm" onClick={handleImport} className="gap-1">
               <Upload className="h-3.5 w-3.5" /> Importer Excel
             </Button>
