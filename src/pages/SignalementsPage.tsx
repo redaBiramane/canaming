@@ -101,8 +101,8 @@ export default function SignalementsPage() {
     setCurrentSignalementId(null);
   };
 
-  const handleReject = (id: string, mot: string) => {
-    updateSignalement(id, "rejeté");
+  const handleReject = async (id: string, mot: string) => {
+    await updateSignalement(id, "rejeté");
     toast.info(`Signalement de "${mot}" rejeté`);
   };
 
