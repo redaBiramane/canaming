@@ -4,7 +4,7 @@ import {
   Plus, Pencil, Trash2, Search, Upload, Download, X, Check, Filter, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/useStore";
 import { useAuth } from "@/hooks/useAuth";
