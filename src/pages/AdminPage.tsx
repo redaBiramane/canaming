@@ -49,6 +49,44 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
 
+  const [usersWithRoles, setUsersWithRoles] = useState<UserWithRole[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, email, display_name");
+    const { data: roles } = await supabase.from("user_roles").select("user_id, role");
+    if (profiles && roles) {
+      const roleMap = new Map(roles.map(r => [r.user_id, r.role as "admin" | "user"]));
+      setUsersWithRoles(profiles.map(p => ({
+        ...p,
+        role: roleMap.get(p.user_id) || "user",
+      })));
+    }
+    setLoadingUsers(false);
+  };
+
+  useEffect(() => {
+    if (isAdmin) fetchUsers();
+  }, [isAdmin]);
+
+  const toggleRole = async (userId: string, currentRole: "admin" | "user") => {
+    const newRole = currentRole === "admin" ? "user" : "admin";
+    if (userId === user?.id && newRole === "user") {
+      if (!confirm("Vous allez perdre vos droits admin. Continuer ?")) return;
+    }
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ role: newRole })
+      .eq("user_id", userId);
+    if (error) {
+      toast.error("Erreur : " + error.message);
+    } else {
+      toast.success(`Rôle changé en ${newRole}`);
+      fetchUsers();
+    }
+  };
+
   const filtered = dictionary.filter((e) => {
     const matchSearch = !search || 
       e.terme_source.toLowerCase().includes(search.toLowerCase()) ||
