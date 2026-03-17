@@ -104,6 +104,18 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (!confirm(`Supprimer les ${dictionary.length} termes du dictionnaire ?`)) return;
+    if (!confirm("Cette action est irréversible. Confirmer la suppression totale ?")) return;
+    try {
+      // Delete all entries using importDictionary with empty array (deletes all then inserts nothing)
+      await importDictionary([], user?.email || "admin");
+      toast.success("Dictionnaire vidé");
+    } catch (err) {
+      toast.error("Erreur lors de la suppression");
+    }
+  };
+
   const handleImport = () => {
     const input = document.createElement("input");
     input.type = "file";
