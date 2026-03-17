@@ -178,7 +178,7 @@ export default function AdminPage() {
     exportToExcel(dictionary);
     toast.success("Dictionnaire exporté");
   };
-
+const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contact", "Géographie", "Structure", "Juridique", "Technique"];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
