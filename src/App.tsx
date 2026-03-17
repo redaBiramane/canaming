@@ -12,6 +12,7 @@ import AdminPage from "./pages/AdminPage";
 import HistoryPage from "./pages/HistoryPage";
 import SettingsPage from "./pages/SettingsPage";
 import SignalementsPage from "./pages/SignalementsPage";
+import UsersPage from "./pages/UsersPage";
 import DashboardPage from "./pages/DashboardPage";
 import DocumentationPage from "./pages/DocumentationPage";
 import NotFound from "./pages/NotFound";
@@ -47,6 +48,7 @@ function AppRoutes() {
         <Route path="/signalements" element={<SignalementsPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

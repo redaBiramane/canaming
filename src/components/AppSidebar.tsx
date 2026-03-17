@@ -1,9 +1,9 @@
 import { 
   LayoutDashboard, TextCursorInput, Code2, BookOpen, 
-  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText
+  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import logoCA from "@/assets/logo-ca.png";
 
 const mainItems = [
@@ -25,14 +28,15 @@ const adminItems = [
   { title: "Signalements", url: "/signalements", icon: Flag },
   { title: "Historique", url: "/history", icon: History },
   { title: "Documentation", url: "/documentation", icon: FileText },
-  { title: "Paramètres", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
   const { state: sidebarState, toggleSidebar } = useSidebar();
   const collapsed = sidebarState === "collapsed";
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, role, signOut } = useAuth();
+  const isAdmin = role === "admin";
 
   return (
     <Sidebar collapsible="icon">
@@ -92,26 +96,42 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         {!collapsed && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-xs font-medium text-primary">
-                  {role === "admin" ? "A" : "U"}
-                </span>
-              </div>
-              <div className="text-xs">
-                <p className="font-medium text-sidebar-foreground truncate max-w-[120px]">
-                  {user?.email?.split("@")[0]}
-                </p>
-                <p className="text-muted-foreground">
-                  {role === "admin" ? "Admin" : "Utilisateur"}
-                </p>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={signOut} title="Déconnexion">
-              <LogOut className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="w-full flex items-center justify-between rounded-md px-2 py-2 hover:bg-sidebar-accent transition-colors">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-xs font-medium text-primary">
+                      {role === "admin" ? "A" : "U"}
+                    </span>
+                  </div>
+                  <div className="text-xs text-left">
+                    <p className="font-medium text-sidebar-foreground truncate max-w-[120px]">
+                      {user?.email?.split("@")[0]}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {role === "admin" ? "Admin" : "Utilisateur"}
+                    </p>
+                  </div>
+                </div>
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56">
+              <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2 cursor-pointer">
+                <Settings className="h-4 w-4" /> Paramètres
+              </DropdownMenuItem>
+              {isAdmin && (
+                <DropdownMenuItem onClick={() => navigate("/users")} className="gap-2 cursor-pointer">
+                  <Users className="h-4 w-4" /> Gestion des utilisateurs
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signOut} className="gap-2 cursor-pointer text-destructive">
+                <LogOut className="h-4 w-4" /> Se déconnecter
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </SidebarFooter>
     </Sidebar>
