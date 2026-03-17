@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Plus, Pencil, Trash2, Search, Upload, Download, X, Check, Filter, Flag, CheckCircle2, XCircle,
+  Plus, Pencil, Trash2, Search, Upload, Download, X, Check, Filter, Flag, CheckCircle2, XCircle, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
