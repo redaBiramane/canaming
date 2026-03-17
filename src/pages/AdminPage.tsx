@@ -67,14 +67,14 @@ export default function AdminPage() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.terme_source.trim() || !form.abreviation.trim()) {
       toast.error("Terme et abréviation requis");
       return;
     }
     const synonymes = form.synonymes.split(",").map((s) => s.trim()).filter(Boolean);
     if (editingId) {
-      updateEntry(editingId, {
+      await updateEntry(editingId, {
         terme_source: form.terme_source.toLowerCase(),
         abreviation: form.abreviation.toUpperCase(),
         description: form.description,
@@ -83,7 +83,7 @@ export default function AdminPage() {
       }, user?.email || "admin");
       toast.success("Terme modifié");
     } else {
-      addEntry({
+      await addEntry({
         terme_source: form.terme_source.toLowerCase(),
         abreviation: form.abreviation.toUpperCase(),
         description: form.description,
