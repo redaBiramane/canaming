@@ -190,7 +190,6 @@ export default function AdminPage() {
     toast.success("Dictionnaire exporté");
   };
 
-  const isAdmin = role === "admin";
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
