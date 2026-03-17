@@ -104,7 +104,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleImport = async () => {
+  const handleImport = () => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".xlsx,.xls";
@@ -119,7 +119,7 @@ export default function AdminPage() {
       if (result.warnings.length > 0) {
         result.warnings.forEach((w) => toast.warning(w));
       }
-      importDictionary(result.entries, user?.email || "admin");
+      await importDictionary(result.entries, user?.email || "admin");
       toast.success(`${result.entries.length} termes importés`);
     };
     input.click();
