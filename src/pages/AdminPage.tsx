@@ -48,6 +48,7 @@ export default function AdminPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
+  const isAdmin = role === "admin";
 
   const [usersWithRoles, setUsersWithRoles] = useState<UserWithRole[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
