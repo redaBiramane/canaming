@@ -1,5 +1,5 @@
 import { 
-  LayoutDashboard, TextCursorInput, Code2, BookOpen, 
+  LayoutDashboard, TextCursorInput, Code2, BookOpen, Database,
   History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -21,6 +21,7 @@ const mainItems = [
   { title: "Tableau de bord", url: "/dashboard", icon: BarChart3 },
   { title: "Renommer des colonnes", url: "/rename", icon: TextCursorInput },
   { title: "Analyse SQL", url: "/sql", icon: Code2 },
+  { title: "Analyse DBT", url: "/dbt", icon: Database },
 ];
 
 const adminItems = [
