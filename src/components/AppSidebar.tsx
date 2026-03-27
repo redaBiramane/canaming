@@ -1,5 +1,5 @@
 import { 
-  LayoutDashboard, TextCursorInput, Code2, BookOpen, Database,
+  LayoutDashboard, TextCursorInput, Code2, BookOpen, Database, Sparkles,
   History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -15,6 +15,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import logoCA from "@/assets/logo-ca.png";
+import { useAppStore } from "@/hooks/useStore";
 
 const mainItems = [
   { title: "Accueil", url: "/", icon: Home },
@@ -22,6 +23,7 @@ const mainItems = [
   { title: "Renommer des colonnes", url: "/rename", icon: TextCursorInput },
   { title: "Analyse SQL", url: "/sql", icon: Code2 },
   { title: "Analyse DBT", url: "/dbt", icon: Database },
+  { title: "IA Naming", url: "/ia-naming", icon: Sparkles },
 ];
 
 const adminItems = [
@@ -37,7 +39,9 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, role, signOut } = useAuth();
+  const { signalements } = useAppStore();
   const isAdmin = role === "admin";
+  const pendingCount = signalements.filter((s) => s.statut === "en_attente").length;
 
   return (
     <Sidebar collapsible="icon">
@@ -85,7 +89,16 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && (
+                        <span className="flex items-center justify-between flex-1">
+                          {item.title}
+                          {item.url === "/signalements" && pendingCount > 0 && (
+                            <span className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                              {pendingCount}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

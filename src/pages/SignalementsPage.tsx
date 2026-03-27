@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useAppStore } from "@/hooks/useStore";
 import { useAuth } from "@/hooks/useAuth";
 import { Signalement } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -95,6 +96,23 @@ export default function SignalementsPage() {
     });
     if (currentSignalementId) {
       await updateSignalement(currentSignalementId, "traité");
+      // Send notification to the user who reported
+      const sig = signalements.find((s) => s.id === currentSignalementId);
+      if (sig) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("user_id")
+          .eq("email", sig.auteur)
+          .single();
+        if (profile?.user_id) {
+          await supabase.from("notifications").insert({
+            user_id: profile.user_id,
+            title: "Signalement traité ✅",
+            message: `Le mot "${sig.mot}" a été ajouté au dictionnaire (${form.abreviation.toUpperCase()}).`,
+            type: "success",
+          });
+        }
+      }
     }
     toast.success(`"${form.terme_source}" ajouté au dictionnaire`);
     setDialogOpen(false);
@@ -103,6 +121,23 @@ export default function SignalementsPage() {
 
   const handleReject = async (id: string, mot: string) => {
     await updateSignalement(id, "rejeté");
+    // Send notification to the user who reported
+    const sig = signalements.find((s) => s.id === id);
+    if (sig) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("email", sig.auteur)
+        .single();
+      if (profile?.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: profile.user_id,
+          title: "Signalement rejeté",
+          message: `Le mot "${mot}" n'a pas été retenu pour le dictionnaire.`,
+          type: "warning",
+        });
+      }
+    }
     toast.info(`Signalement de "${mot}" rejeté`);
   };
 

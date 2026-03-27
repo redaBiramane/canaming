@@ -262,6 +262,23 @@ export function useAppStore() {
       nouvelle_valeur: `Contexte: ${contexte}`,
       user_id: user?.id,
     });
+
+    // Notify all admins about the new signalement
+    const { data: adminIds } = await supabase.rpc("get_admin_user_ids");
+    if (adminIds && adminIds.length > 0) {
+      const notifications = (adminIds as string[])
+        .filter((id) => id !== user?.id) // Don't notify yourself
+        .map((id) => ({
+          user_id: id,
+          title: "Nouveau signalement 🚩",
+          message: `Le mot "${mot}" a été signalé par ${auteur} (contexte: ${contexte}).`,
+          type: "info",
+        }));
+      if (notifications.length > 0) {
+        await supabase.from("notifications").insert(notifications);
+      }
+    }
+
     invalidateAll();
   };
 

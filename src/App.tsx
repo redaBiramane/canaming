@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import RenamePage from "./pages/RenamePage";
 import SqlPage from "./pages/SqlPage";
 import DbtPage from "./pages/DbtPage";
+import IaNamingPage from "./pages/IaNamingPage";
 import AdminPage from "./pages/AdminPage";
 import HistoryPage from "./pages/HistoryPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -46,6 +47,7 @@ function AppRoutes() {
         <Route path="/rename" element={<RenamePage />} />
         <Route path="/sql" element={<SqlPage />} />
         <Route path="/dbt" element={<DbtPage />} />
+        <Route path="/ia-naming" element={<IaNamingPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/signalements" element={<SignalementsPage />} />
         <Route path="/history" element={<HistoryPage />} />
