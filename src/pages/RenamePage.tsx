@@ -32,7 +32,7 @@ const statusBadge = {
 };
 
 export default function RenamePage() {
-  const { dictionary, signalements, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
+  const { dictionary, signalements, stopWords, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
   const { user } = useAuth();
   const [columns, setColumns] = useState<string[]>([""]);
   const [results, setResults] = useState<TransformResult[]>([]);
@@ -65,7 +65,7 @@ export default function RenamePage() {
       toast.error("Saisissez au moins un nom de colonne");
       return;
     }
-    const res = validCols.map((c) => transformColumn(c, dictionary));
+    const res = validCols.map((c) => transformColumn(c, dictionary, stopWords));
     setResults(res);
     setEditOverrides({});
     const unknowns = res.filter((r) => r.status === "inconnu" || r.status === "partiel").length;

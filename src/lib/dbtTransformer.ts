@@ -218,9 +218,10 @@ function extractColumnFromExpression(expr: string, lineIndex: number): DbtColumn
  */
 export function transformDbtColumns(
   parsed: ParsedDbtModel,
-  dictionary: DictionaryEntry[]
+  dictionary: DictionaryEntry[],
+  stopWords: string[] = []
 ): TransformResult[] {
-  return parsed.columns.map((col) => transformColumn(col.alias, dictionary));
+  return parsed.columns.map((col) => transformColumn(col.alias, dictionary, stopWords));
 }
 
 /**

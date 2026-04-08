@@ -103,7 +103,8 @@ function stripSqlType(input: string): { columnName: string; sqlType: string | nu
 
 export function transformColumn(
   columnName: string,
-  dictionary: DictionaryEntry[]
+  dictionary: DictionaryEntry[],
+  stopWords: string[] = []
 ): TransformResult {
   const { columnName: cleanName } = stripSqlType(columnName);
   const words = splitWords(cleanName);
@@ -111,7 +112,15 @@ export function transformColumn(
   let hasUnknown = false;
   let hasAmbiguous = false;
 
+  // Normalize stop words for comparison
+  const normalizedStopWords = new Set(stopWords.map((w) => normalize(w)));
+
   for (const word of words) {
+    // Skip stop words entirely
+    if (normalizedStopWords.has(normalize(word))) {
+      continue;
+    }
+
     const { entry, alternatives, matchType } = findMatch(word, dictionary);
 
     if (matchType === "none") {
@@ -140,7 +149,7 @@ export function transformColumn(
 
   const transformed = mappings.map((m) => m.transformed).join("_");
   const okCount = mappings.filter((m) => m.status === "ok").length;
-  const confidence = words.length > 0 ? Math.round((okCount / words.length) * 100) : 100;
+  const confidence = mappings.length > 0 ? Math.round((okCount / mappings.length) * 100) : 100;
 
   let status: TransformResult["status"] = "ok";
   if (hasUnknown && hasAmbiguous) status = "partiel";

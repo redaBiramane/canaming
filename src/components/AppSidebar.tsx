@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, TextCursorInput, Code2, BookOpen, Database, Sparkles,
-  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp
+  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp, ClipboardPaste, Ban
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -21,6 +21,7 @@ const mainItems = [
   { title: "Accueil", url: "/", icon: Home },
   { title: "Tableau de bord", url: "/dashboard", icon: BarChart3 },
   { title: "Renommer des colonnes", url: "/rename", icon: TextCursorInput },
+  { title: "Collage Excel", url: "/excel-paste", icon: ClipboardPaste },
   { title: "Analyse SQL", url: "/sql", icon: Code2 },
   { title: "Analyse DBT", url: "/dbt", icon: Database },
   { title: "IA Naming", url: "/ia-naming", icon: Sparkles },
@@ -28,6 +29,7 @@ const mainItems = [
 
 const adminItems = [
   { title: "Dictionnaire", url: "/admin", icon: BookOpen },
+  { title: "Mots creux", url: "/stop-words", icon: Ban },
   { title: "Signalements", url: "/signalements", icon: Flag },
   { title: "Historique", url: "/history", icon: History },
   { title: "Documentation", url: "/documentation", icon: FileText },

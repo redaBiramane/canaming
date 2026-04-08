@@ -45,6 +45,13 @@ function mapSignalement(row: any): Signalement {
   };
 }
 
+// Default French stop words to ignore during transformation
+const DEFAULT_STOP_WORDS = [
+  "de", "du", "des", "le", "la", "les", "l", "un", "une",
+  "et", "ou", "en", "au", "aux", "par", "pour", "sur", "avec",
+  "dans", "ce", "cette", "ces", "son", "sa", "ses",
+];
+
 export function useAppStore() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -114,11 +121,32 @@ export function useAppStore() {
     },
   });
 
+  // --- Stop Words (stored in app_settings as JSON array) ---
+  const { data: stopWords = [] } = useQuery({
+    queryKey: ["stop_words"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("app_settings")
+        .select("value")
+        .eq("key", "stop_words")
+        .single();
+      if (error && error.code !== "PGRST116") throw error; // PGRST116 = not found
+      if (!data) return DEFAULT_STOP_WORDS;
+      try {
+        const parsed = JSON.parse(data.value);
+        return Array.isArray(parsed) ? parsed.map((w: string) => w.toLowerCase().trim()).filter(Boolean) : DEFAULT_STOP_WORDS;
+      } catch {
+        return DEFAULT_STOP_WORDS;
+      }
+    },
+  });
+
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ["dictionary"] });
     queryClient.invalidateQueries({ queryKey: ["history"] });
     queryClient.invalidateQueries({ queryKey: ["signalements"] });
     queryClient.invalidateQueries({ queryKey: ["app_stats"] });
+    queryClient.invalidateQueries({ queryKey: ["stop_words"] });
   };
 
   // --- Mutations ---
@@ -287,10 +315,39 @@ export function useAppStore() {
     queryClient.invalidateQueries({ queryKey: ["signalements"] });
   };
 
+  // --- Stop words management ---
+  const saveStopWords = async (words: string[]) => {
+    const normalized = [...new Set(words.map((w) => w.toLowerCase().trim()).filter(Boolean))].sort();
+    const value = JSON.stringify(normalized);
+    // Upsert: try update first, then insert if not found
+    const { data: existing } = await supabase
+      .from("app_settings")
+      .select("key")
+      .eq("key", "stop_words")
+      .single();
+    if (existing) {
+      await supabase.from("app_settings").update({ value }).eq("key", "stop_words");
+    } else {
+      await supabase.from("app_settings").insert({ key: "stop_words", value });
+    }
+    queryClient.invalidateQueries({ queryKey: ["stop_words"] });
+  };
+
+  const addStopWord = async (word: string) => {
+    const normalized = word.toLowerCase().trim();
+    if (!normalized || stopWords.includes(normalized)) return;
+    await saveStopWords([...stopWords, normalized]);
+  };
+
+  const removeStopWord = async (word: string) => {
+    await saveStopWords(stopWords.filter((w: string) => w !== word.toLowerCase().trim()));
+  };
+
   return {
     dictionary,
     history,
     signalements,
+    stopWords,
     transformationCount: stats.transformationCount,
     unknownWordsCount: stats.unknownWordsCount,
     addEntry,
@@ -302,5 +359,8 @@ export function useAppStore() {
     deleteHistoryEntry,
     signalerMot,
     updateSignalement,
+    saveStopWords,
+    addStopWord,
+    removeStopWord,
   };
 }

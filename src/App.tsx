@@ -17,6 +17,8 @@ import SignalementsPage from "./pages/SignalementsPage";
 import UsersPage from "./pages/UsersPage";
 import DashboardPage from "./pages/DashboardPage";
 import DocumentationPage from "./pages/DocumentationPage";
+import ExcelPastePage from "./pages/ExcelPastePage";
+import StopWordsPage from "./pages/StopWordsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +47,7 @@ function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/rename" element={<RenamePage />} />
+        <Route path="/excel-paste" element={<ExcelPastePage />} />
         <Route path="/sql" element={<SqlPage />} />
         <Route path="/dbt" element={<DbtPage />} />
         <Route path="/ia-naming" element={<IaNamingPage />} />
@@ -54,6 +57,7 @@ function AppRoutes() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
+        <Route path="/stop-words" element={<StopWordsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

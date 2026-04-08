@@ -22,7 +22,7 @@ const EXAMPLE_SQL = `CREATE TABLE salaire_client (
 );`;
 
 export default function SqlPage() {
-  const { dictionary, signalements, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
+  const { dictionary, signalements, stopWords, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
   const { user } = useAuth();
   const [sql, setSql] = useState("");
   const [parsed, setParsed] = useState<ParsedSql | null>(null);
@@ -41,7 +41,7 @@ export default function SqlPage() {
       return;
     }
     setParsed(p);
-    const res = p.columns.map((c) => transformColumn(c.name, dictionary));
+    const res = p.columns.map((c) => transformColumn(c.name, dictionary, stopWords));
     setResults(res);
     setTransformedSql(generateTransformedSql(p, res));
     const unknowns = res.filter((r) => r.status === "inconnu").length;

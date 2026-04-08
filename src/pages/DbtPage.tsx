@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 export default function DbtPage() {
-  const { dictionary, signalements, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
+  const { dictionary, signalements, stopWords, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
   const { user } = useAuth();
   const [dbtModel, setDbtModel] = useState("");
   const [parsed, setParsed] = useState<ParsedDbtModel | null>(null);
@@ -30,7 +30,7 @@ export default function DbtPage() {
       return;
     }
     setParsed(p);
-    const res = transformDbtColumns(p, dictionary);
+    const res = transformDbtColumns(p, dictionary, stopWords);
     setResults(res);
     setTransformedModel(generateTransformedDbtModel(p, res));
     const unknowns = res.filter((r) => r.status === "inconnu").length;
