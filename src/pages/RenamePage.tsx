@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useSessionStorage } from "@/hooks/useSessionStorage";
 import { motion } from "framer-motion";
 import { Plus, Trash2, CheckCircle2, AlertTriangle, HelpCircle, ArrowRight, Copy, Download, Flag, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,9 +35,9 @@ const statusBadge = {
 export default function RenamePage() {
   const { dictionary, signalements, stopWords, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
   const { user } = useAuth();
-  const [columns, setColumns] = useState<string[]>([""]);
-  const [results, setResults] = useState<TransformResult[]>([]);
-  const [editOverrides, setEditOverrides] = useState<Record<number, string>>({});
+  const [columns, setColumns] = useSessionStorage<string[]>("rename_columns", [""]);
+  const [results, setResults] = useSessionStorage<TransformResult[]>("rename_results", []);
+  const [editOverrides, setEditOverrides] = useSessionStorage<Record<number, string>>("rename_editOverrides", {});
 
   const addColumn = () => setColumns([...columns, ""]);
   const removeColumn = (i: number) => {

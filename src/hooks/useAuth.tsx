@@ -40,10 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setRole(null);
         }
         setLoading(false);
-        // Redirect to home on login
-        if (_event === "SIGNED_IN" && window.location.pathname !== "/") {
-          window.location.replace("/");
-        }
       }
     );
 

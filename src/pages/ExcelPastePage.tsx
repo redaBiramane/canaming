@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useMemo } from "react";
+import { useSessionStorage } from "@/hooks/useSessionStorage";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardPaste, ArrowRight, CheckCircle2, AlertTriangle, HelpCircle,
@@ -89,15 +90,15 @@ export default function ExcelPastePage() {
   const { dictionary, signalements, stopWords, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
   const { user } = useAuth();
 
-  const [rawText, setRawText] = useState("");
-  const [parsedData, setParsedData] = useState<ParsedData | null>(null);
-  const [selectedColumns, setSelectedColumns] = useState<Set<number>>(new Set());
+  const [rawText, setRawText] = useSessionStorage("excel_rawText", "");
+  const [parsedData, setParsedData] = useSessionStorage<ParsedData | null>("excel_parsedData", null);
+  const [selectedColumns, setSelectedColumns] = useSessionStorage<Set<number>>("excel_selectedColumns", new Set());
   // Track which individual values the user wants to EXCLUDE
-  const [excludedValues, setExcludedValues] = useState<Set<string>>(new Set());
-  const [valueFilter, setValueFilter] = useState("");
-  const [results, setResults] = useState<TransformResult[]>([]);
-  const [editOverrides, setEditOverrides] = useState<Record<number, string>>({});
-  const [step, setStep] = useState<"paste" | "select" | "results">("paste");
+  const [excludedValues, setExcludedValues] = useSessionStorage<Set<string>>("excel_excludedValues", new Set());
+  const [valueFilter, setValueFilter] = useSessionStorage("excel_valueFilter", "");
+  const [results, setResults] = useSessionStorage<TransformResult[]>("excel_results", []);
+  const [editOverrides, setEditOverrides] = useSessionStorage<Record<number, string>>("excel_editOverrides", {});
+  const [step, setStep] = useSessionStorage<"paste" | "select" | "results">("excel_step", "paste");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handlePaste = useCallback(

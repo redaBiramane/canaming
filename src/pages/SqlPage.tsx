@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSessionStorage } from "@/hooks/useSessionStorage";
 import { motion } from "framer-motion";
 import { Code2, Copy, Download, ArrowRight, FileDown, CheckCircle2, AlertTriangle, HelpCircle, Flag, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,10 +25,10 @@ const EXAMPLE_SQL = `CREATE TABLE salaire_client (
 export default function SqlPage() {
   const { dictionary, signalements, stopWords, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
   const { user } = useAuth();
-  const [sql, setSql] = useState("");
-  const [parsed, setParsed] = useState<ParsedSql | null>(null);
-  const [results, setResults] = useState<TransformResult[]>([]);
-  const [transformedSql, setTransformedSql] = useState("");
+  const [sql, setSql] = useSessionStorage("sql_input", "");
+  const [parsed, setParsed] = useSessionStorage<ParsedSql | null>("sql_parsed", null);
+  const [results, setResults] = useSessionStorage<TransformResult[]>("sql_results", []);
+  const [transformedSql, setTransformedSql] = useSessionStorage("sql_transformed", "");
 
   const analyze = () => {
     const input = sql.trim();

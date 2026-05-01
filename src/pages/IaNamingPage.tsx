@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSessionStorage } from "@/hooks/useSessionStorage";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Copy, ArrowRight, FileDown, RotateCcw, AlertCircle, Loader2, ArrowRightLeft, Zap, BrainCircuit, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,8 +34,8 @@ ORDER BY c.nom_client;`;
 export default function IaNamingPage() {
   const { dictionary, incrementTransformations, addHistoryEntry } = useAppStore();
   const { user, role } = useAuth();
-  const [query, setQuery] = useState("");
-  const [result, setResult] = useState<LLMTransformResult | null>(null);
+  const [query, setQuery] = useSessionStorage("ianaming_query", "");
+  const [result, setResult] = useSessionStorage<LLMTransformResult | null>("ianaming_result", null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
