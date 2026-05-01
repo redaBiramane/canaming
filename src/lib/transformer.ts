@@ -85,6 +85,8 @@ const SQL_TYPES = new Set([
   "boolean", "bool", "bit",
   "binary", "varbinary", "raw", "long",
   "json", "jsonb", "xml", "uuid", "array",
+  "variant", "object", "geography", "geometry",
+  "timestamp_ltz", "timestamp_ntz", "timestamp_tz", "num"
 ]);
 
 function stripSqlType(input: string): { columnName: string; sqlType: string | null } {
@@ -175,17 +177,30 @@ export interface ParsedSql {
   originalSql: string;
 }
 
-export function parseSql(sql: string): ParsedSql | null {
-  // Check if it's a SELECT statement
-  if (/^\s*SELECT\b/i.test(sql)) {
+export function parseSql(rawSql: string): ParsedSql | null {
+  // Clean SAS PROC SQL wrappers
+  let sql = rawSql.replace(/^\s*PROC\s+SQL\s*;/i, "").replace(/QUIT\s*;\s*$/i, "").trim();
+
+  // Check if it's a CTAS (CREATE TABLE AS SELECT)
+  const ctasMatch = sql.match(/^\s*CREATE\s+(?:OR\s+REPLACE\s+)?(?:(?:LOCAL|GLOBAL)\s+TEMPORARY\s+|TEMP\s+|VOLATILE\s+|TRANSIENT\s+|SECURE\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s+AS\s+(SELECT\b[\s\S]*)/i);
+
+  // Check if it's a SELECT statement or CTAS
+  if (ctasMatch || /^\s*SELECT\b/i.test(sql)) {
+    let selectString = sql;
+    let tableName = "requete_select";
+    if (ctasMatch) {
+      tableName = ctasMatch[1].replace(/"/g, "");
+      selectString = ctasMatch[2];
+    }
+
     // Extract everything between SELECT and FROM
-    const selectMatch = sql.match(/^\s*SELECT\b([\s\S]*?)\bFROM\b/i);
+    const selectMatch = selectString.match(/^\s*SELECT\b([\s\S]*?)\bFROM\b/i);
     let selectBody = "";
     if (selectMatch) {
       selectBody = selectMatch[1];
     } else {
       // Maybe no FROM clause
-      const selectMatchNoFrom = sql.match(/^\s*SELECT\b([\s\S]*?)$/i);
+      const selectMatchNoFrom = selectString.match(/^\s*SELECT\b([\s\S]*?)$/i);
       if (selectMatchNoFrom) selectBody = selectMatchNoFrom[1];
     }
 
@@ -236,12 +251,12 @@ export function parseSql(sql: string): ParsedSql | null {
       });
     }
 
-    return { statementType: "select", tableName: "requete_select", columns, originalSql: sql };
+    return { statementType: "select", tableName, columns, originalSql: rawSql };
   }
 
-  // Match CREATE TABLE with optional OR REPLACE, schema.name, etc.
+  // Match CREATE TABLE with optional Snowflake/Teradata modifiers
   const headerMatch = sql.match(
-    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s*\(/i
+    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:(?:LOCAL|GLOBAL)\s+TEMPORARY\s+|TEMP\s+|VOLATILE\s+|TRANSIENT\s+|SECURE\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s*\(/i
   );
   
   let tableName: string;
@@ -313,7 +328,7 @@ export function parseSql(sql: string): ParsedSql | null {
     }
   }
 
-  return { statementType: "create", tableName, columns, originalSql: sql };
+  return { statementType: "create", tableName, columns, originalSql: rawSql };
 }
 
 /**
