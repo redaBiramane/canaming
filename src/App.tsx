@@ -19,6 +19,7 @@ import DashboardPage from "./pages/DashboardPage";
 import DocumentationPage from "./pages/DocumentationPage";
 import ExcelPastePage from "./pages/ExcelPastePage";
 import StopWordsPage from "./pages/StopWordsPage";
+import GlossaryPage from "./pages/GlossaryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ function AppRoutes() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
+        <Route path="/glossary" element={<GlossaryPage />} />
         <Route path="/stop-words" element={<StopWordsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
