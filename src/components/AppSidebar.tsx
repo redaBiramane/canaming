@@ -20,11 +20,11 @@ import { useAppStore } from "@/hooks/useStore";
 const mainItems = [
   { title: "Accueil", url: "/", icon: Home },
   { title: "Tableau de bord", url: "/dashboard", icon: BarChart3 },
+  { title: "Chercher un terme", url: "/glossary", icon: Search },
   { title: "Renommer des colonnes", url: "/rename", icon: TextCursorInput },
   { title: "Collage Excel", url: "/excel-paste", icon: ClipboardPaste },
   { title: "Analyse SQL", url: "/sql", icon: Code2 },
   { title: "Analyse DBT", url: "/dbt", icon: Database },
-  { title: "Chercher un terme", url: "/glossary", icon: Search },
   { title: "IA Naming", url: "/ia-naming", icon: Sparkles },
 ];
 
