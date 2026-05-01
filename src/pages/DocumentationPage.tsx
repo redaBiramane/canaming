@@ -8,6 +8,7 @@ import {
   TextCursorInput, Code2, BookOpen, Flag, History, Settings, BarChart3,
   Upload, Download, Search, Plus, Pencil, Trash2, CheckCircle2, XCircle,
   RotateCcw, FileDown, ShieldCheck, Users, ArrowRight, Home, LogIn,
+  Workflow, Filter, SearchCode, Replace, AlertTriangle
 } from "lucide-react";
 
 const fadeIn = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
@@ -161,6 +162,116 @@ function AdminGuide() {
               ))}
             </tbody>
           </table>
+        </div>
+      </Section>
+
+      <Section icon={Workflow} title="Moteur de transformation (Sous le capot)">
+        <p>Découvrez étape par étape comment l'outil analyse et convertit les noms de colonnes. Ce diagramme explique les règles appliquées par le moteur interne :</p>
+        
+        <div className="mt-4 space-y-4">
+          
+          {/* Step 1 */}
+          <div className="flex gap-4 p-4 border rounded-lg bg-card items-start relative overflow-hidden shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+            <div className="bg-primary/10 p-2 rounded-lg text-primary mt-1">
+              <Filter className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">1. Nettoyage et Découpage</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Le nom d'origine est purifié (retrait des types SQL comme VARCHAR, passage en minuscules, suppression des accents). 
+                Il est ensuite découpé en mots isolés en gérant le <code>snake_case</code>, le <code>camelCase</code> et les espaces.
+              </p>
+              <div className="flex items-center gap-2 mt-3 text-xs font-mono text-muted-foreground bg-muted/50 p-2.5 rounded-md border w-fit">
+                "CodeClient_Actif" <ArrowRight className="h-3.5 w-3.5 text-primary" /> ["code", "client", "actif"]
+              </div>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="flex gap-4 p-4 border rounded-lg bg-card items-start relative overflow-hidden shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-muted-foreground"></div>
+            <div className="bg-muted p-2 rounded-lg text-muted-foreground mt-1">
+              <XCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">2. Filtrage des Mots Creux</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Les mots présents dans la liste des <strong>Mots creux</strong> (ex: <i>de, du, le, type</i>) sont purement et simplement ignorés de l'analyse et retirés du nom final.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="flex gap-4 p-4 border rounded-lg bg-card items-start relative overflow-hidden shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+            <div className="bg-blue-500/10 p-2 rounded-lg text-blue-500 mt-1">
+              <SearchCode className="h-5 w-5" />
+            </div>
+            <div className="w-full">
+              <h3 className="font-semibold text-foreground">3. Recherche dans le Dictionnaire</h3>
+              <p className="text-sm text-muted-foreground mt-1 mb-3">
+                Pour chaque mot restant, le moteur interroge le dictionnaire selon un ordre de priorité strict pour trouver l'abréviation :
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div className="border rounded-md p-2.5 flex items-center gap-3 bg-muted/20">
+                  <span className="bg-background border shadow-sm px-2 py-0.5 rounded text-xs font-bold text-muted-foreground">Priorité 1</span>
+                  <span className="font-medium text-foreground">Match exact <span className="text-muted-foreground font-normal">(Terme Source)</span></span>
+                </div>
+                <div className="border rounded-md p-2.5 flex items-center gap-3 bg-muted/20">
+                  <span className="bg-background border shadow-sm px-2 py-0.5 rounded text-xs font-bold text-muted-foreground">Priorité 2</span>
+                  <span className="font-medium text-foreground">Match au singulier <span className="text-muted-foreground font-normal">(-s ignoré)</span></span>
+                </div>
+                <div className="border rounded-md p-2.5 flex items-center gap-3 bg-muted/20">
+                  <span className="bg-background border shadow-sm px-2 py-0.5 rounded text-xs font-bold text-muted-foreground">Priorité 3</span>
+                  <span className="font-medium text-foreground">Match sur les <span className="text-muted-foreground font-normal">Synonymes</span></span>
+                </div>
+                <div className="border rounded-md p-2.5 flex items-center gap-3 bg-muted/20">
+                  <span className="bg-background border shadow-sm px-2 py-0.5 rounded text-xs font-bold text-muted-foreground">Priorité 4</span>
+                  <span className="font-medium text-foreground">Déjà une <span className="text-muted-foreground font-normal">Abréviation</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Step 4 */}
+          <div className="flex gap-4 p-4 border rounded-lg bg-card items-start relative overflow-hidden shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-success"></div>
+            <div className="bg-success/10 p-2 rounded-lg text-success mt-1">
+              <Replace className="h-5 w-5" />
+            </div>
+            <div className="w-full">
+              <h3 className="font-semibold text-foreground">4. Décision & Recomposition</h3>
+              <p className="text-sm text-muted-foreground mt-1 mb-3">
+                Le moteur attribue un statut, puis assemble les abréviations avec des <code>_</code>.
+              </p>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between p-3 rounded-md bg-success/5 border border-success/20">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                    <strong className="text-success">Trouvé (OK)</strong>
+                  </div>
+                  <span className="text-muted-foreground text-xs font-medium">Remplacé par l'abréviation</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-md bg-warning/5 border border-warning/20">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    <strong className="text-warning">Ambigu</strong>
+                  </div>
+                  <span className="text-muted-foreground text-xs font-medium">Plusieurs abréviations possibles</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-md bg-destructive/5 border border-destructive/20">
+                  <div className="flex items-center gap-2">
+                    <XCircle className="h-4 w-4 text-destructive" />
+                    <strong className="text-destructive">Inconnu</strong>
+                  </div>
+                  <span className="text-muted-foreground text-xs font-medium">Conservé tel quel (en MAJUSCULES)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
         </div>
       </Section>
 
