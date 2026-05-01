@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/hooks/useStore";
 import { useAuth } from "@/hooks/useAuth";
-import { parseSqlCreateTable, transformColumn, generateTransformedSql, type ParsedSql } from "@/lib/transformer";
+import { parseSql, transformColumn, generateTransformedSql, type ParsedSql } from "@/lib/transformer";
 import { TransformResult } from "@/lib/dictionary";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -36,9 +36,9 @@ export default function SqlPage() {
       toast.error("Collez un script SQL CREATE TABLE");
       return;
     }
-    const p = parseSqlCreateTable(input);
+    const p = parseSql(input);
     if (!p || p.columns.length === 0) {
-      toast.error("Impossible de parser le script SQL. Vérifiez le format CREATE TABLE.");
+      toast.error("Impossible de parser le script SQL. Vérifiez la syntaxe.");
       return;
     }
     setParsed(p);
@@ -98,7 +98,7 @@ export default function SqlPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Analyse SQL</h1>
-        <p className="text-muted-foreground mt-1">Collez un script CREATE TABLE pour transformer automatiquement tous les noms de colonnes.</p>
+        <p className="text-muted-foreground mt-1">Collez un script CREATE TABLE ou SELECT pour transformer automatiquement les colonnes.</p>
       </div>
 
       {/* SQL Input */}
@@ -114,7 +114,7 @@ export default function SqlPage() {
         <Textarea
           value={sql}
           onChange={(e) => setSql(e.target.value)}
-          placeholder="CREATE TABLE ... ;"
+          placeholder="CREATE TABLE ... ;\nou\nSELECT ... FROM ... ;"
           className="font-mono min-h-[200px] text-sm"
         />
         <div className="flex gap-2">

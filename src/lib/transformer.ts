@@ -169,12 +169,76 @@ export interface SqlColumn {
 }
 
 export interface ParsedSql {
+  statementType: "create" | "select" | "unknown";
   tableName: string;
   columns: SqlColumn[];
   originalSql: string;
 }
 
-export function parseSqlCreateTable(sql: string): ParsedSql | null {
+export function parseSql(sql: string): ParsedSql | null {
+  // Check if it's a SELECT statement
+  if (/^\s*SELECT\b/i.test(sql)) {
+    // Extract everything between SELECT and FROM
+    const selectMatch = sql.match(/^\s*SELECT\b([\s\S]*?)\bFROM\b/i);
+    let selectBody = "";
+    if (selectMatch) {
+      selectBody = selectMatch[1];
+    } else {
+      // Maybe no FROM clause
+      const selectMatchNoFrom = sql.match(/^\s*SELECT\b([\s\S]*?)$/i);
+      if (selectMatchNoFrom) selectBody = selectMatchNoFrom[1];
+    }
+
+    if (!selectBody.trim()) return null;
+
+    const columnDefs: string[] = [];
+    let depth = 0;
+    let inQuote = false;
+    let current = "";
+    for (let i = 0; i < selectBody.length; i++) {
+      const ch = selectBody[i];
+      if (ch === "'" && !inQuote) { inQuote = true; current += ch; continue; }
+      if (ch === "'" && inQuote) { inQuote = false; current += ch; continue; }
+      if (inQuote) { current += ch; continue; }
+      if (ch === "(") depth++;
+      else if (ch === ")") depth--;
+      if (ch === "," && depth === 0) {
+        columnDefs.push(current.trim());
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    if (current.trim()) columnDefs.push(current.trim());
+
+    const columns: SqlColumn[] = [];
+    for (const def of columnDefs) {
+      let name = def;
+      const asMatch = def.match(/\bAS\s+([a-zA-Z0-9_"]+)$/i);
+      if (asMatch) {
+        name = asMatch[1];
+      } else {
+        const parts = def.split(/\s+/);
+        const lastWord = parts[parts.length - 1];
+        if (lastWord.includes(".")) {
+          name = lastWord.split(".").pop() || lastWord;
+        } else {
+          name = lastWord;
+        }
+      }
+      name = name.replace(/"/g, "");
+      if (name.includes("(")) continue;
+
+      columns.push({
+        name,
+        type: "",
+        constraints: "",
+      });
+    }
+
+    return { statementType: "select", tableName: "requete_select", columns, originalSql: sql };
+  }
+
   // Match CREATE TABLE with optional OR REPLACE, schema.name, etc.
   const headerMatch = sql.match(
     /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s*\(/i
@@ -249,7 +313,7 @@ export function parseSqlCreateTable(sql: string): ParsedSql | null {
     }
   }
 
-  return { tableName, columns, originalSql: sql };
+  return { statementType: "create", tableName, columns, originalSql: sql };
 }
 
 /**
@@ -270,13 +334,19 @@ export function generateTransformedSql(
     const result = results[i];
     if (!result || result.transformed === col.name) continue;
 
-    // Replace only the column definition name (word boundary match)
-    // Match the column name that appears at the start of a line/after whitespace, followed by the type
-    const regex = new RegExp(
-      `(^|[\\s,(])${escapeRegex(col.name)}(\\s+${escapeRegex(col.type.split("(")[0])})`,
-      "gmi"
-    );
-    output = output.replace(regex, `$1${result.transformed}$2`);
+    if (parsed.statementType === "select") {
+      // Global word boundary replacement for SELECT statements
+      const regex = new RegExp(`\\b${escapeRegex(col.name)}\\b`, "gmi");
+      output = output.replace(regex, result.transformed);
+    } else {
+      // Replace only the column definition name (word boundary match)
+      // Match the column name that appears at the start of a line/after whitespace, followed by the type
+      const regex = new RegExp(
+        `(^|[\\s,(])${escapeRegex(col.name)}(\\s+${escapeRegex(col.type.split("(")[0])})`,
+        "gmi"
+      );
+      output = output.replace(regex, `$1${result.transformed}$2`);
+    }
   }
 
   return output;
