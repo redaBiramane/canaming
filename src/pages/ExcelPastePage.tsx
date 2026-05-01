@@ -365,8 +365,14 @@ export default function ExcelPastePage() {
                 <Table2 className="h-4 w-4" />
                 Analyser les colonnes
               </Button>
-              <p className="text-xs text-muted-foreground">
-                Formats supportés : tabulations (Excel), points-virgules (CSV), ou une valeur par ligne
+              {rawText && (
+                <Button variant="outline" onClick={reset} className="gap-2">
+                  <RotateCcw className="h-4 w-4" />
+                  Remise à zéro
+                </Button>
+              )}
+              <p className="text-xs text-muted-foreground hidden sm:block">
+                Formats supportés : tabulations, points-virgules, ou 1 valeur/ligne
               </p>
             </div>
           </motion.div>
@@ -719,6 +725,14 @@ export default function ExcelPastePage() {
                     className="gap-1"
                   >
                     <Download className="h-3.5 w-3.5" /> Excel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={reset}
+                    className="gap-1"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Remise à zéro
                   </Button>
                 </div>
               </div>
