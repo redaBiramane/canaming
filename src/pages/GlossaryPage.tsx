@@ -8,44 +8,66 @@ export default function GlossaryPage() {
   const { dictionary } = useAppStore();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const reverseAnalysis = useMemo(() => {
-    if (!searchQuery.trim()) return null;
-    const words = searchQuery.replace(/([a-z])([A-Z])/g, "$1_$2").split(/[\s_\-]+/).filter(Boolean);
-    if (words.length <= 1) return null; // Only for composite words
+  const reverseAnalyses = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    
+    const columnDefs = searchQuery.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+    const analyses = [];
+    
+    for (const def of columnDefs) {
+      // First word is column name, rest is ignored (SQL type)
+      const columnName = def.split(/\s+/)[0];
+      if (!columnName) continue;
+      
+      const words = columnName.replace(/([a-z])([A-Z])/g, "$1_$2").split(/[\s_\-]+/).filter(Boolean);
+      if (words.length <= 1 && columnDefs.length === 1) continue;
 
-    return words.map(word => {
-      const w = word.toLowerCase();
-      let match = dictionary.find(d => d.abreviation.toLowerCase() === w && d.actif);
-      if (!match) {
-        match = dictionary.find(d => 
-          (d.terme_source.toLowerCase() === w || d.synonymes.some(s => s.toLowerCase() === w)) && d.actif
-        );
-      }
-      return { 
-        original: word, 
-        translated: match ? match.terme_source : word, 
-        found: !!match 
-      };
-    });
+      const parts = words.map(word => {
+        const w = word.toLowerCase();
+        let match = dictionary.find(d => d.abreviation.toLowerCase() === w && d.actif);
+        if (!match) {
+          match = dictionary.find(d => 
+            (d.terme_source.toLowerCase() === w || d.synonymes.some(s => s.toLowerCase() === w)) && d.actif
+          );
+        }
+        return { 
+          original: word, 
+          translated: match ? match.terme_source : word, 
+          found: !!match 
+        };
+      });
+      analyses.push({ columnName, parts });
+    }
+    return analyses;
   }, [searchQuery, dictionary]);
 
   const filteredResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const rawQuery = searchQuery.toLowerCase().trim();
-    const queryParts = rawQuery.split(/[\s_\-]+/).filter(Boolean);
+    
+    // Get all valid words from the query
+    const columnDefs = rawQuery.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+    const validWords = new Set<string>();
+    for (const def of columnDefs) {
+      const columnName = def.split(/\s+/)[0];
+      if (!columnName) continue;
+      const words = columnName.split(/[\s_\-]+/).filter(Boolean);
+      words.forEach(w => validWords.add(w));
+    }
     
     let results = dictionary.filter((entry) => {
       if (!entry.actif) return false;
       const abrev = entry.abreviation.toLowerCase();
       const term = entry.terme_source.toLowerCase();
       
+      // Match on the entire query if it's a single search
       if (abrev.includes(rawQuery) || term.includes(rawQuery)) return true;
       if (entry.synonymes.some((s) => s.toLowerCase().includes(rawQuery))) return true;
       
-      if (queryParts.length > 1) {
-        if (queryParts.includes(abrev)) return true;
-        if (entry.synonymes.some(s => queryParts.includes(s.toLowerCase()))) return true;
-      }
+      // Match exactly on any of the parsed words
+      if (validWords.has(abrev)) return true;
+      if (entry.synonymes.some(s => validWords.has(s.toLowerCase()))) return true;
+      
       return false;
     });
 
@@ -110,25 +132,31 @@ export default function GlossaryPage() {
             className="space-y-6"
           >
             {/* Reverse Analysis Banner for Composite Queries */}
-            {reverseAnalysis && (
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-primary mb-3 uppercase tracking-wide">Traduction de la colonne</h3>
-                <div className="flex flex-wrap items-center gap-3">
-                  {reverseAnalysis.map((part, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
-                      <div className={`flex flex-col items-center px-3 py-1.5 rounded-lg border ${part.found ? 'bg-success/10 border-success/30' : 'bg-destructive/10 border-destructive/30'}`}>
-                        <span className="text-xs font-mono text-muted-foreground">{part.original}</span>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          {part.found ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <XCircle className="h-3.5 w-3.5 text-destructive" />}
-                          <span className={`font-semibold ${part.found ? 'text-success' : 'text-destructive'}`}>{part.translated}</span>
+            {reverseAnalyses.length > 0 && (
+              <div className="space-y-4">
+                {reverseAnalyses.map((analysis, i) => (
+                  <div key={i} className="bg-primary/5 border border-primary/20 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-primary mb-3 uppercase tracking-wide">
+                      Traduction : <span className="font-mono text-foreground ml-2 bg-background px-2.5 py-1 rounded-md border shadow-sm">{analysis.columnName}</span>
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-3 mt-4">
+                      {analysis.parts.map((part, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                          <div className={`flex flex-col items-center px-4 py-2 rounded-lg border bg-background shadow-sm ${part.found ? 'border-success/40' : 'border-destructive/40'}`}>
+                            <span className="text-xs font-mono text-muted-foreground">{part.original}</span>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              {part.found ? <CheckCircle2 className="h-4 w-4 text-success" /> : <XCircle className="h-4 w-4 text-destructive" />}
+                              <span className={`font-semibold ${part.found ? 'text-success' : 'text-destructive'}`}>{part.translated}</span>
+                            </div>
+                          </div>
+                          {idx < analysis.parts.length - 1 && (
+                            <div className="h-[2px] w-5 bg-muted-foreground/20 rounded" />
+                          )}
                         </div>
-                      </div>
-                      {idx < reverseAnalysis.length - 1 && (
-                        <div className="h-[2px] w-4 bg-muted-foreground/30 rounded" />
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
 
