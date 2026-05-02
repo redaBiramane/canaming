@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { transformWithLLM, type LLMTransformResult } from "@/lib/llmService";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { useI18nStore } from "@/lib/i18n";
 
 const EXAMPLE_QUERY = `SELECT 
     c.nom_client,
@@ -33,6 +34,7 @@ ORDER BY c.nom_client;`;
 
 export default function IaNamingPage() {
   const { dictionary, incrementTransformations, addHistoryEntry } = useAppStore();
+  const { t, lang } = useI18nStore();
   const { user, role } = useAuth();
   const [query, setQuery] = useSessionStorage("ianaming_query", "");
   const [result, setResult] = useSessionStorage<LLMTransformResult | null>("ianaming_result", null);
@@ -58,11 +60,11 @@ export default function IaNamingPage() {
   const analyze = async () => {
     const input = query.trim();
     if (!input) {
-      toast.error("Collez une requête SQL");
+      toast.error(t("ianaming.toast_no_query"));
       return;
     }
     if (!apiKey) {
-      toast.error("Clé API OpenAI non configurée. Contactez un administrateur.");
+      toast.error(t("ianaming.api_key_missing"));
       return;
     }
 
@@ -86,9 +88,9 @@ export default function IaNamingPage() {
           mapping: m.reason,
         })),
       });
-      toast.success(`${res.mappings.length} colonne(s) transformée(s) par l'IA`);
+      toast.success(`${res.mappings.length} ${t("ianaming.toast_success")}`);
     } catch (err: any) {
-      toast.error(err.message || "Erreur lors de l'appel à l'IA");
+      toast.error(err.message || t("admin.toast_error"));
     } finally {
       setLoading(false);
     }
@@ -96,14 +98,14 @@ export default function IaNamingPage() {
 
   const loadExample = () => {
     setQuery(EXAMPLE_QUERY);
-    toast.info("Exemple chargé");
+    toast.info(t("analysis.toast_example"));
   };
 
   const copyTransformed = () => {
     if (result) {
       navigator.clipboard.writeText(result.transformedQuery);
       setCopied(true);
-      toast.success("Requête transformée copiée");
+      toast.success(t("ianaming.toast_copy_success"));
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -117,7 +119,7 @@ export default function IaNamingPage() {
       a.download = "query_ia_renamed.sql";
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Fichier SQL téléchargé");
+      toast.success(t("ianaming.toast_download_success"));
     }
   };
 
@@ -155,18 +157,18 @@ export default function IaNamingPage() {
                 <BrainCircuit className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground tracking-tight">IA Naming</h1>
+                <h1 className="text-2xl font-bold text-foreground tracking-tight">{t("ianaming.title")}</h1>
                 <p className="text-xs font-medium text-primary tracking-widest uppercase">Powered by OpenAI</p>
               </div>
             </div>
             <p className="text-muted-foreground mt-2 max-w-lg text-sm leading-relaxed">
-              Collez n'importe quelle requête SQL — l'IA transformera <strong className="text-foreground">intelligemment</strong> tous les noms de colonnes selon le dictionnaire de nommage Crédit Agricole.
+              {t("ianaming.hero_desc")}
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2 bg-card/80 backdrop-blur-sm border rounded-lg px-3 py-2">
             <div className={`w-2 h-2 rounded-full ${isConfigured ? 'bg-success animate-pulse' : 'bg-destructive'}`} />
             <span className="text-xs font-medium text-muted-foreground">
-              {isConfigured ? "IA connectée" : "IA non connectée"}
+              {isConfigured ? t("ianaming.ai_connected") : t("ianaming.ai_disconnected")}
             </span>
           </div>
         </div>
@@ -186,11 +188,11 @@ export default function IaNamingPage() {
                   <AlertCircle className="h-4 w-4 text-warning" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground text-sm">Configuration requise</p>
+                  <p className="font-semibold text-foreground text-sm">{t("ianaming.config_required")}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {role === "admin"
-                      ? "Rendez-vous dans Paramètres → Configuration IA pour ajouter votre clé API OpenAI."
-                      : "Contactez un administrateur pour activer la transformation par IA."}
+                      ? t("ianaming.admin_config_hint")
+                      : t("ianaming.user_config_hint")}
                   </p>
                 </div>
               </div>
@@ -209,10 +211,10 @@ export default function IaNamingPage() {
         <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/30">
           <div className="flex items-center gap-2">
             <Zap className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-sm text-foreground">Requête SQL libre</span>
+            <span className="font-semibold text-sm text-foreground">{t("ianaming.input_title")}</span>
           </div>
           <Button variant="ghost" size="sm" onClick={loadExample} className="text-xs gap-1.5 hover:bg-primary/10 hover:text-primary">
-            <Sparkles className="h-3 w-3" /> Charger un exemple
+            <Sparkles className="h-3 w-3" /> {t("ianaming.load_example")}
           </Button>
         </div>
         <div className="p-5 space-y-4">
@@ -239,12 +241,12 @@ export default function IaNamingPage() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Analyse en cours…</span>
+                  <span>{t("ianaming.analyzing")}</span>
                 </>
               ) : (
                 <>
                   <BrainCircuit className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  <span>Transformer avec l'IA</span>
+                  <span>{t("ianaming.btn_transform")}</span>
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                 </>
               )}
@@ -278,9 +280,9 @@ export default function IaNamingPage() {
               />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-foreground">L'IA analyse votre requête…</p>
+              <p className="font-semibold text-foreground">{t("ianaming.ai_analyzing_long")}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Application du dictionnaire de nommage ({dictionary.length} règles)
+                {t("ianaming.applying_rules").replace("{count}", dictionary.length.toString())}
               </p>
             </div>
             <div className="flex gap-1">
@@ -319,7 +321,7 @@ export default function IaNamingPage() {
                     <Sparkles className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Résumé de l'IA</p>
+                    <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">{t("ianaming.ai_summary")}</p>
                     <p className="text-sm text-foreground leading-relaxed">{result.explanation}</p>
                   </div>
                 </div>
@@ -338,7 +340,7 @@ export default function IaNamingPage() {
                   <div className="flex items-center gap-2">
                     <ArrowRightLeft className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm text-foreground">
-                      Mapping des colonnes
+                      {t("ianaming.mapping_title")}
                     </span>
                     <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                       {result.mappings.length}
@@ -349,10 +351,10 @@ export default function IaNamingPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b bg-muted/20">
-                        <th className="text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">Original</th>
+                        <th className="text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">{t("analysis.original")}</th>
                         <th className="text-center p-3 font-medium text-muted-foreground w-8"></th>
-                        <th className="text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">Transformé</th>
-                        <th className="text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">Explication</th>
+                        <th className="text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">{t("analysis.transformed")}</th>
+                        <th className="text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">{t("analysis.col_detail")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -390,7 +392,7 @@ export default function IaNamingPage() {
               className="rounded-xl border bg-card shadow-sm overflow-hidden"
             >
               <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/30">
-                <span className="font-semibold text-sm text-foreground">Comparaison avant / après</span>
+                <span className="font-semibold text-sm text-foreground">{t("ianaming.compare_title")}</span>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -399,10 +401,10 @@ export default function IaNamingPage() {
                     className={`gap-1.5 text-xs transition-all ${copied ? 'border-success text-success' : ''}`}
                   >
                     {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                    {copied ? "Copié !" : "Copier"}
+                    {copied ? t("ianaming.copied") : t("analysis.copy")}
                   </Button>
                   <Button size="sm" onClick={downloadResult} className="gap-1.5 text-xs">
-                    <FileDown className="h-3.5 w-3.5" /> Télécharger .sql
+                    <FileDown className="h-3.5 w-3.5" /> {t("ianaming.download_sql")}
                   </Button>
                 </div>
               </div>
@@ -410,7 +412,7 @@ export default function IaNamingPage() {
                 <div className="p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 rounded-full bg-destructive/60" />
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Original</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t("analysis.original")}</p>
                   </div>
                   <div className="bg-muted/40 rounded-lg p-4 font-mono text-sm overflow-x-auto max-h-[450px] overflow-y-auto border border-border/50">
                     <pre className="whitespace-pre-wrap text-foreground/80">{query}</pre>
@@ -419,7 +421,7 @@ export default function IaNamingPage() {
                 <div className="p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Transformé par l'IA</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t("analysis.transformed")}</p>
                   </div>
                   <div className="bg-primary/[0.03] rounded-lg p-4 font-mono text-sm overflow-x-auto max-h-[450px] overflow-y-auto border border-primary/10">
                     <pre className="whitespace-pre-wrap text-foreground">{result.transformedQuery}</pre>

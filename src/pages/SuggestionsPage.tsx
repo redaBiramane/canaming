@@ -86,8 +86,10 @@ export default function SuggestionsPage() {
           .filter((id) => id !== user?.id) // Don't notify yourself
           .map((id) => ({
             user_id: id,
-            title: "Nouvelle idée 💡",
-            message: `L'idée "${titre.trim()}" a été proposée par ${user?.email || 'Anonyme'}.`,
+            title: t("admin.notification_new_suggestion_title") || "Nouvelle idée 💡",
+            message: (t("admin.notification_new_suggestion_message") || "L'idée \"{title}\" a été proposée par {author}.")
+              .replace("{title}", titre.trim())
+              .replace("{author}", user?.email || "Anonyme"),
             type: "info",
           }));
         if (notifications.length > 0) {

@@ -31,7 +31,7 @@ export default function LandingPage() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full border border-border" onClick={() => navigate("/suggestions")} title="Boîte à idées">
+          <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full border border-border" onClick={() => navigate("/suggestions")} title={t("admin.suggestions_title")}>
             <Lightbulb className="h-4 w-4" />
           </Button>
           <LangToggle />

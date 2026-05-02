@@ -63,11 +63,12 @@ function parseExcelPaste(text: string): ParsedData | null {
   // If only 1 column and no clear header pattern, treat all values as column names (no header)
   if (allRows[0].length === 1) {
     const values = allRows.map((r) => r[0]).filter(Boolean);
+    const defaultColName = "Colonnes à transformer"; // This will be handled by t() in component
     return {
-      headers: ["Colonnes à transformer"],
+      headers: [defaultColName],
       rows: allRows.slice(1),
       detectedColumns: [{
-        name: "Colonnes à transformer",
+        name: defaultColName,
         index: 0,
         values,
       }],
@@ -110,6 +111,11 @@ export default function ExcelPastePage() {
         setRawText(text);
         const parsed = parseExcelPaste(text);
         if (parsed && parsed.detectedColumns.length > 0) {
+          // Replace default column name if it was set in parseExcelPaste
+          if (parsed.detectedColumns.length === 1 && parsed.detectedColumns[0].name === "Colonnes à transformer") {
+            parsed.detectedColumns[0].name = t("excel.default_col_name");
+            parsed.headers[0] = t("excel.default_col_name");
+          }
           setParsedData(parsed);
           setSelectedColumns(new Set(parsed.detectedColumns.map((_, i) => i)));
           // Auto-exclude stop words
@@ -143,6 +149,11 @@ export default function ExcelPastePage() {
     }
     const parsed = parseExcelPaste(rawText);
     if (parsed && parsed.detectedColumns.length > 0) {
+      // Replace default column name if it was set in parseExcelPaste
+      if (parsed.detectedColumns.length === 1 && parsed.detectedColumns[0].name === "Colonnes à transformer") {
+        parsed.detectedColumns[0].name = t("excel.default_col_name");
+        parsed.headers[0] = t("excel.default_col_name");
+      }
       setParsedData(parsed);
       setSelectedColumns(new Set(parsed.detectedColumns.map((_, i) => i)));
       // Auto-exclude stop words
@@ -882,19 +893,19 @@ export default function ExcelPastePage() {
         transition={{ delay: 0.3 }}
         className="ca-card p-5 space-y-3 border-dashed"
       >
-        <h3 className="font-semibold text-foreground text-sm">💡 Comment utiliser cette fonctionnalité ?</h3>
+        <h3 className="font-semibold text-foreground text-sm">{t("excel.help_title")}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-muted-foreground">
           <div className="space-y-1">
-            <p className="font-medium text-foreground">1. Copier depuis Excel</p>
-            <p>Sélectionnez les cellules contenant les noms de colonnes dans Excel et faites Ctrl+C / Cmd+C</p>
+            <p className="font-medium text-foreground">{t("excel.help_step_1_title")}</p>
+            <p>{t("excel.help_step_1_desc")}</p>
           </div>
           <div className="space-y-1">
-            <p className="font-medium text-foreground">2. Sélectionner les mots</p>
-            <p>Choisissez quels mots transformer. Cliquez sur un mot pour l'exclure</p>
+            <p className="font-medium text-foreground">{t("excel.help_step_2_title")}</p>
+            <p>{t("excel.help_step_2_desc")}</p>
           </div>
           <div className="space-y-1">
-            <p className="font-medium text-foreground">3. Transformer en masse</p>
-            <p>Les mots sélectionnés seront transformés d'un coup selon le dictionnaire</p>
+            <p className="font-medium text-foreground">{t("excel.help_step_3_title")}</p>
+            <p>{t("excel.help_step_3_desc")}</p>
           </div>
         </div>
       </motion.div>

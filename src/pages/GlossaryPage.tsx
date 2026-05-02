@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/hooks/useStore";
 import { Input } from "@/components/ui/input";
 import { Search, BookA, Tag, Info, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
+import { useI18nStore } from "@/lib/i18n";
 
 export default function GlossaryPage() {
   const { dictionary } = useAppStore();
+  const { t } = useI18nStore();
   const [searchQuery, setSearchQuery] = useState("");
 
   const reverseAnalyses = useMemo(() => {
@@ -98,9 +100,9 @@ export default function GlossaryPage() {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-2">
           <BookA className="h-8 w-8" />
         </div>
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">Glossaire Entreprise</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-foreground">{t("glossary.hero_title")}</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Recherchez la signification d'une abréviation ou trouvez comment nommer une donnée selon les standards.
+          {t("glossary.hero_desc")}
         </p>
       </div>
 
@@ -109,7 +111,7 @@ export default function GlossaryPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Ex: MNT, Client, Taux..."
+            placeholder={t("glossary.search_placeholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-6 text-lg rounded-2xl shadow-sm border-2 focus-visible:ring-primary focus-visible:border-primary transition-all"
@@ -118,7 +120,7 @@ export default function GlossaryPage() {
         </div>
         {!searchQuery && (
           <p className="text-center text-sm text-muted-foreground mt-4">
-            Tapez au moins une lettre pour lancer la recherche dans nos {dictionary.length} termes référencés.
+            {t("glossary.search_hint").replace("{count}", dictionary.length.toString())}
           </p>
         )}
       </div>
@@ -137,7 +139,7 @@ export default function GlossaryPage() {
                 {reverseAnalyses.map((analysis, i) => (
                   <div key={i} className="bg-primary/5 border border-primary/20 rounded-xl p-5">
                     <h3 className="text-sm font-semibold text-primary mb-3 uppercase tracking-wide">
-                      Traduction : <span className="font-mono text-foreground ml-2 bg-background px-2.5 py-1 rounded-md border shadow-sm">{analysis.columnName}</span>
+                      {t("glossary.translation_label")} <span className="font-mono text-foreground ml-2 bg-background px-2.5 py-1 rounded-md border shadow-sm">{analysis.columnName}</span>
                     </h3>
                     <div className="flex flex-wrap items-center gap-3 mt-4">
                       {analysis.parts.map((part, idx) => (
@@ -163,8 +165,8 @@ export default function GlossaryPage() {
             {filteredResults.length === 0 ? (
               <div className="text-center p-12 bg-muted/30 rounded-2xl border border-dashed">
                 <Search className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground">Aucun résultat trouvé</h3>
-                <p className="text-muted-foreground mt-1">Essayez avec un autre mot ou un synonyme.</p>
+                <h3 className="text-lg font-medium text-foreground">{t("glossary.no_results")}</h3>
+                <p className="text-muted-foreground mt-1">{t("glossary.no_results_desc")}</p>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">

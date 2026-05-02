@@ -62,18 +62,19 @@ export default function DashboardPage() {
   // Activity over last 7 days
   const activityData = useMemo(() => {
     const days: Record<string, number> = {};
+    const dateLocale = lang === "fr" ? "fr-FR" : "en-US";
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const key = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+      const key = d.toLocaleDateString(dateLocale, { day: "2-digit", month: "2-digit" });
       days[key] = 0;
     }
     history.forEach((h) => {
-      const key = new Date(h.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+      const key = new Date(h.date).toLocaleDateString(dateLocale, { day: "2-digit", month: "2-digit" });
       if (key in days) days[key]++;
     });
     return Object.entries(days).map(([date, actions]) => ({ date, actions }));
-  }, [history]);
+  }, [history, lang]);
 
   // Signalements per user
   const signalementsByUser = useMemo(() => {
@@ -258,7 +259,7 @@ export default function DashboardPage() {
                           <span className={signals > 0 ? "ca-badge-warning" : "ca-badge-unknown"}>{signals}</span>
                         </td>
                         <td className="p-3 text-xs text-muted-foreground">
-                          {lastActivity ? new Date(lastActivity).toLocaleDateString("fr-FR", {
+                          {lastActivity ? new Date(lastActivity).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
                             day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
                           }) : "—"}
                         </td>

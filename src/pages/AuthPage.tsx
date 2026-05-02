@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 import logoCA from "@/assets/logo-ca.png";
+import { useI18nStore } from "@/lib/i18n";
 
 export default function AuthPage() {
   const { signIn, signUp } = useAuth();
+  const { t } = useI18nStore();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,14 +28,14 @@ export default function AuthPage() {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("Connexion réussie");
+        toast.success(t("auth.toast_login_success"));
       }
     } else {
       const { error } = await signUp(email, password, displayName);
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("Compte créé ! Vérifiez votre email pour confirmer votre inscription.");
+        toast.success(t("auth.toast_signup_success"));
       }
     }
     setLoading(false);
@@ -49,8 +51,8 @@ export default function AuthPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <img src={logoCA} alt="CA Personal Finance & Mobility" className="h-16 w-auto mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-foreground">Naming Studio</h1>
-          <p className="text-muted-foreground mt-1">Normalisation SQL • Crédit Agricole</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("sidebar.app_name")}</h1>
+          <p className="text-muted-foreground mt-1">{t("auth.subtitle")}</p>
         </div>
 
         {/* Card */}
@@ -63,7 +65,7 @@ export default function AuthPage() {
               }`}
               onClick={() => setMode("login")}
             >
-              Connexion
+              {t("auth.login_tab")}
             </button>
             <button
               className={`flex-1 text-sm font-medium py-2 rounded-md transition-colors ${
@@ -71,36 +73,36 @@ export default function AuthPage() {
               }`}
               onClick={() => setMode("signup")}
             >
-              Inscription
+              {t("auth.signup_tab")}
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div>
-                <Label htmlFor="displayName">Nom complet</Label>
+                <Label htmlFor="displayName">{t("auth.label_fullname")}</Label>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Jean Dupont"
+                  placeholder={t("auth.placeholder_fullname")}
                   required
                 />
               </div>
             )}
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.label_email")}</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="jean.dupont@credit-agricole.fr"
+                placeholder={t("auth.placeholder_email")}
                 required
               />
             </div>
             <div>
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">{t("auth.label_password")}</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -122,13 +124,15 @@ export default function AuthPage() {
               </div>
             </div>
             <Button type="submit" className="w-full gap-2" disabled={loading}>
-              {mode === "login" ? (
+              {loading ? (
+                <div className="h-4 w-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+              ) : mode === "login" ? (
                 <>
-                  <LogIn className="h-4 w-4" /> Se connecter
+                  <LogIn className="h-4 w-4" /> {t("auth.btn_login")}
                 </>
               ) : (
                 <>
-                  <UserPlus className="h-4 w-4" /> Créer un compte
+                  <UserPlus className="h-4 w-4" /> {t("auth.btn_signup")}
                 </>
               )}
             </Button>
@@ -136,19 +140,19 @@ export default function AuthPage() {
 
           <p className="text-xs text-center text-muted-foreground">
             {mode === "login"
-              ? "Pas encore de compte ? "
-              : "Déjà un compte ? "}
+              ? t("auth.no_account")
+              : t("auth.already_account")}
             <button
               className="text-primary hover:underline"
               onClick={() => setMode(mode === "login" ? "signup" : "login")}
             >
-              {mode === "login" ? "S'inscrire" : "Se connecter"}
+              {mode === "login" ? t("auth.link_signup") : t("auth.link_login")}
             </button>
           </p>
         </div>
 
         <p className="text-xs text-center text-muted-foreground mt-6">
-          © 2026 CA Naming Studio — Outil interne Crédit Agricole
+          {t("auth.footer")}
         </p>
       </motion.div>
     </div>

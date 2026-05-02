@@ -10,6 +10,7 @@ import { transformColumn } from "@/lib/transformer";
 import { TransformResult } from "@/lib/dictionary";
 import { exportResultsToExcel } from "@/lib/excel";
 import { toast } from "sonner";
+import { useI18nStore } from "@/lib/i18n";
 
 const statusIcon = {
   ok: <CheckCircle2 className="h-4 w-4 text-success" />,
@@ -34,6 +35,7 @@ const statusBadge = {
 
 export default function RenamePage() {
   const { dictionary, signalements, stopWords, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
+  const { t, lang } = useI18nStore();
   const { user } = useAuth();
   const [columns, setColumns] = useSessionStorage<string[]>("rename_columns", [""]);
   const [results, setResults] = useSessionStorage<TransformResult[]>("rename_results", []);
@@ -63,7 +65,7 @@ export default function RenamePage() {
   const transform = () => {
     const validCols = columns.filter((c) => c.trim());
     if (validCols.length === 0) {
-      toast.error("Saisissez au moins un nom de colonne");
+      toast.error(t("rename.toast_no_cols"));
       return;
     }
     const res = validCols.map((c) => transformColumn(c, dictionary, stopWords));
@@ -84,13 +86,13 @@ export default function RenamePage() {
         mapping: r.details.map((d) => `${d.original}→${d.transformed}`).join(", "),
       })),
     });
-    toast.success(`${res.length} colonne(s) transformée(s)`);
+    toast.success(`${res.length} ${t("rename.toast_transformed")}`);
   };
 
   const copyResults = () => {
     const text = results.map((r, i) => `${r.original} → ${editOverrides[i] || r.transformed}`).join("\n");
     navigator.clipboard.writeText(text);
-    toast.success("Résultats copiés");
+    toast.success(t("rename.toast_copied"));
   };
 
   const exportResults = () => {
@@ -101,22 +103,22 @@ export default function RenamePage() {
       status: statusLabel[r.status],
     }));
     exportResultsToExcel(data);
-    toast.success("Export téléchargé");
+    toast.success(t("rename.toast_exported"));
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Renommer des colonnes</h1>
-        <p className="text-muted-foreground mt-1">Saisissez vos noms de colonnes pour les standardiser automatiquement.</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("rename.main_title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("rename.main_desc")}</p>
       </div>
 
       {/* Input area */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card p-5 space-y-3">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-foreground">Colonnes à transformer</h2>
+          <h2 className="font-semibold text-foreground">{t("rename.input_title")}</h2>
           <Button variant="outline" size="sm" onClick={addColumn} className="gap-1">
-            <Plus className="h-3.5 w-3.5" /> Ajouter
+            <Plus className="h-3.5 w-3.5" /> {t("excel.reset") === "Remise à zéro" ? "Ajouter" : "Add"}
           </Button>
         </div>
         {columns.map((col, i) => (
@@ -124,7 +126,7 @@ export default function RenamePage() {
             <Input
               value={col}
               onChange={(e) => updateColumn(i, e.target.value)}
-              placeholder="ex: code_salaire_montant (séparez par virgule ou tabulation)"
+              placeholder={t("rename.placeholder")}
               className="font-mono"
               onKeyDown={(e) => e.key === "Enter" && transform()}
             />
@@ -137,11 +139,11 @@ export default function RenamePage() {
         ))}
         <div className="flex gap-2 mt-2">
           <Button onClick={transform} className="gap-2">
-            Transformer <ArrowRight className="h-4 w-4" />
+            {t("excel.transform_btn")} <ArrowRight className="h-4 w-4" />
           </Button>
           {(results.length > 0 || columns.some(c => c.trim())) && (
             <Button variant="outline" onClick={() => { setColumns([""]); setResults([]); setEditOverrides({}); }} className="gap-2">
-              <RotateCcw className="h-4 w-4" /> Remise à zéro
+              <RotateCcw className="h-4 w-4" /> {t("rename.reset")}
             </Button>
           )}
         </div>
@@ -151,7 +153,7 @@ export default function RenamePage() {
       {results.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-foreground">Résultats</h2>
+            <h2 className="font-semibold text-foreground">{t("rename.results_title")}</h2>
             <div className="flex gap-2">
               {results.some((r) => r.details.some((d) => d.status === "inconnu")) && (
                 <Button
@@ -168,15 +170,15 @@ export default function RenamePage() {
                       });
                     });
                     allUnknowns.forEach((u) => signalerMot(u.word, u.context, user?.email || "utilisateur"));
-                    if (allUnknowns.length > 0) toast.success(`${allUnknowns.length} mot(s) signalé(s)`);
-                    else toast.info("Tous les mots inconnus ont déjà été signalés");
+                    if (allUnknowns.length > 0) toast.success(`${allUnknowns.length} ${t("rename.toast_reported")}`);
+                    else toast.info(t("rename.toast_reported_all_info"));
                   }}
                 >
-                  <Flag className="h-3.5 w-3.5" /> Signaler tout
+                  <Flag className="h-3.5 w-3.5" /> {t("rename.report_all")}
                 </Button>
               )}
               <Button variant="outline" size="sm" onClick={copyResults} className="gap-1">
-                <Copy className="h-3.5 w-3.5" /> Copier
+                <Copy className="h-3.5 w-3.5" /> {t("rename.copy")}
               </Button>
               <Button variant="outline" size="sm" onClick={exportResults} className="gap-1">
                 <Download className="h-3.5 w-3.5" /> Excel
@@ -188,12 +190,12 @@ export default function RenamePage() {
             <table className="w-full text-sm">
               <thead className="bg-muted">
                 <tr>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Nom original</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Nom proposé</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Statut</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Confiance</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Détail</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("rename.col_original")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("rename.col_proposed")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("rename.col_status")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("rename.col_confidence")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("rename.col_detail")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("rename.col_actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -235,10 +237,10 @@ export default function RenamePage() {
                           onClick={() => {
                             const unknowns = r.details.filter((d) => d.status === "inconnu");
                             unknowns.forEach((d) => signalerMot(d.original, r.original, user?.email || "utilisateur"));
-                            toast.success(`${unknowns.length} mot(s) signalé(s)`);
+                            toast.success(`${unknowns.length} ${t("rename.toast_reported")}`);
                           }}
                         >
-                          <Flag className="h-3 w-3" /> Signaler
+                          <Flag className="h-3 w-3" /> {t("rename.report")}
                         </Button>
                       )}
                     </td>
