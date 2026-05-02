@@ -68,7 +68,8 @@ export default function SuggestionsPage() {
     });
 
     if (error) {
-      toast.error("Erreur lors de l'envoi de la suggestion");
+      console.error("Insert error:", error);
+      toast.error(`Erreur (${error.code}): ${error.message}`);
     } else {
       toast.success("Suggestion envoyée avec succès !");
       setIsDialogOpen(false);
