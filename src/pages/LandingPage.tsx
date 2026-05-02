@@ -11,7 +11,7 @@ import logoCA from "@/assets/logo-ca.png";
 export default function LandingPage() {
   const navigate = useNavigate();
   const { dictionary, transformationCount } = useAppStore();
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
 
   const features = [
     { icon: TextCursorInput, title: t("landing.feature_1_title"), desc: t("landing.feature_1_desc") },

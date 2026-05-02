@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, TextCursorInput, Code2, BookOpen, Database, Sparkles,
-  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp, ClipboardPaste, Ban, Search, FileCode2
+  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp, ClipboardPaste, Ban, Search, FileCode2, Lightbulb
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -16,26 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import logoCA from "@/assets/logo-ca.png";
 import { useAppStore } from "@/hooks/useStore";
-
-const mainItems = [
-  { title: "Accueil", url: "/", icon: Home },
-  { title: "Tableau de bord", url: "/dashboard", icon: BarChart3 },
-  { title: "Chercher un terme", url: "/glossary", icon: Search },
-  { title: "Renommer des colonnes", url: "/rename", icon: TextCursorInput },
-  { title: "Collage Excel", url: "/excel-paste", icon: ClipboardPaste },
-  { title: "Analyse SQL", url: "/sql", icon: Code2 },
-  { title: "Analyse DBT", url: "/dbt", icon: Database },
-  { title: "Analyse SAS", url: "/sas", icon: FileCode2 },
-  { title: "IA Naming", url: "/ia-naming", icon: Sparkles },
-];
-
-const adminItems = [
-  { title: "Dictionnaire", url: "/admin", icon: BookOpen },
-  { title: "Mots creux", url: "/stop-words", icon: Ban },
-  { title: "Signalements", url: "/signalements", icon: Flag },
-  { title: "Historique", url: "/history", icon: History },
-  { title: "Documentation", url: "/documentation", icon: FileText },
-];
+import { useI18nStore } from "@/lib/i18n";
 
 export function AppSidebar() {
   const { state: sidebarState, toggleSidebar } = useSidebar();
@@ -44,8 +25,30 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { user, role, signOut } = useAuth();
   const { signalements } = useAppStore();
+  const { t, lang } = useI18nStore();
   const isAdmin = role === "admin";
   const pendingCount = signalements.filter((s) => s.statut === "en_attente").length;
+
+  const mainItems = [
+    { title: t("sidebar.home"), url: "/", icon: Home },
+    { title: t("sidebar.dashboard"), url: "/dashboard", icon: BarChart3 },
+    { title: t("sidebar.search"), url: "/glossary", icon: Search },
+    { title: t("sidebar.rename"), url: "/rename", icon: TextCursorInput },
+    { title: t("sidebar.excel"), url: "/excel-paste", icon: ClipboardPaste },
+    { title: t("sidebar.sql"), url: "/sql", icon: Code2 },
+    { title: t("sidebar.dbt"), url: "/dbt", icon: Database },
+    { title: t("sidebar.sas"), url: "/sas", icon: FileCode2 },
+    { title: t("sidebar.ianaming"), url: "/ia-naming", icon: Sparkles },
+    { title: t("sidebar.suggestions"), url: "/suggestions", icon: Lightbulb },
+  ];
+
+  const adminItems = [
+    { title: t("sidebar.dictionary"), url: "/admin", icon: BookOpen },
+    { title: t("sidebar.stopwords"), url: "/stop-words", icon: Ban },
+    { title: t("sidebar.reports"), url: "/signalements", icon: Flag },
+    { title: t("sidebar.history"), url: "/history", icon: History },
+    { title: t("sidebar.docs"), url: "/documentation", icon: FileText },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -67,7 +70,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.navigation")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
@@ -85,7 +88,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Administration</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.admin")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {adminItems.map((item) => (
@@ -137,16 +140,16 @@ export function AppSidebar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="start" className="w-56">
               <DropdownMenuItem onClick={() => navigate("/settings")} className="gap-2 cursor-pointer">
-                <Settings className="h-4 w-4" /> Paramètres
+                <Settings className="h-4 w-4" /> {t("sidebar.settings")}
               </DropdownMenuItem>
               {isAdmin && (
                 <DropdownMenuItem onClick={() => navigate("/users")} className="gap-2 cursor-pointer">
-                  <Users className="h-4 w-4" /> Gestion des utilisateurs
+                  <Users className="h-4 w-4" /> {t("sidebar.users")}
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="gap-2 cursor-pointer text-destructive">
-                <LogOut className="h-4 w-4" /> Se déconnecter
+                <LogOut className="h-4 w-4" /> {t("sidebar.logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
