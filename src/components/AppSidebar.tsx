@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, TextCursorInput, Code2, BookOpen, Database, Sparkles,
-  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp, ClipboardPaste, Ban, Search, FileCode2, Lightbulb
+  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp, ClipboardPaste, Ban, Search, FileCode2
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -39,7 +39,6 @@ export function AppSidebar() {
     { title: t("sidebar.dbt"), url: "/dbt", icon: Database },
     { title: t("sidebar.sas"), url: "/sas", icon: FileCode2 },
     { title: t("sidebar.ianaming"), url: "/ia-naming", icon: Sparkles },
-    { title: t("sidebar.suggestions"), url: "/suggestions", icon: Lightbulb },
   ];
 
   const adminItems = [

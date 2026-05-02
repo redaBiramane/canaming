@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { TextCursorInput, Code2, BookOpen, LogIn, Columns3, FileDown, Eye, Database, FileCode2 } from "lucide-react";
+import { TextCursorInput, Code2, BookOpen, LogIn, Columns3, FileDown, Eye, Database, FileCode2, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/hooks/useStore";
 import { useI18nStore } from "@/lib/i18n";
@@ -31,6 +31,9 @@ export default function LandingPage() {
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full border border-border" onClick={() => navigate("/suggestions")} title="Boîte à idées">
+            <Lightbulb className="h-4 w-4" />
+          </Button>
           <LangToggle />
           <ThemeToggle />
           <Button onClick={() => navigate("/login")} className="gap-2">

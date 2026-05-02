@@ -11,14 +11,6 @@ export default function HomePage() {
   const { dictionary, transformationCount } = useAppStore();
   const { t, lang } = useI18nStore();
 
-  const features = [
-    { icon: TextCursorInput, title: t("landing.feature_1_title"), desc: t("landing.feature_1_desc"), onClick: () => navigate("/rename") },
-    { icon: Code2, title: t("landing.feature_2_title"), desc: t("landing.feature_2_desc"), onClick: () => navigate("/sql") },
-    { icon: Database, title: t("landing.feature_3_title"), desc: t("landing.feature_3_desc"), onClick: () => navigate("/dbt") },
-    { icon: FileCode2, title: t("landing.feature_4_title"), desc: t("landing.feature_4_desc"), onClick: () => navigate("/sas") },
-    { icon: Lightbulb, title: t("sidebar.suggestions"), desc: "Proposez de nouvelles fonctionnalités", onClick: () => navigate("/suggestions") },
-  ];
-
   return (
     <div className="max-w-5xl mx-auto space-y-10">
       {/* Hero */}
@@ -49,24 +41,6 @@ export default function HomePage() {
             {t("sidebar.dictionary")}
           </Button>
         </div>
-      </motion.div>
-
-      {/* Features grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15 }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-      >
-        {features.map((f, i) => (
-          <div key={i} className="ca-card p-5 space-y-3 cursor-pointer hover:border-primary/50" onClick={f.onClick}>
-            <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-              <f.icon className="h-5 w-5 text-accent-foreground" />
-            </div>
-            <h3 className="font-semibold text-foreground">{f.title}</h3>
-            <p className="text-sm text-muted-foreground">{f.desc}</p>
-          </div>
-        ))}
       </motion.div>
 
       {/* Quick example */}

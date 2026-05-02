@@ -24,6 +24,7 @@ export default function SuggestionsPage() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [tableMissing, setTableMissing] = useState(false);
   
   // Form state
   const [titre, setTitre] = useState("");
@@ -43,11 +44,14 @@ export default function SuggestionsPage() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      // If table doesn't exist yet, we catch it silently and show empty
       console.error(error);
+      if (error.code === '42P01') {
+        setTableMissing(true);
+      }
       setSuggestions([]);
     } else {
       setSuggestions(data || []);
+      setTableMissing(false);
     }
     setLoading(false);
   };
@@ -123,7 +127,7 @@ export default function SuggestionsPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2" disabled={tableMissing}>
               <Plus className="w-4 h-4" /> Proposer une idée
             </Button>
           </DialogTrigger>
@@ -160,9 +164,44 @@ export default function SuggestionsPage() {
         </Dialog>
       </div>
 
+      {tableMissing && role === 'admin' && (
+        <div className="bg-destructive/10 border-l-4 border-destructive p-4 rounded-lg my-4">
+          <h3 className="text-destructive font-bold mb-2">Configuration requise !</h3>
+          <p className="text-sm text-foreground mb-4">
+            La table <code>suggestions</code> n'existe pas encore dans votre base de données Supabase.
+            Veuillez exécuter le script SQL suivant dans le SQL Editor de Supabase :
+          </p>
+          <pre className="bg-card border p-4 rounded text-xs font-mono overflow-x-auto text-foreground">
+{`CREATE TABLE suggestions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  titre TEXT NOT NULL,
+  description TEXT NOT NULL,
+  auteur TEXT NOT NULL,
+  statut TEXT DEFAULT 'nouveau',
+  votes INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE suggestions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Tout le monde peut voir les suggestions" ON suggestions FOR SELECT USING (true);
+CREATE POLICY "Les utilisateurs connectés peuvent créer" ON suggestions FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Les admins peuvent tout faire" ON suggestions FOR ALL USING (
+  EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = auth.uid() AND user_roles.role = 'admin')
+);`}
+          </pre>
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-12 text-muted-foreground">Chargement...</div>
-      ) : suggestions.length === 0 ? (
+      ) : tableMissing && role !== 'admin' ? (
+        <div className="text-center py-12 bg-card border rounded-xl">
+          <Lightbulb className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+          <h3 className="text-lg font-medium">Bientôt disponible</h3>
+          <p className="text-muted-foreground text-sm mt-1">L'administrateur est en train d'installer cette fonctionnalité.</p>
+        </div>
+      ) : suggestions.length === 0 && !tableMissing ? (
         <div className="text-center py-12 bg-card border rounded-xl">
           <Lightbulb className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="text-lg font-medium">Aucune idée pour le moment</h3>
