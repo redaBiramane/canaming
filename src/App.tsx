@@ -4,8 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/AppLayout";
+import { Navigate } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
-import HomePage from "./pages/HomePage";
+import LandingPage from "./pages/LandingPage";
 import RenamePage from "./pages/RenamePage";
 import SqlPage from "./pages/SqlPage";
 import DbtPage from "./pages/DbtPage";
@@ -38,31 +39,35 @@ function AppRoutes() {
     );
   }
 
-  if (!user) {
-    return <AuthPage />;
-  }
-
   return (
-    <AppLayout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/rename" element={<RenamePage />} />
-        <Route path="/excel-paste" element={<ExcelPastePage />} />
-        <Route path="/sql" element={<SqlPage />} />
-        <Route path="/dbt" element={<DbtPage />} />
-        <Route path="/ia-naming" element={<IaNamingPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/signalements" element={<SignalementsPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/documentation" element={<DocumentationPage />} />
-        <Route path="/glossary" element={<GlossaryPage />} />
-        <Route path="/stop-words" element={<StopWordsPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AppLayout>
+    <Routes>
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+      
+      <Route path="/*" element={
+        !user ? <Navigate to="/login" replace /> : (
+          <AppLayout>
+            <Routes>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/rename" element={<RenamePage />} />
+              <Route path="/excel-paste" element={<ExcelPastePage />} />
+              <Route path="/sql" element={<SqlPage />} />
+              <Route path="/dbt" element={<DbtPage />} />
+              <Route path="/ia-naming" element={<IaNamingPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/signalements" element={<SignalementsPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/documentation" element={<DocumentationPage />} />
+              <Route path="/glossary" element={<GlossaryPage />} />
+              <Route path="/stop-words" element={<StopWordsPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppLayout>
+        )
+      } />
+    </Routes>
   );
 }
 
