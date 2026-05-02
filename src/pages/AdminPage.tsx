@@ -33,7 +33,7 @@ const emptyForm: FormData = { terme_source: "", abreviation: "", description: ""
 export default function AdminPage() {
   const { dictionary, signalements, addEntry, updateEntry, deleteEntry, importDictionary, updateSignalement } = useAppStore();
   const { role, user } = useAuth();
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);

@@ -19,11 +19,11 @@ const statusIcon = {
   partiel: <AlertTriangle className="h-4 w-4 text-warning" />,
 };
 
-const statusLabel = {
-  ok: "OK",
-  ambigu: "Ambigu",
-  inconnu: "Inconnu",
-  partiel: "Partiel",
+const statusLabel: Record<string, string> = {
+  ok: "ok",
+  ambigu: "ambiguous",
+  inconnu: "unknown",
+  partiel: "ambiguous",
 };
 
 const statusBadge = {
@@ -76,8 +76,8 @@ export default function RenamePage() {
     addHistoryEntry({
       auteur: user?.email || "utilisateur",
       action: "transformation",
-      terme: `${res.length} colonne(s)`,
-      nouvelle_valeur: `${res.filter((r) => r.status === "ok").length} OK, ${unknowns} à revoir`,
+      terme: `${res.length} ${t("rename.toast_cols_unit")}`,
+      nouvelle_valeur: `${res.filter((r) => r.status === "ok").length} OK, ${unknowns} ${t("rename.to_review")}`,
       details: res.map((r) => ({
         original: r.original,
         transformed: r.transformed,
@@ -100,7 +100,7 @@ export default function RenamePage() {
       original: r.original,
       transformed: editOverrides[i] || r.transformed,
       details: r.details.map((d) => `${d.original}→${d.transformed}`).join(", "),
-      status: statusLabel[r.status],
+      status: t(`excel.summary_${statusLabel[r.status]}`),
     }));
     exportResultsToExcel(data);
     toast.success(t("rename.toast_exported"));
@@ -118,7 +118,7 @@ export default function RenamePage() {
         <div className="flex items-center justify-between mb-2">
           <h2 className="font-semibold text-foreground">{t("rename.input_title")}</h2>
           <Button variant="outline" size="sm" onClick={addColumn} className="gap-1">
-            <Plus className="h-3.5 w-3.5" /> {t("excel.reset") === "Remise à zéro" ? "Ajouter" : "Add"}
+            <Plus className="h-3.5 w-3.5" /> {t("rename.add_col")}
           </Button>
         </div>
         {columns.map((col, i) => (
@@ -211,7 +211,7 @@ export default function RenamePage() {
                     </td>
                     <td className="p-3">
                       <span className={`inline-flex items-center gap-1.5 ${statusBadge[r.status]}`}>
-                        {statusIcon[r.status]} {statusLabel[r.status]}
+                        {statusIcon[r.status]} {t(`excel.summary_${statusLabel[r.status]}`)}
                       </span>
                     </td>
                     <td className="p-3">

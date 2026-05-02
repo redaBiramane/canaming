@@ -11,7 +11,7 @@ import { useI18nStore } from "@/lib/i18n";
 
 export default function AuthPage() {
   const { signIn, signUp } = useAuth();
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

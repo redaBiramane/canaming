@@ -7,7 +7,7 @@ import { useI18nStore } from "@/lib/i18n";
 
 export default function GlossaryPage() {
   const { dictionary } = useAppStore();
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   const [searchQuery, setSearchQuery] = useState("");
 
   const reverseAnalyses = useMemo(() => {

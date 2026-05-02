@@ -18,7 +18,7 @@ export default function StopWordsPage() {
   const { stopWords, addStopWord, removeStopWord, saveStopWords } = useAppStore();
   const { role } = useAuth();
   const isAdmin = role === "admin";
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
 
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -237,7 +237,7 @@ export default function StopWordsPage() {
                         }`}
                       >
                         {w}
-                        {stopWords.includes(w) && " (existant)"}
+                        {stopWords.includes(w) && ` (${t("admin.already_exists")})`}
                       </span>
                     ))}
                 </div>

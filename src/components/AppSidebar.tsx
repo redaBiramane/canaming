@@ -130,7 +130,7 @@ export function AppSidebar() {
                       {user?.email?.split("@")[0]}
                     </p>
                     <p className="text-muted-foreground">
-                      {role === "admin" ? "Admin" : "Utilisateur"}
+                      {role === "admin" ? t("sidebar.role_admin") : t("sidebar.role_user")}
                     </p>
                   </div>
                 </div>

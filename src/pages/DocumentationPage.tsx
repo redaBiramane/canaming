@@ -46,7 +46,7 @@ function FeatureBadge({ children }: { children: React.ReactNode }) {
 }
 
 function UserGuide() {
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   return (
     <div className="space-y-6">
       <Section icon={Home} title={t("docs.section_home")}>
@@ -114,7 +114,7 @@ function UserGuide() {
 }
 
 function AdminGuide() {
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   return (
     <div className="space-y-6">
       <Section icon={ShieldCheck} title={t("docs.section_roles")}>
@@ -319,7 +319,7 @@ function AdminGuide() {
 
 export default function DocumentationPage() {
   const { role } = useAuth();
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   const isAdmin = role === \"admin\";
   const [tab, setTab] = useState(\"user\");
 
