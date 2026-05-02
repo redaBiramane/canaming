@@ -81,7 +81,7 @@ function AppRoutes() {
 }
 
 const App = () => (
-  <ThemeProvider defaultTheme="system" storageKey="ca-naming-theme">
+  <ThemeProvider attribute="class" defaultTheme="system" storageKey="ca-naming-theme">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Sonner />
