@@ -45,7 +45,7 @@ export default function SuggestionsPage() {
 
     if (error) {
       console.error(error);
-      if (error.code === '42P01') {
+      if (error.code === '42P01' || error.code === 'PGRST205') {
         setTableMissing(true);
       }
       setSuggestions([]);
