@@ -8,10 +8,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { parseDbtModel, transformDbtColumns, generateTransformedDbtModel, EXAMPLE_DBT_MODEL, type ParsedDbtModel } from "@/lib/dbtTransformer";
 import { TransformResult } from "@/lib/dictionary";
 import { toast } from "sonner";
+import { TransformResult } from "@/lib/dictionary";
+import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { useI18nStore } from "@/lib/i18n";
 
 export default function DbtPage() {
   const { dictionary, signalements, stopWords, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
+  const { t, lang } = useI18nStore();
   const { user } = useAuth();
   const [dbtModel, setDbtModel] = useState("");
   const [parsed, setParsed] = useState<ParsedDbtModel | null>(null);
@@ -21,12 +25,12 @@ export default function DbtPage() {
   const analyze = () => {
     const input = dbtModel.trim();
     if (!input) {
-      toast.error("Collez un modèle dbt");
+      toast.error(t("analysis.toast_no_script"));
       return;
     }
     const p = parseDbtModel(input);
     if (!p || p.columns.length === 0) {
-      toast.error("Aucune colonne détectée. Vérifiez que votre modèle contient un SELECT avec des colonnes.");
+      toast.error(t("analysis.toast_no_vars"));
       return;
     }
     setParsed(p);
@@ -51,17 +55,17 @@ export default function DbtPage() {
         };
       }),
     });
-    toast.success(`${p.columns.length} colonnes détectées et transformées`);
+    toast.success(`${p.columns.length} ${t("analysis.toast_analyzed")}`);
   };
 
   const loadExample = () => {
     setDbtModel(EXAMPLE_DBT_MODEL);
-    toast.info("Exemple dbt chargé");
+    toast.info(t("analysis.toast_example"));
   };
 
   const copyTransformed = () => {
     navigator.clipboard.writeText(transformedModel);
-    toast.success("Modèle transformé copié");
+    toast.success(t("analysis.toast_copied"));
   };
 
   const downloadModel = () => {
@@ -72,7 +76,7 @@ export default function DbtPage() {
     a.download = "model_renamed.sql";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Fichier dbt téléchargé");
+    toast.success(t("analysis.toast_downloaded"));
   };
 
   const resetAll = () => {
@@ -91,18 +95,18 @@ export default function DbtPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Analyse DBT</h1>
-        <p className="text-muted-foreground mt-1">Collez un modèle dbt pour transformer automatiquement tous les noms de colonnes avec le dictionnaire.</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("analysis.dbt_title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("analysis.dbt_desc")}</p>
       </div>
 
       {/* DBT Model Input */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card p-5 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <Database className="h-4 w-4" /> Modèle dbt
+            <Database className="h-4 w-4" /> DBT {t("analysis.input_script")}
           </h2>
           <Button variant="ghost" size="sm" onClick={loadExample} className="text-xs">
-            Charger un exemple
+            {t("analysis.load_example")}
           </Button>
         </div>
         <Textarea
@@ -113,11 +117,11 @@ export default function DbtPage() {
         />
         <div className="flex gap-2">
           <Button onClick={analyze} className="gap-2">
-            Analyser et transformer <ArrowRight className="h-4 w-4" />
+            {t("analysis.analyze_btn")} <ArrowRight className="h-4 w-4" />
           </Button>
           {(parsed || dbtModel) && (
             <Button variant="outline" onClick={resetAll} className="gap-2">
-              <RotateCcw className="h-4 w-4" /> Remise à zéro
+              <RotateCcw className="h-4 w-4" /> {t("analysis.reset_btn")}
             </Button>
           )}
         </div>
@@ -129,7 +133,7 @@ export default function DbtPage() {
           {/* Column mapping table */}
           <div className="ca-card p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-foreground">Mapping des colonnes</h2>
+              <h2 className="font-semibold text-foreground">{t("analysis.mapping_title")}</h2>
               {results.some((r) => r.details.some((d) => d.status === "inconnu")) && (
                 <Button
                   variant="outline"
@@ -145,11 +149,11 @@ export default function DbtPage() {
                       });
                     });
                     allUnknowns.forEach((u) => signalerMot(u.word, u.context, user?.email || "utilisateur"));
-                    if (allUnknowns.length > 0) toast.success(`${allUnknowns.length} mot(s) signalé(s)`);
-                    else toast.info("Tous les mots inconnus ont déjà été signalés");
+                    if (allUnknowns.length > 0) toast.success(`${allUnknowns.length} ${t("analysis.toast_reported_all")}`);
+                    else toast.info(t("analysis.toast_reported_all_info"));
                   }}
                 >
-                  <Flag className="h-3.5 w-3.5" /> Signaler tout
+                  <Flag className="h-3.5 w-3.5" /> {t("analysis.report_all")}
                 </Button>
               )}
             </div>
@@ -157,10 +161,10 @@ export default function DbtPage() {
               <table className="w-full text-sm">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Colonne originale</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Colonne renommée</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Statut</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Détail</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_original")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_renamed")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_status")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_detail")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -196,7 +200,7 @@ export default function DbtPage() {
                                       onClick={() => {
                                         const unknowns = r.details.filter((d) => d.status === "inconnu");
                                         unknowns.forEach((d) => signalerMot(d.original, r.original, user?.email || "utilisateur"));
-                                        toast.success(`${unknowns.length} mot(s) signalé(s) à l'équipe Data Quality`);
+                                        toast.success(`${unknowns.length} ${t("analysis.toast_reported")}`);
                                       }}
                                       disabled={r.details
                                         .filter((d) => d.status === "inconnu")
@@ -204,10 +208,10 @@ export default function DbtPage() {
                                       }
                                     >
                                       <Flag className="h-3 w-3" />
-                                      Signaler
+                                      {t("analysis.report")}
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent>Signaler les mots inconnus à l'admin pour ajout au dictionnaire</TooltipContent>
+                                  <TooltipContent>{t("analysis.tooltip_report")}</TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
                             )}
@@ -224,25 +228,25 @@ export default function DbtPage() {
           {/* Side-by-side diff */}
           <div className="ca-card p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-foreground">Comparaison avant / après</h2>
+              <h2 className="font-semibold text-foreground">{t("analysis.compare_title")}</h2>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={copyTransformed} className="gap-1">
-                  <Copy className="h-3.5 w-3.5" /> Copier
+                  <Copy className="h-3.5 w-3.5" /> {t("analysis.copy")}
                 </Button>
                 <Button size="sm" onClick={downloadModel} className="gap-1">
-                  <FileDown className="h-3.5 w-3.5" /> Télécharger .sql
+                  <FileDown className="h-3.5 w-3.5" /> {t("analysis.download")} .sql
                 </Button>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Original</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">{t("analysis.original")}</p>
                 <div className="bg-muted rounded-lg p-4 font-mono text-sm overflow-x-auto max-h-[500px] overflow-y-auto">
                   <pre className="whitespace-pre-wrap">{dbtModel}</pre>
                 </div>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Transformé</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">{t("analysis.transformed")}</p>
                 <div className="bg-accent rounded-lg p-4 font-mono text-sm overflow-x-auto max-h-[500px] overflow-y-auto">
                   <pre className="whitespace-pre-wrap">{transformedModel}</pre>
                 </div>

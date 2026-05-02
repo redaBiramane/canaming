@@ -9,9 +9,11 @@ import { parseSasScript, transformSasVariables, generateTransformedSasScript, EX
 import { TransformResult } from "@/lib/dictionary";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { useI18nStore } from "@/lib/i18n";
 
 export default function SasPage() {
   const { dictionary, signalements, stopWords, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
+  const { t, lang } = useI18nStore();
   const { user } = useAuth();
   const [sasScript, setSasScript] = useState("");
   const [parsed, setParsed] = useState<ParsedSasScript | null>(null);
@@ -21,12 +23,12 @@ export default function SasPage() {
   const analyze = () => {
     const input = sasScript.trim();
     if (!input) {
-      toast.error("Collez un script SAS");
+      toast.error(t("analysis.toast_no_script"));
       return;
     }
     const p = parseSasScript(input);
     if (!p || p.variables.length === 0) {
-      toast.error("Aucune variable détectée. Vérifiez la syntaxe de votre script SAS.");
+      toast.error(t("analysis.toast_no_vars"));
       return;
     }
     setParsed(p);
@@ -51,17 +53,17 @@ export default function SasPage() {
         };
       }),
     });
-    toast.success(`${p.variables.length} variables détectées et transformées`);
+    toast.success(`${p.variables.length} ${t("analysis.toast_analyzed")}`);
   };
 
   const loadExample = () => {
     setSasScript(EXAMPLE_SAS_SCRIPT);
-    toast.info("Exemple SAS chargé");
+    toast.info(t("analysis.toast_example"));
   };
 
   const copyTransformed = () => {
     navigator.clipboard.writeText(transformedScript);
-    toast.success("Script transformé copié");
+    toast.success(t("analysis.toast_copied"));
   };
 
   const downloadScript = () => {
@@ -72,7 +74,7 @@ export default function SasPage() {
     a.download = "script_renamed.sas";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Fichier SAS téléchargé");
+    toast.success(t("analysis.toast_downloaded"));
   };
 
   const resetAll = () => {
@@ -91,18 +93,18 @@ export default function SasPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Analyse SAS</h1>
-        <p className="text-muted-foreground mt-1">Collez un script SAS (DATA ou PROC SQL) pour standardiser automatiquement vos noms de variables.</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("analysis.sas_title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("analysis.sas_desc")}</p>
       </div>
 
       {/* SAS Script Input */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card p-5 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <FileCode2 className="h-4 w-4" /> Script SAS
+            <FileCode2 className="h-4 w-4" /> SAS {t("analysis.input_script")}
           </h2>
           <Button variant="ghost" size="sm" onClick={loadExample} className="text-xs">
-            Charger un exemple
+            {t("analysis.load_example")}
           </Button>
         </div>
         <Textarea
@@ -113,11 +115,11 @@ export default function SasPage() {
         />
         <div className="flex gap-2">
           <Button onClick={analyze} className="gap-2">
-            Analyser et transformer <ArrowRight className="h-4 w-4" />
+            {t("analysis.analyze_btn")} <ArrowRight className="h-4 w-4" />
           </Button>
           {(parsed || sasScript) && (
             <Button variant="outline" onClick={resetAll} className="gap-2">
-              <RotateCcw className="h-4 w-4" /> Remise à zéro
+              <RotateCcw className="h-4 w-4" /> {t("analysis.reset_btn")}
             </Button>
           )}
         </div>
@@ -129,7 +131,7 @@ export default function SasPage() {
           {/* Mapping table */}
           <div className="ca-card p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-foreground">Mapping des variables</h2>
+              <h2 className="font-semibold text-foreground">{t("analysis.mapping_title")}</h2>
               {results.some((r) => r.details.some((d) => d.status === "inconnu")) && (
                 <Button
                   variant="outline"
@@ -145,11 +147,11 @@ export default function SasPage() {
                       });
                     });
                     allUnknowns.forEach((u) => signalerMot(u.word, u.context, user?.email || "utilisateur"));
-                    if (allUnknowns.length > 0) toast.success(`${allUnknowns.length} mot(s) signalé(s)`);
-                    else toast.info("Tous les mots inconnus ont déjà été signalés");
+                    if (allUnknowns.length > 0) toast.success(`${allUnknowns.length} ${t("analysis.toast_reported_all")}`);
+                    else toast.info(t("analysis.toast_reported_all_info"));
                   }}
                 >
-                  <Flag className="h-3.5 w-3.5" /> Signaler tout
+                  <Flag className="h-3.5 w-3.5" /> {t("analysis.report_all")}
                 </Button>
               )}
             </div>
@@ -157,10 +159,10 @@ export default function SasPage() {
               <table className="w-full text-sm">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Variable originale</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Variable renommée</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Statut</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Détail</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_original")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_renamed")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_status")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_detail")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -196,7 +198,7 @@ export default function SasPage() {
                                       onClick={() => {
                                         const unknowns = r.details.filter((d) => d.status === "inconnu");
                                         unknowns.forEach((d) => signalerMot(d.original, r.original, user?.email || "utilisateur"));
-                                        toast.success(`${unknowns.length} mot(s) signalé(s) à l'équipe Data Quality`);
+                                        toast.success(`${unknowns.length} ${t("analysis.toast_reported")}`);
                                       }}
                                       disabled={r.details
                                         .filter((d) => d.status === "inconnu")
@@ -204,10 +206,10 @@ export default function SasPage() {
                                       }
                                     >
                                       <Flag className="h-3 w-3" />
-                                      Signaler
+                                      {t("analysis.report")}
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent>Signaler les mots inconnus à l'admin pour ajout au dictionnaire</TooltipContent>
+                                  <TooltipContent>{t("analysis.tooltip_report")}</TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
                             )}
@@ -224,25 +226,25 @@ export default function SasPage() {
           {/* Side-by-side diff */}
           <div className="ca-card p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-foreground">Comparaison avant / après</h2>
+              <h2 className="font-semibold text-foreground">{t("analysis.compare_title")}</h2>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={copyTransformed} className="gap-1">
-                  <Copy className="h-3.5 w-3.5" /> Copier
+                  <Copy className="h-3.5 w-3.5" /> {t("analysis.copy")}
                 </Button>
                 <Button size="sm" onClick={downloadScript} className="gap-1">
-                  <FileDown className="h-3.5 w-3.5" /> Télécharger .sas
+                  <FileDown className="h-3.5 w-3.5" /> {t("analysis.download")} .sas
                 </Button>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Original</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">{t("analysis.original")}</p>
                 <div className="bg-muted rounded-lg p-4 font-mono text-sm overflow-x-auto max-h-[500px] overflow-y-auto">
                   <pre className="whitespace-pre-wrap">{sasScript}</pre>
                 </div>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Transformé</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">{t("analysis.transformed")}</p>
                 <div className="bg-accent rounded-lg p-4 font-mono text-sm overflow-x-auto max-h-[500px] overflow-y-auto">
                   <pre className="whitespace-pre-wrap">{transformedScript}</pre>
                 </div>
