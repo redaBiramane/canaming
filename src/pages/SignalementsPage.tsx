@@ -19,6 +19,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useI18nStore } from "@/lib/i18n";
 
 const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contact", "Géographie", "Structure", "Juridique", "Technique"];
 
@@ -41,6 +42,7 @@ const emptyForm: FormData = { terme_source: "", abreviation: "", description: ""
 export default function SignalementsPage() {
   const { signalements, addEntry, updateSignalement } = useAppStore();
   const { role, user } = useAuth();
+  const { t } = useI18nStore();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -138,7 +140,7 @@ export default function SignalementsPage() {
         });
       }
     }
-    toast.info(`Signalement de "${mot}" rejeté`);
+    toast.info(t("admin.toast_rejected"));
   };
 
   const exportSignalements = (format: "xlsx" | "csv") => {
@@ -159,9 +161,9 @@ export default function SignalementsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Mots signalés</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("admin.signals_title")}</h1>
         <p className="text-muted-foreground mt-1">
-          Termes inconnus remontés par les utilisateurs lors des transformations
+          {t("admin.signals_desc")}
         </p>
       </div>
 
@@ -171,21 +173,21 @@ export default function SignalementsPage() {
           <Clock className="h-5 w-5 text-warning" />
           <div>
             <div className="text-2xl font-bold text-foreground">{counts.en_attente}</div>
-            <div className="text-xs text-muted-foreground">En attente</div>
+            <div className="text-xs text-muted-foreground">{t("dashboard.pending")}</div>
           </div>
         </div>
         <div className="ca-stat-card">
           <CheckCircle2 className="h-5 w-5 text-success" />
           <div>
             <div className="text-2xl font-bold text-foreground">{counts.traité}</div>
-            <div className="text-xs text-muted-foreground">Traités</div>
+            <div className="text-xs text-muted-foreground">{t("dashboard.processed")}</div>
           </div>
         </div>
         <div className="ca-stat-card">
           <XCircle className="h-5 w-5 text-destructive" />
           <div>
             <div className="text-2xl font-bold text-foreground">{counts.rejeté}</div>
-            <div className="text-xs text-muted-foreground">Rejetés</div>
+            <div className="text-xs text-muted-foreground">{t("dashboard.rejected")}</div>
           </div>
         </div>
       </div>
@@ -197,7 +199,7 @@ export default function SignalementsPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher par mot, contexte ou auteur..."
+            placeholder={t("admin.search")}
             className="pl-9"
           />
         </div>
@@ -207,10 +209,10 @@ export default function SignalementsPage() {
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous les statuts</SelectItem>
-            <SelectItem value="en_attente">En attente</SelectItem>
-            <SelectItem value="traité">Traités</SelectItem>
-            <SelectItem value="rejeté">Rejetés</SelectItem>
+            <SelectItem value="all">{t("admin.all_categories")}</SelectItem>
+            <SelectItem value="en_attente">{t("dashboard.pending")}</SelectItem>
+            <SelectItem value="traité">{t("dashboard.processed")}</SelectItem>
+            <SelectItem value="rejeté">{t("dashboard.rejected")}</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="sm" className="gap-1" onClick={() => exportSignalements("xlsx")}>
@@ -236,12 +238,12 @@ export default function SignalementsPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted">
                 <tr>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Mot signalé</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Contexte (colonne)</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Signalé par</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Statut</th>
-                  {isAdmin && <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>}
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_word")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_context")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_author")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_date")}</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_status")}</th>
+                  {isAdmin && <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_actions")}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -278,7 +280,7 @@ export default function SignalementsPage() {
                                 className="h-7 gap-1 text-xs"
                                 onClick={() => handleAddToDictionary(s)}
                               >
-                                <Plus className="h-3 w-3" /> Ajouter
+                                <Plus className="h-3 w-3" /> {t("admin.btn_add_dict")}
                               </Button>
                               <Button
                                 size="sm"
@@ -303,20 +305,19 @@ export default function SignalementsPage() {
         )}
       </motion.div>
 
-      {/* Add to dictionary dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ajouter au dictionnaire</DialogTitle>
+            <DialogTitle>{t("admin.add_title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Terme source</Label>
+                <Label>{t("admin.label_source")}</Label>
                 <Input value={form.terme_source} onChange={(e) => setForm({ ...form, terme_source: e.target.value })} placeholder="montant" />
               </div>
               <div>
-                <Label>Abréviation</Label>
+                <Label>{t("admin.label_abbrev")}</Label>
                 <Input value={form.abreviation} onChange={(e) => setForm({ ...form, abreviation: e.target.value })} placeholder="MNT" className="font-mono" />
               </div>
             </div>
@@ -341,9 +342,9 @@ export default function SignalementsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("admin.cancel")}</Button>
             <Button onClick={handleSave} className="gap-1">
-              <Check className="h-4 w-4" /> Ajouter au dictionnaire
+              <Check className="h-4 w-4" /> {t("admin.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -10,11 +10,13 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend,
 } from "recharts";
+import { useI18nStore } from "@/lib/i18n";
 
 const COLORS = ["hsl(152, 55%, 28%)", "hsl(38, 92%, 50%)", "hsl(0, 65%, 52%)", "hsl(210, 15%, 50%)", "hsl(152, 60%, 40%)", "hsl(270, 50%, 50%)", "hsl(200, 60%, 45%)", "hsl(30, 70%, 50%)"];
 
 export default function DashboardPage() {
   const { dictionary, history, signalements, transformationCount, unknownWordsCount } = useAppStore();
+  const { t } = useI18nStore();
   const { role } = useAuth();
   const isAdmin = role === "admin";
 
@@ -34,10 +36,10 @@ export default function DashboardPage() {
 
   // Signalement stats
   const signalementStats = useMemo(() => [
-    { name: "En attente", value: signalements.filter((s) => s.statut === "en_attente").length },
-    { name: "Traités", value: signalements.filter((s) => s.statut === "traité").length },
-    { name: "Rejetés", value: signalements.filter((s) => s.statut === "rejeté").length },
-  ], [signalements]);
+    { name: t("dashboard.pending"), value: signalements.filter((s) => s.statut === "en_attente").length },
+    { name: t("dashboard.processed"), value: signalements.filter((s) => s.statut === "traité").length },
+    { name: t("dashboard.rejected"), value: signalements.filter((s) => s.statut === "rejeté").length },
+  ], [signalements, t]);
 
   // Unique users from history
   const uniqueUsers = useMemo(() => {
@@ -86,25 +88,25 @@ export default function DashboardPage() {
   }, [signalements]);
 
   const stats = [
-    { label: "Termes dans le dictionnaire", value: dictionary.length, icon: BookOpen, color: "text-primary" },
-    { label: "Transformations réalisées", value: transformationCount, icon: ArrowRightLeft, color: "text-primary" },
-    { label: "Taux de correspondance", value: `${matchRate}%`, icon: TrendingUp, color: "text-success" },
-    { label: "Mots inconnus rencontrés", value: unknownWordsCount, icon: HelpCircle, color: "text-warning" },
+    { label: t("dashboard.terms_in_dict"), value: dictionary.length, icon: BookOpen, color: "text-primary" },
+    { label: t("dashboard.transformations"), value: transformationCount, icon: ArrowRightLeft, color: "text-primary" },
+    { label: t("dashboard.match_rate"), value: `${matchRate}%`, icon: TrendingUp, color: "text-success" },
+    { label: t("dashboard.unknown_words"), value: unknownWordsCount, icon: HelpCircle, color: "text-warning" },
     ...(isAdmin ? [
-      { label: "Utilisateurs actifs", value: uniqueUsers.length, icon: Users, color: "text-primary" },
-      { label: "Signalements", value: signalements.length, icon: Flag, color: "text-warning" },
+      { label: t("dashboard.active_users"), value: uniqueUsers.length, icon: Users, color: "text-primary" },
+      { label: t("dashboard.reports"), value: signalements.length, icon: Flag, color: "text-warning" },
     ] : [
-      { label: "Catégories", value: categories.length, icon: AlertTriangle, color: "text-primary" },
-      { label: "Modifications récentes", value: history.length, icon: Clock, color: "text-muted-foreground" },
+      { label: t("dashboard.categories"), value: categories.length, icon: AlertTriangle, color: "text-primary" },
+      { label: t("dashboard.recent_mods"), value: history.length, icon: Clock, color: "text-muted-foreground" },
     ]),
   ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("dashboard.title")}</h1>
         <p className="text-muted-foreground mt-1">
-          {isAdmin ? "Vue d'ensemble administrateur" : "Vue d'ensemble de la plateforme de normalisation"}
+          {isAdmin ? t("dashboard.subtitle_admin") : t("dashboard.subtitle_user")}
         </p>
       </div>
 
@@ -135,7 +137,7 @@ export default function DashboardPage() {
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="ca-card p-5">
               <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-primary" />
-                Activité des 7 derniers jours
+                {t("dashboard.activity_7d")}
               </h2>
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={activityData}>
@@ -153,7 +155,7 @@ export default function DashboardPage() {
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="ca-card p-5">
               <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Flag className="h-4 w-4 text-warning" />
-                Signalements par statut
+                {t("dashboard.reports_by_status")}
               </h2>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
@@ -186,7 +188,7 @@ export default function DashboardPage() {
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="ca-card p-5">
               <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
-                Transformations par utilisateur
+                {t("dashboard.trans_by_user")}
               </h2>
               {userTransformations.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -199,14 +201,14 @@ export default function DashboardPage() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">Aucune donnée</p>
+                <p className="text-sm text-muted-foreground text-center py-8">{t("dashboard.no_data")}</p>
               )}
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="ca-card p-5">
               <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Flag className="h-4 w-4 text-warning" />
-                Signalements par utilisateur
+                {t("dashboard.reports_by_user")}
               </h2>
               {signalementsByUser.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -219,7 +221,7 @@ export default function DashboardPage() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">Aucune donnée</p>
+                <p className="text-sm text-muted-foreground text-center py-8">{t("dashboard.no_data")}</p>
               )}
             </motion.div>
           </div>
@@ -228,16 +230,16 @@ export default function DashboardPage() {
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="ca-card p-5">
             <h2 className="font-semibold text-foreground mb-3 flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />
-              Utilisateurs actifs
+              {t("dashboard.active_users")}
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Utilisateur</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Transformations</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Signalements</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Dernière activité</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("dashboard.user_col")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("dashboard.trans_col")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("dashboard.reports_col")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("dashboard.last_activity_col")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -272,7 +274,7 @@ export default function DashboardPage() {
 
       {/* Categories breakdown */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: isAdmin ? 0.35 : 0.1 }} className="ca-card p-5">
-        <h2 className="font-semibold text-foreground mb-3">Répartition par catégorie</h2>
+        <h2 className="font-semibold text-foreground mb-3">{t("dashboard.cat_breakdown")}</h2>
         {isAdmin ? (
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={categoryData}>
@@ -301,7 +303,7 @@ export default function DashboardPage() {
       {/* Recent dictionary (non-admin) */}
       {!isAdmin && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="ca-card p-5">
-          <h2 className="font-semibold text-foreground mb-3">Derniers termes ajoutés</h2>
+          <h2 className="font-semibold text-foreground mb-3">{t("dashboard.recent_added")}</h2>
           <div className="flex flex-wrap gap-2">
             {dictionary.slice(-15).reverse().map((e) => (
               <span key={e.id} className="inline-flex items-center gap-1 bg-muted text-foreground px-3 py-1.5 rounded-lg text-sm">

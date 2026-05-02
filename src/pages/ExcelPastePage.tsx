@@ -13,6 +13,7 @@ import { transformColumn } from "@/lib/transformer";
 import { TransformResult } from "@/lib/dictionary";
 import { exportResultsToExcel } from "@/lib/excel";
 import { toast } from "sonner";
+import { useI18nStore } from "@/lib/i18n";
 
 const statusIcon = {
   ok: <CheckCircle2 className="h-4 w-4 text-success" />,
@@ -21,11 +22,11 @@ const statusIcon = {
   partiel: <AlertTriangle className="h-4 w-4 text-warning" />,
 };
 
-const statusLabel = {
-  ok: "OK",
-  ambigu: "Ambigu",
-  inconnu: "Inconnu",
-  partiel: "Partiel",
+const statusLabel: Record<string, string> = {
+  ok: "ok",
+  ambigu: "ambiguous",
+  inconnu: "unknown",
+  partiel: "ambiguous",
 };
 
 const statusBadge = {
@@ -89,6 +90,7 @@ function parseExcelPaste(text: string): ParsedData | null {
 export default function ExcelPastePage() {
   const { dictionary, signalements, stopWords, incrementTransformations, addHistoryEntry, signalerMot } = useAppStore();
   const { user } = useAuth();
+  const { t } = useI18nStore();
 
   const [rawText, setRawText] = useSessionStorage("excel_rawText", "");
   const [parsedData, setParsedData] = useSessionStorage<ParsedData | null>("excel_parsedData", null);
@@ -121,13 +123,13 @@ export default function ExcelPastePage() {
           setExcludedValues(autoExcluded);
           setStep("select");
           const totalValues = parsed.detectedColumns.reduce((sum, col) => sum + col.values.length, 0);
-          toast.success(`${parsed.detectedColumns.length} colonne(s) détectée(s) avec ${totalValues} valeur(s)`);
+          toast.success(`${parsed.detectedColumns.length} ${t("excel.toast_cols_detected")} ${totalValues} ${t("excel.toast_values")}`);
         } else {
-          toast.error("Impossible de détecter des colonnes. Vérifiez le format du contenu collé.");
+          toast.error(t("excel.toast_no_cols"));
         }
       }
     },
-    []
+    [stopWords, t]
   );
 
   const handleTextChange = (text: string) => {
@@ -136,7 +138,7 @@ export default function ExcelPastePage() {
 
   const analyzeText = () => {
     if (!rawText.trim()) {
-      toast.error("Collez du contenu depuis Excel d'abord");
+      toast.error(t("excel.toast_no_data"));
       return;
     }
     const parsed = parseExcelPaste(rawText);
@@ -154,9 +156,9 @@ export default function ExcelPastePage() {
       setExcludedValues(autoExcluded);
       setStep("select");
       const totalValues = parsed.detectedColumns.reduce((sum, col) => sum + col.values.length, 0);
-      toast.success(`${parsed.detectedColumns.length} colonne(s) détectée(s) avec ${totalValues} valeur(s)`);
+      toast.success(`${parsed.detectedColumns.length} ${t("excel.toast_cols_detected")} ${totalValues} ${t("excel.toast_values")}`);
     } else {
-      toast.error("Impossible de détecter des colonnes. Vérifiez le format.");
+      toast.error(t("excel.toast_no_cols"));
     }
   };
 
@@ -229,7 +231,7 @@ export default function ExcelPastePage() {
 
   const transformSelected = () => {
     if (finalValues.length === 0) {
-      toast.error("Sélectionnez au moins une valeur à transformer");
+      toast.error(t("excel.toast_select_one"));
       return;
     }
 
@@ -253,7 +255,7 @@ export default function ExcelPastePage() {
         mapping: r.details.map((d) => `${d.original}→${d.transformed}`).join(", "),
       })),
     });
-    toast.success(`${res.length} valeur(s) transformée(s)`);
+    toast.success(`${res.length} ${t("excel.toast_transformed")}`);
   };
 
   const copyResults = () => {
@@ -261,7 +263,7 @@ export default function ExcelPastePage() {
       .map((r, i) => `${r.original}\t${editOverrides[i] || r.transformed}`)
       .join("\n");
     navigator.clipboard.writeText(text);
-    toast.success("Résultats copiés (format tabulaire)");
+    toast.success(t("excel.toast_copied"));
   };
 
   const exportResults = () => {
@@ -269,10 +271,10 @@ export default function ExcelPastePage() {
       original: r.original,
       transformed: editOverrides[i] || r.transformed,
       details: r.details.map((d) => `${d.original}→${d.transformed}`).join(", "),
-      status: statusLabel[r.status],
+      status: t(`excel.summary_${statusLabel[r.status]}`),
     }));
     exportResultsToExcel(data, "collage_excel_resultats.xlsx");
-    toast.success("Export téléchargé");
+    toast.success(t("excel.toast_exported"));
   };
 
   const reset = () => {
@@ -289,18 +291,16 @@ export default function ExcelPastePage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Collage Excel</h1>
-        <p className="text-muted-foreground mt-1">
-          Copiez-collez des cellules depuis Excel pour détecter et transformer automatiquement les noms de colonnes.
-        </p>
+        <h1 className="text-2xl font-bold text-foreground">{t("excel.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("excel.desc")}</p>
       </div>
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 text-sm">
         {[
-          { key: "paste", label: "1. Coller", icon: ClipboardPaste },
-          { key: "select", label: "2. Sélectionner", icon: Columns3 },
-          { key: "results", label: "3. Résultats", icon: Sparkles },
+          { key: "paste", label: t("excel.step_paste"), icon: ClipboardPaste },
+          { key: "select", label: t("excel.step_select"), icon: Columns3 },
+          { key: "results", label: t("excel.step_results"), icon: Sparkles },
         ].map((s, i) => (
           <div key={s.key} className="flex items-center gap-2">
             {i > 0 && <div className="w-8 h-px bg-border" />}
@@ -335,7 +335,7 @@ export default function ExcelPastePage() {
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-foreground flex items-center gap-2">
                 <ClipboardPaste className="h-5 w-5 text-primary" />
-                Collez vos données Excel
+                {t("excel.paste_title")}
               </h2>
             </div>
 
@@ -345,7 +345,7 @@ export default function ExcelPastePage() {
                 value={rawText}
                 onChange={(e) => handleTextChange(e.target.value)}
                 onPaste={handlePaste}
-                placeholder={`Collez ici le contenu copié depuis Excel...\n\nVous pouvez coller :\n• Une colonne de noms (ex: KEY, DYM, UPDATED, ...)\n• Un tableau entier avec en-têtes et données\n• Des données séparées par tabulations ou points-virgules`}
+                placeholder={t("excel.paste_placeholder")}
                 className="w-full h-64 p-4 rounded-lg border border-border bg-background font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-muted-foreground/50"
               />
               {!rawText && (
@@ -353,7 +353,7 @@ export default function ExcelPastePage() {
                   <div className="text-center space-y-3 opacity-40">
                     <ClipboardPaste className="h-12 w-12 mx-auto text-muted-foreground" />
                     <p className="text-sm text-muted-foreground font-medium">
-                      Ctrl+V / Cmd+V pour coller
+                      {t("excel.paste_hint")}
                     </p>
                   </div>
                 </div>
@@ -363,16 +363,16 @@ export default function ExcelPastePage() {
             <div className="flex items-center gap-3">
               <Button onClick={analyzeText} disabled={!rawText.trim()} className="gap-2">
                 <Table2 className="h-4 w-4" />
-                Analyser les colonnes
+                {t("excel.analyze_cols")}
               </Button>
               {rawText && (
                 <Button variant="outline" onClick={reset} className="gap-2">
                   <RotateCcw className="h-4 w-4" />
-                  Remise à zéro
+                  {t("excel.reset")}
                 </Button>
               )}
               <p className="text-xs text-muted-foreground hidden sm:block">
-                Formats supportés : tabulations, points-virgules, ou 1 valeur/ligne
+                {t("excel.supported_formats")}
               </p>
             </div>
           </motion.div>
@@ -393,20 +393,20 @@ export default function ExcelPastePage() {
                 <div className="flex items-center justify-between">
                   <h2 className="font-semibold text-foreground flex items-center gap-2">
                     <Columns3 className="h-5 w-5 text-primary" />
-                    Colonnes détectées ({parsedData.detectedColumns.length})
+                    {t("excel.cols_detected")} ({parsedData.detectedColumns.length})
                   </h2>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={selectAllColumns}>
-                      Tout sélectionner
+                      {t("excel.select_all")}
                     </Button>
                     <Button variant="outline" size="sm" onClick={deselectAllColumns}>
-                      Tout désélectionner
+                      {t("excel.deselect_all")}
                     </Button>
                   </div>
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  Choisissez la ou les colonnes contenant les noms à transformer.
+                  {t("excel.choose_cols")}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -432,7 +432,7 @@ export default function ExcelPastePage() {
                         {col.name}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {col.values.length} valeur(s)
+                        {col.values.length} {t("excel.toast_values")}
                       </p>
                     </motion.button>
                   ))}
@@ -446,22 +446,22 @@ export default function ExcelPastePage() {
                 <div className="flex items-center justify-between">
                   <h2 className="font-semibold text-foreground flex items-center gap-2">
                     <Table2 className="h-5 w-5 text-primary" />
-                    Mots détectés ({allUniqueValues.length})
+                    {t("excel.words_detected")} ({allUniqueValues.length})
                   </h2>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={selectAllValues}>
-                      Tout inclure
+                      {t("excel.include_all")}
                     </Button>
                     <Button variant="outline" size="sm" onClick={deselectAllValues}>
-                      Tout exclure
+                      {t("excel.exclude_all")}
                     </Button>
                   </div>
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  Cliquez sur un mot pour l'inclure ou l'exclure de la transformation.
+                  {t("excel.click_to_include")}
                   <span className="font-medium text-foreground ml-1">
-                    {finalValues.length}/{allUniqueValues.length} sélectionné(s)
+                    {finalValues.length}/{allUniqueValues.length} {t("excel.selected")}
                   </span>
                 </p>
 
@@ -472,7 +472,7 @@ export default function ExcelPastePage() {
                     <Input
                       value={valueFilter}
                       onChange={(e) => setValueFilter(e.target.value)}
-                      placeholder="Rechercher un mot..."
+                      placeholder={t("excel.search")}
                       className="pl-9 h-9"
                     />
                     {valueFilter && (
@@ -515,13 +515,13 @@ export default function ExcelPastePage() {
 
                 {valueFilter && filteredValues.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    Aucun mot ne correspond à « {valueFilter} »
+                    {t("excel.no_match")} « {valueFilter} »
                   </p>
                 )}
 
                 {valueFilter && filteredValues.length < allUniqueValues.length && (
                   <p className="text-xs text-muted-foreground text-center">
-                    {filteredValues.length} résultat(s) sur {allUniqueValues.length}
+                    {filteredValues.length} {t("excel.results_of")} {allUniqueValues.length}
                   </p>
                 )}
               </div>
@@ -531,7 +531,7 @@ export default function ExcelPastePage() {
             <div className="ca-card p-5 space-y-3">
               <h2 className="font-semibold text-foreground flex items-center gap-2">
                 <Table2 className="h-5 w-5 text-muted-foreground" />
-                Aperçu des données
+                {t("excel.data_preview")}
               </h2>
               <div className="border rounded-lg overflow-auto max-h-48">
                 <table className="w-full text-sm">
@@ -549,7 +549,7 @@ export default function ExcelPastePage() {
                           {h}
                           {selectedColumns.has(i) && (
                             <span className="ml-1.5 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-                              source
+                              {t("excel.source")}
                             </span>
                           )}
                         </th>
@@ -580,25 +580,24 @@ export default function ExcelPastePage() {
               </div>
               {parsedData.rows.length > 6 && (
                 <p className="text-xs text-muted-foreground text-center">
-                  … et {parsedData.rows.length - 6} autres ligne(s)
+                  {t("excel.and_more_rows").replace("{count}", (parsedData.rows.length - 6).toString())}
                 </p>
               )}
             </div>
 
-            {/* Actions */}
             <div className="flex gap-2 items-center">
               <Button onClick={transformSelected} disabled={finalValues.length === 0} className="gap-2">
                 <Sparkles className="h-4 w-4" />
-                Transformer {finalValues.length} valeur(s)
+                {t("excel.transform_btn")} {finalValues.length} {t("excel.transform_btn_suffix")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
               <Button variant="outline" onClick={() => setStep("paste")} className="gap-2">
                 <RotateCcw className="h-4 w-4" />
-                Retour
+                {t("excel.back")}
               </Button>
               {excludedValues.size > 0 && (
                 <span className="text-xs text-muted-foreground">
-                  {excludedValues.size} mot(s) exclu(s)
+                  {t("excel.words_excluded").replace("{count}", excludedValues.size.toString())}
                 </span>
               )}
             </div>
@@ -618,25 +617,25 @@ export default function ExcelPastePage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 {
-                  label: "Total",
+                  label: t("excel.summary_total"),
                   value: results.length,
                   color: "text-foreground",
                   bg: "bg-muted",
                 },
                 {
-                  label: "OK",
+                  label: t("excel.summary_ok"),
                   value: results.filter((r) => r.status === "ok").length,
                   color: "text-success",
                   bg: "bg-success/10",
                 },
                 {
-                  label: "Ambigus",
+                  label: t("excel.summary_ambiguous"),
                   value: results.filter((r) => r.status === "ambigu").length,
                   color: "text-warning",
                   bg: "bg-warning/10",
                 },
                 {
-                  label: "Inconnus",
+                  label: t("excel.summary_unknown"),
                   value: results.filter(
                     (r) => r.status === "inconnu" || r.status === "partiel"
                   ).length,
@@ -661,7 +660,7 @@ export default function ExcelPastePage() {
             {/* Results table */}
             <div className="ca-card p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-foreground">Résultats de la transformation</h2>
+                <h2 className="font-semibold text-foreground">{t("excel.results_title")}</h2>
                 <div className="flex gap-2">
                   {results.some((r) =>
                     r.details.some((d) => d.status === "inconnu")
@@ -699,15 +698,15 @@ export default function ExcelPastePage() {
                         );
                         if (allUnknowns.length > 0)
                           toast.success(
-                            `${allUnknowns.length} mot(s) signalé(s)`
+                            t("excel.toast_reported_all").replace("{count}", allUnknowns.length.toString())
                           );
                         else
                           toast.info(
-                            "Tous les mots inconnus ont déjà été signalés"
+                            t("excel.toast_reported_all_info")
                           );
                       }}
                     >
-                      <Flag className="h-3.5 w-3.5" /> Signaler tout
+                      <Flag className="h-3.5 w-3.5" /> {t("excel.report_all")}
                     </Button>
                   )}
                   <Button
@@ -716,7 +715,7 @@ export default function ExcelPastePage() {
                     onClick={copyResults}
                     className="gap-1"
                   >
-                    <Copy className="h-3.5 w-3.5" /> Copier
+                    <Copy className="h-3.5 w-3.5" /> {t("excel.copy")}
                   </Button>
                   <Button
                     variant="outline"
@@ -724,7 +723,7 @@ export default function ExcelPastePage() {
                     onClick={exportResults}
                     className="gap-1"
                   >
-                    <Download className="h-3.5 w-3.5" /> Excel
+                    <Download className="h-3.5 w-3.5" /> {t("excel.download_excel")}
                   </Button>
                   <Button
                     variant="outline"
@@ -732,7 +731,7 @@ export default function ExcelPastePage() {
                     onClick={reset}
                     className="gap-1"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" /> Remise à zéro
+                    <RotateCcw className="h-3.5 w-3.5" /> {t("excel.reset")}
                   </Button>
                 </div>
               </div>
@@ -742,22 +741,22 @@ export default function ExcelPastePage() {
                   <thead className="bg-muted sticky top-0">
                     <tr>
                       <th className="text-left p-3 font-medium text-muted-foreground">
-                        Nom original
+                        {t("excel.col_original")}
                       </th>
                       <th className="text-left p-3 font-medium text-muted-foreground">
-                        Nom proposé
+                        {t("excel.col_proposed")}
                       </th>
                       <th className="text-left p-3 font-medium text-muted-foreground">
-                        Statut
+                        {t("excel.col_status")}
                       </th>
                       <th className="text-left p-3 font-medium text-muted-foreground">
-                        Confiance
+                        {t("excel.col_confidence")}
                       </th>
                       <th className="text-left p-3 font-medium text-muted-foreground">
-                        Détail
+                        {t("excel.col_detail")}
                       </th>
                       <th className="text-left p-3 font-medium text-muted-foreground">
-                        Actions
+                        {t("excel.col_actions")}
                       </th>
                     </tr>
                   </thead>
@@ -793,7 +792,7 @@ export default function ExcelPastePage() {
                           <span
                             className={`inline-flex items-center gap-1.5 ${statusBadge[r.status]}`}
                           >
-                            {statusIcon[r.status]} {statusLabel[r.status]}
+                            {statusIcon[r.status]} {t(`excel.summary_${statusLabel[r.status]}`)}
                           </span>
                         </td>
                         <td className="p-3">
@@ -843,11 +842,11 @@ export default function ExcelPastePage() {
                                   )
                                 );
                                 toast.success(
-                                  `${unknowns.length} mot(s) signalé(s)`
+                                  t("excel.toast_reported_all").replace("{count}", unknowns.length.toString())
                                 );
                               }}
                             >
-                              <Flag className="h-3 w-3" /> Signaler
+                              <Flag className="h-3 w-3" /> {t("analysis.report")}
                             </Button>
                           )}
                         </td>
@@ -858,11 +857,10 @@ export default function ExcelPastePage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-2">
               <Button variant="outline" onClick={reset} className="gap-2">
                 <RotateCcw className="h-4 w-4" />
-                Nouveau collage
+                {t("excel.reset")}
               </Button>
               <Button
                 variant="outline"
@@ -870,7 +868,7 @@ export default function ExcelPastePage() {
                 className="gap-2"
               >
                 <Columns3 className="h-4 w-4" />
-                Modifier la sélection
+                {t("excel.step_select")}
               </Button>
             </div>
           </motion.div>

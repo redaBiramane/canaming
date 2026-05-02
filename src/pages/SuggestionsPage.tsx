@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useI18nStore } from "@/lib/i18n";
 
 interface Suggestion {
   id: string;
@@ -21,6 +22,7 @@ interface Suggestion {
 
 export default function SuggestionsPage() {
   const { user, role } = useAuth();
+  const { t } = useI18nStore();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -69,9 +71,9 @@ export default function SuggestionsPage() {
 
     if (error) {
       console.error("Insert error:", error);
-      toast.error(`Erreur (${error.code}): ${error.message}`);
+      toast.error(t("admin.toast_error") + ` (${error.code}): ${error.message}`);
     } else {
-      toast.success("Suggestion envoyée avec succès !");
+      toast.success(t("admin.suggestion_sent"));
       setIsDialogOpen(false);
       setTitre("");
       setDescription("");
@@ -105,12 +107,12 @@ export default function SuggestionsPage() {
 
     if (error) {
       console.error("Vote error:", error);
-      toast.error(`Erreur (${error.code}): ${error.message}`);
+      toast.error(t("admin.toast_error") + ` (${error.code}): ${error.message}`);
     } else if (!data || data.length === 0) {
-      toast.error("Le vote n'a pas été enregistré. Problème de permissions (RLS).");
+      toast.error(t("admin.toast_error"));
     } else {
       setSuggestions(suggestions.map(s => s.id === id ? { ...s, votes: currentVotes + 1 } : s));
-      toast.success("Vote pris en compte !");
+      toast.success(t("admin.toast_saved"));
     }
   };
 
@@ -122,19 +124,19 @@ export default function SuggestionsPage() {
       .eq('id', id);
 
     if (error) {
-      toast.error("Erreur de mise à jour");
+      toast.error(t("admin.toast_error"));
     } else {
       setSuggestions(suggestions.map(s => s.id === id ? { ...s, statut: newStatus } : s));
-      toast.success("Statut mis à jour");
+      toast.success(t("admin.toast_saved"));
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'nouveau': return <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1"><Lightbulb className="w-3 h-3" /> Nouveau</span>;
-      case 'en_cours': return <span className="bg-warning/10 text-warning-foreground px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1"><Clock className="w-3 h-3" /> En cours</span>;
-      case 'accepte': return <span className="bg-success/10 text-success px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Accepté</span>;
-      case 'refuse': return <span className="bg-destructive/10 text-destructive px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1"><XCircle className="w-3 h-3" /> Refusé</span>;
+      case 'nouveau': return <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1"><Lightbulb className="w-3 h-3" /> {t("admin.status_new")}</span>;
+      case 'en_cours': return <span className="bg-warning/10 text-warning-foreground px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1"><Clock className="w-3 h-3" /> {t("admin.status_in_progress")}</span>;
+      case 'accepte': return <span className="bg-success/10 text-success px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {t("admin.status_accepted")}</span>;
+      case 'refuse': return <span className="bg-destructive/10 text-destructive px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1"><XCircle className="w-3 h-3" /> {t("admin.status_rejected")}</span>;
       default: return null;
     }
   };
@@ -143,42 +145,42 @@ export default function SuggestionsPage() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Boîte à idées</h1>
-          <p className="text-muted-foreground mt-1">Proposez et votez pour de nouvelles fonctionnalités.</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("admin.suggestions_title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("admin.suggestions_desc")}</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2" disabled={tableMissing}>
-              <Plus className="w-4 h-4" /> Proposer une idée
+              <Plus className="w-4 h-4" /> {t("admin.propose_idea")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Nouvelle suggestion</DialogTitle>
+              <DialogTitle>{t("admin.new_suggestion")}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Titre de l'idée</label>
+                <label className="text-sm font-medium">{t("admin.idea_title")}</label>
                 <Input 
                   value={titre} 
                   onChange={e => setTitre(e.target.value)} 
-                  placeholder="Ex: Mode sombre automatique"
+                  placeholder={t("admin.idea_placeholder")}
                   maxLength={100}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Description détaillée</label>
+                <label className="text-sm font-medium">{t("admin.idea_desc")}</label>
                 <Textarea 
                   value={description} 
                   onChange={e => setDescription(e.target.value)} 
-                  placeholder="Expliquez votre besoin..."
+                  placeholder={t("admin.idea_desc_placeholder")}
                   className="h-32 resize-none"
                   required
                 />
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? "Envoi..." : "Soumettre la suggestion"}
+                {submitting ? "..." : t("admin.submit_suggestion")}
               </Button>
             </form>
           </DialogContent>
@@ -216,18 +218,18 @@ CREATE POLICY "Les admins peuvent tout faire" ON suggestions FOR ALL USING (
       )}
 
       {loading ? (
-        <div className="text-center py-12 text-muted-foreground">Chargement...</div>
+        <div className="text-center py-12 text-muted-foreground">{t("dashboard.no_data") || "..."}</div>
       ) : tableMissing && role !== 'admin' ? (
         <div className="text-center py-12 bg-card border rounded-xl">
           <Lightbulb className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="text-lg font-medium">Bientôt disponible</h3>
-          <p className="text-muted-foreground text-sm mt-1">L'administrateur est en train d'installer cette fonctionnalité.</p>
+          <h3 className="text-lg font-medium">{t("admin.coming_soon")}</h3>
+          <p className="text-muted-foreground text-sm mt-1">{t("admin.setup_in_progress")}</p>
         </div>
       ) : suggestions.length === 0 && !tableMissing ? (
         <div className="text-center py-12 bg-card border rounded-xl">
           <Lightbulb className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="text-lg font-medium">Aucune idée pour le moment</h3>
-          <p className="text-muted-foreground text-sm mt-1">Soyez le premier à proposer une évolution !</p>
+          <h3 className="text-lg font-medium">{t("admin.no_ideas")}</h3>
+          <p className="text-muted-foreground text-sm mt-1">{t("admin.be_first")}</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -259,7 +261,7 @@ CREATE POLICY "Les admins peuvent tout faire" ON suggestions FOR ALL USING (
                       <div>
                         <h3 className="font-semibold text-lg text-foreground">{suggestion.titre}</h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Proposé par {suggestion.auteur} le {new Date(suggestion.created_at).toLocaleDateString('fr-FR')}
+                          {t("admin.proposed_by").replace("{author}", suggestion.auteur)} {new Date(suggestion.created_at).toLocaleDateString('fr-FR')}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -272,10 +274,10 @@ CREATE POLICY "Les admins peuvent tout faire" ON suggestions FOR ALL USING (
                             value={suggestion.statut}
                             onChange={(e) => updateStatus(suggestion.id, e.target.value as any)}
                           >
-                            <option value="nouveau">Nouveau</option>
-                            <option value="en_cours">En cours</option>
-                            <option value="accepte">Accepté</option>
-                            <option value="refuse">Refusé</option>
+                            <option value="nouveau">{t("admin.status_new")}</option>
+                            <option value="en_cours">{t("admin.status_in_progress")}</option>
+                            <option value="accepte">{t("admin.status_accepted")}</option>
+                            <option value="refuse">{t("admin.status_rejected")}</option>
                           </select>
                         )}
                       </div>

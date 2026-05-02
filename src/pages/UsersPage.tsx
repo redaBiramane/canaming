@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useI18nStore } from "@/lib/i18n";
 
 interface UserWithRole {
   user_id: string;
@@ -17,6 +18,7 @@ interface UserWithRole {
 export default function UsersPage() {
   const { user, role } = useAuth();
   const isAdmin = role === "admin";
+  const { t } = useI18nStore();
   const [usersWithRoles, setUsersWithRoles] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -41,16 +43,16 @@ export default function UsersPage() {
   const toggleRole = async (userId: string, currentRole: "admin" | "user") => {
     const newRole = currentRole === "admin" ? "user" : "admin";
     if (userId === user?.id && newRole === "user") {
-      if (!confirm("Vous allez perdre vos droits admin. Continuer ?")) return;
+      if (!confirm(t("admin.revoke_admin_confirm"))) return;
     }
     const { error } = await supabase
       .from("user_roles")
       .update({ role: newRole })
       .eq("user_id", userId);
     if (error) {
-      toast.error("Erreur : " + error.message);
+      toast.error(t("admin.toast_error") + " : " + error.message);
     } else {
-      toast.success(`Rôle changé en ${newRole}`);
+      toast.success(t("admin.role_changed").replace("{role}", newRole));
       fetchUsers();
     }
   };
@@ -58,7 +60,7 @@ export default function UsersPage() {
   if (!isAdmin) {
     return (
       <div className="max-w-2xl mx-auto text-center py-12">
-        <p className="text-muted-foreground">Accès réservé aux administrateurs.</p>
+        <p className="text-muted-foreground">{t("admin.admin_only")}</p>
       </div>
     );
   }
@@ -68,12 +70,12 @@ export default function UsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Users className="h-6 w-6" /> Gestion des utilisateurs
+            <Users className="h-6 w-6" /> {t("admin.users_title")}
           </h1>
-          <p className="text-muted-foreground mt-1">{usersWithRoles.length} utilisateurs inscrits</p>
+          <p className="text-muted-foreground mt-1">{usersWithRoles.length} {t("admin.users_desc")}</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loading}>
-          Rafraîchir
+          {t("admin.refresh")}
         </Button>
       </div>
 
@@ -82,10 +84,10 @@ export default function UsersPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted">
               <tr>
-                <th className="text-left p-3 font-medium text-muted-foreground">Utilisateur</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("dashboard.user_col") || "Utilisateur"}</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Rôle</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_role")}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -103,7 +105,7 @@ export default function UsersPage() {
                   <td className="p-3">
                     <Badge variant={u.role === "admin" ? "default" : "secondary"} className="gap-1">
                       {u.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                      {u.role === "admin" ? "Admin" : "Utilisateur"}
+                      {u.role === "admin" ? "Admin" : t("dashboard.subtitle_user").split(' ')[0] || "User"}
                     </Badge>
                   </td>
                   <td className="p-3">
@@ -114,9 +116,9 @@ export default function UsersPage() {
                       className="gap-1"
                     >
                       {u.role === "admin" ? (
-                        <><User className="h-3.5 w-3.5" /> Rétrograder</>
+                        <><User className="h-3.5 w-3.5" /> {t("admin.demote")}</>
                       ) : (
-                        <><Shield className="h-3.5 w-3.5" /> Promouvoir admin</>
+                        <><Shield className="h-3.5 w-3.5" /> {t("admin.promote")}</>
                       )}
                     </Button>
                   </td>

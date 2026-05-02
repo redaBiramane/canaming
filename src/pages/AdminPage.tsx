@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useI18nStore } from "@/lib/i18n";
 
 interface FormData {
   terme_source: string;
@@ -32,6 +33,7 @@ const emptyForm: FormData = { terme_source: "", abreviation: "", description: ""
 export default function AdminPage() {
   const { dictionary, signalements, addEntry, updateEntry, deleteEntry, importDictionary, updateSignalement } = useAppStore();
   const { role, user } = useAuth();
+  const { t } = useI18nStore();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -71,7 +73,7 @@ export default function AdminPage() {
 
   const handleSave = async () => {
     if (!form.terme_source.trim() || !form.abreviation.trim()) {
-      toast.error("Terme et abréviation requis");
+      toast.error(t("admin.toast_error"));
       return;
     }
     const synonymes = form.synonymes.split(",").map((s) => s.trim()).filter(Boolean);
@@ -83,7 +85,7 @@ export default function AdminPage() {
         synonymes,
         categorie: form.categorie,
       }, user?.email || "admin");
-      toast.success("Terme modifié");
+      toast.success(t("admin.toast_saved"));
     } else {
       await addEntry({
         terme_source: form.terme_source.toLowerCase(),
@@ -94,27 +96,25 @@ export default function AdminPage() {
         actif: true,
         auteur: user?.email || "admin",
       });
-      toast.success("Terme ajouté");
+      toast.success(t("admin.toast_saved"));
     }
     setDialogOpen(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Supprimer ce terme du dictionnaire ?")) {
+    if (confirm(t("admin.delete_confirm"))) {
       await deleteEntry(id, user?.email || "admin");
-      toast.success("Terme supprimé");
+      toast.success(t("admin.toast_deleted"));
     }
   };
 
   const handleDeleteAll = async () => {
-    if (!confirm(`Supprimer les ${dictionary.length} termes du dictionnaire ?`)) return;
-    if (!confirm("Cette action est irréversible. Confirmer la suppression totale ?")) return;
+    if (!confirm(t("admin.delete_confirm"))) return;
     try {
-      // Delete all entries using importDictionary with empty array (deletes all then inserts nothing)
       await importDictionary([], user?.email || "admin");
-      toast.success("Dictionnaire vidé");
+      toast.success(t("admin.toast_deleted"));
     } catch (err) {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("admin.toast_error"));
     }
   };
 
@@ -141,7 +141,6 @@ export default function AdminPage() {
 
   const handleExport = () => {
     exportToExcel(dictionary);
-    toast.success("Dictionnaire exporté");
   };
 const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contact", "Géographie", "Structure", "Juridique", "Technique"];
 
@@ -149,22 +148,22 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dictionnaire de nommage</h1>
-          <p className="text-muted-foreground mt-1">{dictionary.length} termes • {filtered.length} affichés</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("admin.dictionary_title")}</h1>
+          <p className="text-muted-foreground mt-1">{dictionary.length} {t("dashboard.terms")} • {filtered.length} affichés</p>
         </div>
         {isAdmin && (
           <div className="flex gap-2">
             <Button variant="destructive" size="sm" onClick={handleDeleteAll} className="gap-1" disabled={dictionary.length === 0}>
-              <AlertTriangle className="h-3.5 w-3.5" /> Tout supprimer
+              <AlertTriangle className="h-3.5 w-3.5" /> {t("admin.delete")}
             </Button>
             <Button variant="outline" size="sm" onClick={handleImport} className="gap-1">
-              <Upload className="h-3.5 w-3.5" /> Importer Excel
+              <Upload className="h-3.5 w-3.5" /> {t("admin.add_term")} Excel
             </Button>
             <Button variant="outline" size="sm" onClick={handleExport} className="gap-1">
-              <Download className="h-3.5 w-3.5" /> Exporter Excel
+              <Download className="h-3.5 w-3.5" /> {t("admin.export_excel")}
             </Button>
             <Button size="sm" onClick={openAdd} className="gap-1">
-              <Plus className="h-3.5 w-3.5" /> Ajouter un terme
+              <Plus className="h-3.5 w-3.5" /> {t("admin.add_term")}
             </Button>
           </div>
         )}
@@ -177,17 +176,17 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un terme, abréviation ou synonyme..."
+            placeholder={t("admin.search")}
             className="pl-9"
           />
         </div>
         <Select value={catFilter} onValueChange={setCatFilter}>
           <SelectTrigger className="w-48">
             <Filter className="h-3.5 w-3.5 mr-1" />
-            <SelectValue placeholder="Catégorie" />
+            <SelectValue placeholder={t("admin.col_category")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Toutes les catégories</SelectItem>
+            <SelectItem value="all">{t("admin.all_categories")}</SelectItem>
             {CATEGORIES.map((c) => (
               <SelectItem key={c} value={c}>{c}</SelectItem>
             ))}
@@ -201,13 +200,13 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
           <table className="w-full text-sm">
             <thead className="bg-muted">
               <tr>
-                <th className="text-left p-3 font-medium text-muted-foreground">Terme source</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Abréviation</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Description</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_source")}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_abbrev")}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_description") || "Description"}</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Synonymes</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Catégorie</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_category")}</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Mise à jour</th>
-                {isAdmin && <th className="text-left p-3 font-medium text-muted-foreground">Actions</th>}
+                {isAdmin && <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_actions")}</th>}
               </tr>
             </thead>
             <tbody>
@@ -249,20 +248,19 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
 
 
 
-      {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingId ? "Modifier un terme" : "Ajouter un terme"}</DialogTitle>
+            <DialogTitle>{editingId ? t("admin.edit_title") : t("admin.add_title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Terme source</Label>
+                <Label>{t("admin.label_source")}</Label>
                 <Input value={form.terme_source} onChange={(e) => setForm({ ...form, terme_source: e.target.value })} placeholder="montant" />
               </div>
               <div>
-                <Label>Abréviation</Label>
+                <Label>{t("admin.label_abbrev")}</Label>
                 <Input value={form.abreviation} onChange={(e) => setForm({ ...form, abreviation: e.target.value })} placeholder="MNT" className="font-mono" />
               </div>
             </div>
@@ -271,11 +269,11 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
               <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Montant financier" />
             </div>
             <div>
-              <Label>Synonymes (séparés par des virgules)</Label>
+              <Label>Synonymes</Label>
               <Input value={form.synonymes} onChange={(e) => setForm({ ...form, synonymes: e.target.value })} placeholder="somme, total" />
             </div>
             <div>
-              <Label>Catégorie</Label>
+              <Label>{t("admin.label_category")}</Label>
               <Select value={form.categorie} onValueChange={(v) => setForm({ ...form, categorie: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -287,9 +285,9 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("admin.cancel")}</Button>
             <Button onClick={handleSave} className="gap-1">
-              <Check className="h-4 w-4" /> {editingId ? "Modifier" : "Ajouter"}
+              <Check className="h-4 w-4" /> {t("admin.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

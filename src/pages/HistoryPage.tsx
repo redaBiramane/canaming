@@ -4,6 +4,7 @@ import { useAppStore } from "@/hooks/useStore";
 import { useAuth } from "@/hooks/useAuth";
 import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, Eye, X, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useI18nStore } from "@/lib/i18n";
 
 const actionIcons: Record<string, JSX.Element> = {
   ajout: <Plus className="h-3.5 w-3.5 text-success" />,
@@ -38,6 +39,7 @@ const actionBadge: Record<string, string> = {
 export default function HistoryPage() {
   const { history, deleteHistoryEntry } = useAppStore();
   const { user, role } = useAuth();
+  const { t } = useI18nStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filteredHistory = useMemo(() => {
@@ -50,24 +52,24 @@ export default function HistoryPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Historique des modifications</h1>
-        <p className="text-muted-foreground mt-1">{filteredHistory.length} entrée(s) dans l'historique</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("admin.history_title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("admin.history_desc")}</p>
       </div>
 
       {filteredHistory.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="ca-card p-12 text-center">
           <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Aucune modification enregistrée pour le moment.</p>
+          <p className="text-muted-foreground">{t("admin.no_history")}</p>
         </motion.div>
       ) : (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted">
               <tr>
-                <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Action</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_date") || "Date"}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_action") || "Action"}</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Terme</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Détail</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_details") || "Détail"}</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">Auteur</th>
                 <th className="text-left p-3 font-medium text-muted-foreground w-12"></th>
               </tr>
@@ -137,13 +139,13 @@ export default function HistoryPage() {
               <table className="w-full text-sm">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Colonne originale</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("excel.col_original")}</th>
                     {selectedEntry.details.some((d) => d.type) && (
                       <th className="text-left p-3 font-medium text-muted-foreground">Type</th>
                     )}
-                    <th className="text-left p-3 font-medium text-muted-foreground">Colonne transformée</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Statut</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Confiance</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("excel.col_proposed")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("excel.col_status")}</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">{t("excel.col_confidence")}</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Mapping mot par mot</th>
                   </tr>
                 </thead>
