@@ -81,13 +81,17 @@ export default function SuggestionsPage() {
   };
 
   const handleVote = async (id: string, currentVotes: number) => {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('suggestions')
       .update({ votes: currentVotes + 1 })
-      .eq('id', id);
+      .eq('id', id)
+      .select();
 
     if (error) {
-      toast.error("Erreur lors du vote");
+      console.error("Vote error:", error);
+      toast.error(`Erreur (${error.code}): ${error.message}`);
+    } else if (!data || data.length === 0) {
+      toast.error("Le vote n'a pas été enregistré. Problème de permissions (RLS).");
     } else {
       setSuggestions(suggestions.map(s => s.id === id ? { ...s, votes: currentVotes + 1 } : s));
       toast.success("Vote pris en compte !");
@@ -187,6 +191,7 @@ ALTER TABLE suggestions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Tout le monde peut voir les suggestions" ON suggestions FOR SELECT USING (true);
 CREATE POLICY "Les utilisateurs connectés peuvent créer" ON suggestions FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Les utilisateurs peuvent voter" ON suggestions FOR UPDATE USING (auth.role() = 'authenticated');
 CREATE POLICY "Les admins peuvent tout faire" ON suggestions FOR ALL USING (
   EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = auth.uid() AND user_roles.role = 'admin')
 );`}
