@@ -76,6 +76,22 @@ export default function SuggestionsPage() {
       setTitre("");
       setDescription("");
       fetchSuggestions();
+
+      // Notify all admins about the new suggestion
+      const { data: adminIds } = await supabase.rpc("get_admin_user_ids");
+      if (adminIds && adminIds.length > 0) {
+        const notifications = (adminIds as string[])
+          .filter((id) => id !== user?.id) // Don't notify yourself
+          .map((id) => ({
+            user_id: id,
+            title: "Nouvelle idée 💡",
+            message: `L'idée "${titre.trim()}" a été proposée par ${user?.email || 'Anonyme'}.`,
+            type: "info",
+          }));
+        if (notifications.length > 0) {
+          await supabase.from("notifications").insert(notifications);
+        }
+      }
     }
     setSubmitting(false);
   };
