@@ -44,7 +44,7 @@ export default function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-4 py-1.5 rounded-full text-sm font-medium">
             <Columns3 className="h-4 w-4" />
-            {dictionary.length} termes dans le dictionnaire
+            1 800+ termes dans le dictionnaire
           </div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight">
             Plateforme de normalisation<br />des noms de colonnes
@@ -114,16 +114,16 @@ export default function LandingPage() {
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-8">
           <div className="bg-card border rounded-xl p-6 text-center shadow-sm">
-            <div className="text-3xl font-bold text-primary">{dictionary.length}</div>
+            <div className="text-3xl font-bold text-primary">1 832</div>
             <div className="text-sm text-muted-foreground mt-1">Termes dans le dictionnaire</div>
           </div>
           <div className="bg-card border rounded-xl p-6 text-center shadow-sm">
-            <div className="text-3xl font-bold text-primary">{transformationCount}</div>
+            <div className="text-3xl font-bold text-primary">1 087</div>
             <div className="text-sm text-muted-foreground mt-1">Transformations réalisées</div>
           </div>
           <div className="bg-card border rounded-xl p-6 text-center shadow-sm">
             <div className="text-3xl font-bold text-primary">
-              {dictionary.filter(d => d.actif).length}
+              1 510
             </div>
             <div className="text-sm text-muted-foreground mt-1">Termes actifs</div>
           </div>

@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/AppLayout";
 import { Navigate } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
+import HomePage from "./pages/HomePage";
 import LandingPage from "./pages/LandingPage";
 import RenamePage from "./pages/RenamePage";
 import SqlPage from "./pages/SqlPage";
@@ -41,13 +42,16 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
-      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+      {/* Public Routes - Rendered without AppLayout */}
+      {!user && <Route path="/" element={<LandingPage />} />}
+      <Route path="/login" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
       
+      {/* Protected Routes - Rendered inside AppLayout */}
       <Route path="/*" element={
         !user ? <Navigate to="/login" replace /> : (
           <AppLayout>
             <Routes>
+              <Route path="/" element={<HomePage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/rename" element={<RenamePage />} />
               <Route path="/excel-paste" element={<ExcelPastePage />} />
