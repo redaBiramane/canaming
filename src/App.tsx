@@ -11,6 +11,7 @@ import LandingPage from "./pages/LandingPage";
 import RenamePage from "./pages/RenamePage";
 import SqlPage from "./pages/SqlPage";
 import DbtPage from "./pages/DbtPage";
+import SasPage from "./pages/SasPage";
 import IaNamingPage from "./pages/IaNamingPage";
 import AdminPage from "./pages/AdminPage";
 import HistoryPage from "./pages/HistoryPage";
@@ -57,6 +58,7 @@ function AppRoutes() {
               <Route path="/excel-paste" element={<ExcelPastePage />} />
               <Route path="/sql" element={<SqlPage />} />
               <Route path="/dbt" element={<DbtPage />} />
+              <Route path="/sas" element={<SasPage />} />
               <Route path="/ia-naming" element={<IaNamingPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/signalements" element={<SignalementsPage />} />

@@ -1,14 +1,15 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { TextCursorInput, Code2, BookOpen, ArrowRight, Columns3, FileDown, Eye } from "lucide-react";
+import { TextCursorInput, Code2, BookOpen, ArrowRight, Columns3, FileDown, Eye, Search, Database, FileCode2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/hooks/useStore";
+import { useAuth } from "@/hooks/useAuth";
 
 const features = [
   { icon: TextCursorInput, title: "Saisie manuelle", desc: "Renommez vos colonnes une par une" },
-  { icon: Code2, title: "Script SQL", desc: "Collez un CREATE TABLE complet" },
-  { icon: Eye, title: "Prévisualisation", desc: "Comparez avant / après en temps réel" },
-  { icon: FileDown, title: "Export SQL", desc: "Téléchargez le script transformé" },
+  { icon: Code2, title: "Script SQL", desc: "Analyse des CREATE TABLE et SELECT" },
+  { icon: Database, title: "Modèle DBT", desc: "Transformez vos modèles avec Jinja" },
+  { icon: FileCode2, title: "Script SAS", desc: "Standardisez vos étapes DATA et PROC SQL" },
 ];
 
 export default function HomePage() {

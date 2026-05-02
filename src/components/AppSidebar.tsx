@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, TextCursorInput, Code2, BookOpen, Database, Sparkles,
-  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp, ClipboardPaste, Ban, Search
+  History, Settings, ChevronLeft, Home, BarChart3, LogOut, Flag, FileText, Shield, Users, ChevronUp, ClipboardPaste, Ban, Search, FileCode2
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -25,6 +25,7 @@ const mainItems = [
   { title: "Collage Excel", url: "/excel-paste", icon: ClipboardPaste },
   { title: "Analyse SQL", url: "/sql", icon: Code2 },
   { title: "Analyse DBT", url: "/dbt", icon: Database },
+  { title: "Analyse SAS", url: "/sas", icon: FileCode2 },
   { title: "IA Naming", url: "/ia-naming", icon: Sparkles },
 ];
 
