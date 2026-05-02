@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/AppLayout";
 import { Navigate } from "react-router-dom";
@@ -18,6 +19,7 @@ import HistoryPage from "./pages/HistoryPage";
 import SettingsPage from "./pages/SettingsPage";
 import SignalementsPage from "./pages/SignalementsPage";
 import UsersPage from "./pages/UsersPage";
+import SuggestionsPage from "./pages/SuggestionsPage";
 import DashboardPage from "./pages/DashboardPage";
 import DocumentationPage from "./pages/DocumentationPage";
 import ExcelPastePage from "./pages/ExcelPastePage";
@@ -62,6 +64,7 @@ function AppRoutes() {
               <Route path="/ia-naming" element={<IaNamingPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/signalements" element={<SignalementsPage />} />
+              <Route path="/suggestions" element={<SuggestionsPage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/users" element={<UsersPage />} />
@@ -78,16 +81,18 @@ function AppRoutes() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider defaultTheme="system" storageKey="ca-naming-theme">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
