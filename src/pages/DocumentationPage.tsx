@@ -8,7 +8,8 @@ import {
   TextCursorInput, Code2, BookOpen, Flag, History, Settings, BarChart3,
   Upload, Download, Search, Plus, Pencil, Trash2, CheckCircle2, XCircle,
   RotateCcw, FileDown, ShieldCheck, Users, ArrowRight, Home, LogIn,
-  Workflow, Filter, SearchCode, Replace, AlertTriangle
+  Workflow, Filter, SearchCode, Replace, AlertTriangle, Plug, Terminal,
+  FileSpreadsheet, Braces, Globe, ExternalLink, Copy
 } from "lucide-react";
 import { useI18nStore } from "@/lib/i18n";
 
@@ -317,6 +318,218 @@ function AdminGuide() {
   );
 }
 
+function CodeBlock({ code, lang: language }: { code: string; lang?: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  return (
+    <div className="relative group">
+      <pre className="bg-muted/80 border rounded-lg p-4 text-xs font-mono overflow-x-auto text-foreground leading-relaxed"><code>{code}</code></pre>
+      <button onClick={copy} className="absolute top-2 right-2 p-1.5 rounded-md bg-background/80 border opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted">
+        {copied ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
+      </button>
+    </div>
+  );
+}
+
+function ApiGuide() {
+  const { t } = useI18nStore();
+  const API_URL = "https://fieldmapper.space/api/transform";
+  return (
+    <div className="space-y-6">
+      <Section icon={Plug} title={t("docs.api_intro_title")}>
+        <p>{t("docs.api_intro_desc")}</p>
+        <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+          <p className="text-xs font-medium text-primary mb-1">{t("docs.api_no_auth")}</p>
+        </div>
+      </Section>
+
+      <Section icon={Globe} title={t("docs.api_endpoint_title")}>
+        <div className="space-y-3">
+          <div>
+            <p className="font-medium text-foreground mb-1">{t("docs.api_endpoint_url")}</p>
+            <code className="bg-muted px-3 py-1.5 rounded text-sm font-mono text-primary">{API_URL}</code>
+          </div>
+          <div>
+            <p className="font-medium text-foreground mb-2">{t("docs.api_methods")}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="border rounded-md p-3 bg-muted/20">
+                <Badge className="mb-2">GET</Badge>
+                <p className="text-xs">{t("docs.api_get_desc")}</p>
+                <CodeBlock code={`GET ${API_URL}?keyword=montant_salaire`} />
+              </div>
+              <div className="border rounded-md p-3 bg-muted/20">
+                <Badge className="mb-2">POST</Badge>
+                <p className="text-xs">{t("docs.api_post_desc")}</p>
+                <CodeBlock code={`POST ${API_URL}\n{"keyword": "montant_salaire"}`} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section icon={Braces} title={t("docs.api_response_title")}>
+        <p>{t("docs.api_response_desc")}</p>
+        <CodeBlock code={`{
+  "original": "montant_salaire",
+  "transformed": "MNT_SAL",
+  "details": [
+    { "original": "montant", "transformed": "MNT",
+      "status": "ok", "match_type": "exact",
+      "meaning": "montant" },
+    { "original": "salaire", "transformed": "SAL",
+      "status": "ok", "match_type": "exact",
+      "meaning": "salaire" }
+  ],
+  "dictionary_size": 1523,
+  "timestamp": "2026-05-03T17:29:41.344Z"
+}`} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+          {[
+            ["original", t("docs.api_field_original")],
+            ["transformed", t("docs.api_field_transformed")],
+            ["details[]", t("docs.api_field_details")],
+            ["dictionary_size", t("docs.api_field_dict_size")],
+          ].map(([field, desc]) => (
+            <div key={field} className="flex items-start gap-2 p-2 rounded bg-muted/30 border">
+              <code className="text-xs font-mono text-primary flex-shrink-0 mt-0.5">{field}</code>
+              <span className="text-xs">{desc}</span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section icon={FileSpreadsheet} title={t("docs.api_excel_title")}>
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-semibold text-foreground mb-1">{t("docs.api_excel_vba_title")}</h4>
+            <p className="mb-2">{t("docs.api_excel_vba_desc")}</p>
+            <CodeBlock lang="vba" code={`Function TransformColumn(keyword As String) As String
+    Dim http As Object
+    Set http = CreateObject("MSXML2.XMLHTTP")
+    Dim url As String
+    url = "${API_URL}?keyword=" _
+        & WorksheetFunction.EncodeURL(keyword)
+    http.Open "GET", url, False
+    http.send
+    If http.Status = 200 Then
+        Dim resp As String: resp = http.responseText
+        Dim s As Long, e As Long
+        s = InStr(resp, """transformed"":""") _
+            + Len("""transformed"":""")
+        e = InStr(s, resp, """")
+        TransformColumn = Mid(resp, s, e - s)
+    Else
+        TransformColumn = "#ERROR"
+    End If
+End Function`} />
+            <div className="mt-2 p-2.5 bg-muted/50 rounded-lg border text-xs">
+              <span className="font-medium text-foreground">💡</span> =TransformColumn(A1)
+            </div>
+          </div>
+          <div>
+            <h4 className="font-semibold text-foreground mb-1">{t("docs.api_excel_pq_title")}</h4>
+            <p className="mb-2">{t("docs.api_excel_pq_desc")}</p>
+            <CodeBlock lang="m" code={`(keyword as text) =>
+let
+    url = "${API_URL}?keyword="
+        & Uri.EscapeDataString(keyword),
+    source = Json.Document(Web.Contents(url)),
+    result = source[transformed]
+in
+    result`} />
+            <p className="mt-2 text-xs">{t("docs.api_excel_pq_usage")}</p>
+          </div>
+        </div>
+      </Section>
+
+      <Section icon={Terminal} title={t("docs.api_python_title")}>
+        <p>{t("docs.api_python_desc")}</p>
+        <CodeBlock lang="python" code={`import requests
+
+def transform(keyword: str) -> dict:
+    r = requests.get(
+        "${API_URL}",
+        params={"keyword": keyword}, timeout=5)
+    return r.json()
+
+result = transform("montant_salaire_brut")
+print(result["transformed"])`} />
+        <p className="mt-3 font-medium text-foreground">{t("docs.api_python_batch_desc")}</p>
+        <CodeBlock lang="python" code={`colonnes = ["montant_salaire", "date_naissance",
+            "code_client", "numero_compte"]
+
+for col in colonnes:
+    r = transform(col)
+    print(f"{r['original']} → {r['transformed']}")`} />
+      </Section>
+
+      <Section icon={Terminal} title={t("docs.api_curl_title")}>
+        <p>{t("docs.api_curl_desc")}</p>
+        <CodeBlock lang="bash" code={`# GET
+curl "${API_URL}?keyword=montant_salaire"
+
+# POST
+curl -X POST ${API_URL} \\
+  -H "Content-Type: application/json" \\
+  -d '{"keyword": "montant_salaire"}'`} />
+      </Section>
+
+      <Section icon={Code2} title={t("docs.api_js_title")}>
+        <p>{t("docs.api_js_desc")}</p>
+        <CodeBlock lang="javascript" code={`async function transform(keyword) {
+  const url = "${API_URL}?keyword="
+    + encodeURIComponent(keyword);
+  const res = await fetch(url);
+  return res.json();
+}
+
+const r = await transform("montant_salaire");
+console.log(r.transformed);`} />
+      </Section>
+
+      <Section icon={BarChart3} title={t("docs.api_powerbi_title")}>
+        <p>{t("docs.api_powerbi_desc")}</p>
+        <CodeBlock lang="m" code={`let
+    keyword = "montant_salaire",
+    url = "${API_URL}?keyword=" & keyword,
+    source = Json.Document(Web.Contents(url)),
+    result = source[transformed]
+in
+    result`} />
+      </Section>
+
+      <Section icon={CheckCircle2} title={t("docs.api_tools_title")}>
+        <div className="overflow-hidden rounded-lg border mt-1">
+          <table className="w-full text-sm">
+            <thead className="bg-muted">
+              <tr>
+                <th className="text-left p-3 font-medium">Tool</th>
+                <th className="text-left p-3 font-medium">Use case</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Postman", t("docs.api_tool_postman")],
+                ["Excel VBA", t("docs.api_tool_vba")],
+                ["Excel Power Query", t("docs.api_tool_pq")],
+                ["Python", t("docs.api_tool_python")],
+                ["cURL", t("docs.api_tool_curl")],
+                ["JavaScript", t("docs.api_tool_js")],
+                ["Power BI", t("docs.api_tool_powerbi")],
+              ].map(([tool, desc]) => (
+                <tr key={tool} className="border-t">
+                  <td className="p-3 font-medium text-foreground">{tool}</td>
+                  <td className="p-3 text-muted-foreground">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Section>
+    </div>
+  );
+}
+
 export default function DocumentationPage() {
   const { role } = useAuth();
   const { t, lang } = useI18nStore();
@@ -330,24 +543,27 @@ export default function DocumentationPage() {
         <p className="text-muted-foreground mt-1">{t("docs.subtitle")}</p>
       </div>
 
-      {isAdmin ? (
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList>
-            <TabsTrigger value="user">{t("docs.tab_user")}</TabsTrigger>
-            <TabsTrigger value="admin">{t("docs.tab_admin")}</TabsTrigger>
-          </TabsList>
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList>
+          <TabsTrigger value="user">{t("docs.tab_user")}</TabsTrigger>
+          {isAdmin && <TabsTrigger value="admin">{t("docs.tab_admin")}</TabsTrigger>}
+          <TabsTrigger value="api">{t("docs.tab_api")}</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="user" className="mt-4">
-            <UserGuide />
-          </TabsContent>
+        <TabsContent value="user" className="mt-4">
+          <UserGuide />
+        </TabsContent>
 
+        {isAdmin && (
           <TabsContent value="admin" className="mt-4">
             <AdminGuide />
           </TabsContent>
-        </Tabs>
-      ) : (
-        <UserGuide />
-      )}
+        )}
+
+        <TabsContent value="api" className="mt-4">
+          <ApiGuide />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
