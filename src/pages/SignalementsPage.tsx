@@ -24,9 +24,9 @@ import { useI18nStore } from "@/lib/i18n";
 const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contact", "Géographie", "Structure", "Juridique", "Technique"];
 
 const statusConfig = {
-  en_attente: { label: "En attente", icon: Clock, className: "ca-badge-warning" },
-  traité: { label: "Traité", icon: CheckCircle2, className: "ca-badge-ok" },
-  rejeté: { label: "Rejeté", icon: XCircle, className: "ca-badge-error" },
+  en_attente: { labelKey: "dashboard.pending", icon: Clock, className: "ca-badge-warning" },
+  traité: { labelKey: "dashboard.processed", icon: CheckCircle2, className: "ca-badge-ok" },
+  rejeté: { labelKey: "dashboard.rejected", icon: XCircle, className: "ca-badge-error" },
 };
 
 interface FormData {
@@ -42,7 +42,7 @@ const emptyForm: FormData = { terme_source: "", abreviation: "", description: ""
 export default function SignalementsPage() {
   const { signalements, addEntry, updateSignalement } = useAppStore();
   const { role, user } = useAuth();
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -83,7 +83,7 @@ export default function SignalementsPage() {
 
   const handleSave = async () => {
     if (!form.terme_source.trim() || !form.abreviation.trim()) {
-      toast.error("Terme et abréviation requis");
+      toast.error(t("admin.term_abbrev_required"));
       return;
     }
     const synonymes = form.synonymes.split(",").map((s) => s.trim()).filter(Boolean);
@@ -109,14 +109,14 @@ export default function SignalementsPage() {
         if (profile?.user_id) {
           await supabase.from("notifications").insert({
             user_id: profile.user_id,
-            title: "Signalement traité ✅",
-            message: `Le mot "${sig.mot}" a été ajouté au dictionnaire (${form.abreviation.toUpperCase()}).`,
+            title: t("admin.signal_processed_title"),
+            message: t("admin.signal_processed_msg").replace("{word}", sig.mot).replace("{abbrev}", form.abreviation.toUpperCase()),
             type: "success",
           });
         }
       }
     }
-    toast.success(`"${form.terme_source}" ajouté au dictionnaire`);
+    toast.success(t("admin.added_to_dict").replace("{word}", form.terme_source));
     setDialogOpen(false);
     setCurrentSignalementId(null);
   };
@@ -134,8 +134,8 @@ export default function SignalementsPage() {
       if (profile?.user_id) {
         await supabase.from("notifications").insert({
           user_id: profile.user_id,
-          title: "Signalement rejeté",
-          message: `Le mot "${mot}" n'a pas été retenu pour le dictionnaire.`,
+          title: t("admin.signal_rejected_title"),
+          message: t("admin.signal_rejected_msg").replace("{word}", mot),
           type: "warning",
         });
       }
@@ -145,17 +145,17 @@ export default function SignalementsPage() {
 
   const exportSignalements = (format: "xlsx" | "csv") => {
     const data = filtered.map((s) => ({
-      Mot: s.mot,
-      Contexte: s.contexte,
-      "Signalé par": s.auteur,
-      Date: new Date(s.date).toLocaleDateString("fr-FR"),
-      Statut: statusConfig[s.statut]?.label || s.statut,
+      [t("admin.export_col_word")]: s.mot,
+      [t("admin.export_col_context")]: s.contexte,
+      [t("admin.export_col_reported_by")]: s.auteur,
+      [t("admin.export_col_date")]: new Date(s.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US'),
+      [t("admin.export_col_status")]: t(statusConfig[s.statut]?.labelKey) || s.statut,
     }));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Signalements");
     XLSX.writeFile(wb, `signalements.${format === "csv" ? "csv" : "xlsx"}`, { bookType: format === "csv" ? "csv" : "xlsx" });
-    toast.success(`Export ${format.toUpperCase()} téléchargé`);
+    toast.success(t("admin.export_downloaded").replace("{format}", format.toUpperCase()));
   };
 
   return (
@@ -206,7 +206,7 @@ export default function SignalementsPage() {
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-48">
             <Filter className="h-3.5 w-3.5 mr-1" />
-            <SelectValue placeholder="Statut" />
+            <SelectValue placeholder={t("admin.col_status")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("admin.all_categories")}</SelectItem>
@@ -228,9 +228,9 @@ export default function SignalementsPage() {
         {filtered.length === 0 ? (
           <div className="p-12 text-center">
             <Flag className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground font-medium">Aucun signalement</p>
+            <p className="text-muted-foreground font-medium">{t("admin.no_signals")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Les termes inconnus détectés lors des transformations apparaîtront ici
+              {t("admin.no_signals_desc")}
             </p>
           </div>
         ) : (
@@ -256,7 +256,7 @@ export default function SignalementsPage() {
                       <td className="p-3 text-muted-foreground font-mono text-xs">{s.contexte}</td>
                       <td className="p-3 text-foreground">{s.auteur}</td>
                       <td className="p-3 text-muted-foreground text-xs">
-                        {new Date(s.date).toLocaleDateString("fr-FR", {
+                        {new Date(s.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
@@ -267,7 +267,7 @@ export default function SignalementsPage() {
                       <td className="p-3">
                         <span className={`inline-flex items-center gap-1.5 ${config.className}`}>
                           <StatusIcon className="h-3.5 w-3.5" />
-                          {config.label}
+                          {t(config.labelKey)}
                         </span>
                       </td>
                       {isAdmin && (
@@ -323,7 +323,7 @@ export default function SignalementsPage() {
             </div>
             <div>
               <Label>{t("admin.col_description_label")}</Label>
-              <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description du terme" />
+              <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("admin.form_desc_placeholder")} />
             </div>
             <div>
               <Label>{t("admin.synonyms_hint")}</Label>

@@ -157,7 +157,7 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
               <AlertTriangle className="h-3.5 w-3.5" /> {t("admin.delete")}
             </Button>
             <Button variant="outline" size="sm" onClick={handleImport} className="gap-1">
-              <Upload className="h-3.5 w-3.5" /> {t("admin.add_term")} Excel
+              <Upload className="h-3.5 w-3.5" /> {t("admin.import_excel")}
             </Button>
             <Button variant="outline" size="sm" onClick={handleExport} className="gap-1">
               <Download className="h-3.5 w-3.5" /> {t("admin.export_excel")}
