@@ -270,8 +270,20 @@
     "toast_deleted": "Supprimé avec succès",
     "toast_error": "Une erreur est survenue",
     "toast_rejected": "Signalement rejeté",
-    "notification_new_suggestion_title": "Nouvelle idée 💡",
-    "notification_new_suggestion_message": "L'idée \"{title}\" a été proposée par {author}."
+    "promote": "Promouvoir",
+    "demote": "Rétrograder",
+    "refresh": "Actualiser",
+    "revoke_admin_confirm": "Êtes-vous sûr de vouloir révoquer vos propres droits admin ?",
+    "role_changed": "Rôle changé en {role}",
+    "admin_only": "Cette page est réservée aux administrateurs.",
+    "col_synonyms": "Synonymes",
+    "col_updated": "Mise à jour",
+    "col_description_label": "Description",
+    "displayed": "affichés",
+    "terms_imported": "termes importés",
+    "already_voted": "Vous avez déjà voté pour cette suggestion",
+    "synonyms_label": "Synonymes",
+    "synonyms_hint": "Synonymes (séparés par des virgules)"
   },
   "settings": {
     "title": "Paramètres",

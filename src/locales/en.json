@@ -270,8 +270,20 @@
     "toast_deleted": "Deleted successfully",
     "toast_error": "An error occurred",
     "toast_rejected": "Report rejected",
-    "notification_new_suggestion_title": "New idea 💡",
-    "notification_new_suggestion_message": "The idea \"{title}\" was proposed by {author}."
+    "promote": "Promote",
+    "demote": "Demote",
+    "refresh": "Refresh",
+    "revoke_admin_confirm": "Are you sure you want to revoke your own admin rights?",
+    "role_changed": "Role changed to {role}",
+    "admin_only": "This page is reserved for administrators.",
+    "col_synonyms": "Synonyms",
+    "col_updated": "Updated",
+    "col_description_label": "Description",
+    "displayed": "displayed",
+    "terms_imported": "terms imported",
+    "already_voted": "You have already voted for this suggestion",
+    "synonyms_label": "Synonyms",
+    "synonyms_hint": "Synonyms (separated by commas)"
   },
   "settings": {
     "title": "Settings",

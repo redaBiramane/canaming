@@ -18,7 +18,7 @@ interface UserWithRole {
 export default function UsersPage() {
   const { user, role } = useAuth();
   const isAdmin = role === "admin";
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   const [usersWithRoles, setUsersWithRoles] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(false);
 

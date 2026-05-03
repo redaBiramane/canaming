@@ -33,6 +33,23 @@ export default function SuggestionsPage() {
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Track voted suggestions to prevent duplicate votes
+  const [votedIds, setVotedIds] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem('ca-naming-voted-suggestions');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  const markAsVoted = (id: string) => {
+    const updated = new Set(votedIds);
+    updated.add(id);
+    setVotedIds(updated);
+    localStorage.setItem('ca-naming-voted-suggestions', JSON.stringify([...updated]));
+  };
+
   useEffect(() => {
     fetchSuggestions();
   }, []);
@@ -101,6 +118,12 @@ export default function SuggestionsPage() {
   };
 
   const handleVote = async (id: string, currentVotes: number) => {
+    // Prevent duplicate votes
+    if (votedIds.has(id)) {
+      toast.info(t("admin.already_voted"));
+      return;
+    }
+
     const { data, error } = await supabase
       .from('suggestions')
       .update({ votes: currentVotes + 1 })
@@ -114,6 +137,7 @@ export default function SuggestionsPage() {
       toast.error(t("admin.toast_error"));
     } else {
       setSuggestions(suggestions.map(s => s.id === id ? { ...s, votes: currentVotes + 1 } : s));
+      markAsVoted(id);
       toast.success(t("admin.toast_saved"));
     }
   };
@@ -247,10 +271,15 @@ CREATE POLICY "Les admins peuvent tout faire" ON suggestions FOR ALL USING (
                   {/* Vote column */}
                   <div className="flex flex-col items-center gap-2">
                     <Button 
-                      variant="outline" 
+                      variant={votedIds.has(suggestion.id) ? "default" : "outline"}
                       size="icon" 
-                      className="w-10 h-10 rounded-full hover:text-primary hover:border-primary transition-colors"
+                      className={`w-10 h-10 rounded-full transition-colors ${
+                        votedIds.has(suggestion.id)
+                          ? "bg-primary text-primary-foreground cursor-default"
+                          : "hover:text-primary hover:border-primary"
+                      }`}
                       onClick={() => handleVote(suggestion.id, suggestion.votes)}
+                      disabled={votedIds.has(suggestion.id)}
                     >
                       <ThumbsUp className="w-4 h-4" />
                     </Button>

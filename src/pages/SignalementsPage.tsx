@@ -322,15 +322,15 @@ export default function SignalementsPage() {
               </div>
             </div>
             <div>
-              <Label>Description</Label>
+              <Label>{t("admin.col_description_label")}</Label>
               <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description du terme" />
             </div>
             <div>
-              <Label>Synonymes (séparés par des virgules)</Label>
+              <Label>{t("admin.synonyms_hint")}</Label>
               <Input value={form.synonymes} onChange={(e) => setForm({ ...form, synonymes: e.target.value })} placeholder="syn1, syn2" />
             </div>
             <div>
-              <Label>Catégorie</Label>
+              <Label>{t("admin.label_category")}</Label>
               <Select value={form.categorie} onValueChange={(v) => setForm({ ...form, categorie: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>

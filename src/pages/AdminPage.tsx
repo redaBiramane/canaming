@@ -134,7 +134,7 @@ export default function AdminPage() {
         result.warnings.forEach((w) => toast.warning(w));
       }
       await importDictionary(result.entries, user?.email || "admin");
-      toast.success(`${result.entries.length} termes importés`);
+      toast.success(`${result.entries.length} ${t("admin.terms_imported")}`);
     };
     input.click();
   };
@@ -149,7 +149,7 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t("admin.dictionary_title")}</h1>
-          <p className="text-muted-foreground mt-1">{dictionary.length} {t("dashboard.terms")} • {filtered.length} affichés</p>
+          <p className="text-muted-foreground mt-1">{dictionary.length} {t("dashboard.terms")} • {filtered.length} {t("admin.displayed")}</p>
         </div>
         {isAdmin && (
           <div className="flex gap-2">
@@ -202,10 +202,10 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
               <tr>
                 <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_source")}</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_abbrev")}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_description") || "Description"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Synonymes</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_description_label")}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_synonyms")}</th>
                 <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_category")}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Mise à jour</th>
+                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_updated")}</th>
                 {isAdmin && <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_actions")}</th>}
               </tr>
             </thead>
@@ -265,11 +265,11 @@ const CATEGORIES = ["Général", "Finance", "RH", "Commercial", "Civil", "Contac
               </div>
             </div>
             <div>
-              <Label>Description</Label>
+              <Label>{t("admin.col_description_label")}</Label>
               <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Montant financier" />
             </div>
             <div>
-              <Label>Synonymes</Label>
+              <Label>{t("admin.synonyms_label")}</Label>
               <Input value={form.synonymes} onChange={(e) => setForm({ ...form, synonymes: e.target.value })} placeholder="somme, total" />
             </div>
             <div>
