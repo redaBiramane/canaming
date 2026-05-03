@@ -62,9 +62,9 @@ export default async function handler(req: any, res: any) {
   }
 
   // 2. Init Supabase
-  // Note: Vercel will use these from your environment variables
+  // Prefer SERVICE_ROLE_KEY to bypass RLS, fallback to PUBLISHABLE_KEY
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     return res.status(500).json({ error: 'Server configuration error' });
@@ -75,14 +75,12 @@ export default async function handler(req: any, res: any) {
   try {
     // 3. Fetch data
     const [dictRes, stopRes] = await Promise.all([
-      supabase.from('dictionary').select('*'),
+      supabase.from('dictionary').select('*').eq('actif', true),
       supabase.from('app_settings').select('value').eq('key', 'stop_words').single()
     ]);
 
     const dictionary = dictRes.data;
     const stopWordsSetting = stopRes.data;
-    const dictError = dictRes.error;
-    const stopError = stopRes.error;
 
     let stopWordsArray: string[] = [];
     if (stopWordsSetting?.value) {
@@ -119,14 +117,6 @@ export default async function handler(req: any, res: any) {
       original: keyword,
       transformed: mappings.map(m => m.transformed).join('_'),
       details: mappings,
-      debug: {
-        dictionary_count: dict.length,
-        stop_words_count: stopWords.size,
-        dict_error: dictError,
-        stop_error: stopError,
-        env_url_defined: !!supabaseUrl,
-        env_key_defined: !!supabaseKey
-      },
       timestamp: new Date().toISOString()
     };
 
