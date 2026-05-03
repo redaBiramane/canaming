@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+// Trigger deployment to pick up SUPABASE_SERVICE_ROLE_KEY
 
 // Standalone transformation logic for the API
 function normalize(str: string): string {
