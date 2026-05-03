@@ -22,7 +22,7 @@ interface Suggestion {
 
 export default function SuggestionsPage() {
   const { user, role } = useAuth();
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -263,7 +263,7 @@ CREATE POLICY "Les admins peuvent tout faire" ON suggestions FOR ALL USING (
                       <div>
                         <h3 className="font-semibold text-lg text-foreground">{suggestion.titre}</h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {t("admin.proposed_by").replace("{author}", suggestion.auteur)} {new Date(suggestion.created_at).toLocaleDateString('fr-FR')}
+                          {t("admin.proposed_by").replace("{author}", suggestion.auteur)} {new Date(suggestion.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US')}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
