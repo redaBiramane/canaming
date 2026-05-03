@@ -166,7 +166,7 @@ function AdminGuide() {
               <h3 className="font-semibold text-foreground">{t("docs.engine_step_1_title")}</h3>
               <p className="text-sm text-muted-foreground mt-1">{t("docs.engine_step_1_desc")}</p>
               <div className="flex items-center gap-2 mt-3 text-xs font-mono text-muted-foreground bg-muted/50 p-2.5 rounded-md border w-fit">
-                \"CodeClient_Actif\" <ArrowRight className="h-3.5 w-3.5 text-primary" /> [\"code\", \"client\", \"actif\"]
+                "CodeClient_Actif" <ArrowRight className="h-3.5 w-3.5 text-primary" /> ["code", "client", "actif"]
               </div>
             </div>
           </div>
@@ -320,28 +320,28 @@ function AdminGuide() {
 export default function DocumentationPage() {
   const { role } = useAuth();
   const { t, lang } = useI18nStore();
-  const isAdmin = role === \"admin\";
-  const [tab, setTab] = useState(\"user\");
+  const isAdmin = role === "admin";
+  const [tab, setTab] = useState("user");
 
   return (
-    <div className=\"max-w-4xl mx-auto space-y-6\">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className=\"text-2xl font-bold text-foreground\">{t(\"docs.title\")}</h1>
-        <p className=\"text-muted-foreground mt-1\">{t(\"docs.subtitle\")}</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("docs.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("docs.subtitle")}</p>
       </div>
 
       {isAdmin ? (
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
-            <TabsTrigger value=\"user\">{t(\"docs.tab_user\")}</TabsTrigger>
-            <TabsTrigger value=\"admin\">{t(\"docs.tab_admin\")}</TabsTrigger>
+            <TabsTrigger value="user">{t("docs.tab_user")}</TabsTrigger>
+            <TabsTrigger value="admin">{t("docs.tab_admin")}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value=\"user\" className=\"mt-4\">
+          <TabsContent value="user" className="mt-4">
             <UserGuide />
           </TabsContent>
 
-          <TabsContent value=\"admin\" className=\"mt-4\">
+          <TabsContent value="admin" className="mt-4">
             <AdminGuide />
           </TabsContent>
         </Tabs>
