@@ -74,10 +74,15 @@ export default async function handler(req: any, res: any) {
 
   try {
     // 3. Fetch data
-    const [{ data: dictionary }, { data: stopWordsSetting }] = await Promise.all([
-      supabase.from('dictionary').select('*').eq('actif', true),
+    const [dictRes, stopRes] = await Promise.all([
+      supabase.from('dictionary').select('*'),
       supabase.from('app_settings').select('value').eq('key', 'stop_words').single()
     ]);
+
+    const dictionary = dictRes.data;
+    const stopWordsSetting = stopRes.data;
+    const dictError = dictRes.error;
+    const stopError = stopRes.error;
 
     let stopWordsArray: string[] = [];
     if (stopWordsSetting?.value) {
@@ -117,6 +122,10 @@ export default async function handler(req: any, res: any) {
       debug: {
         dictionary_count: dict.length,
         stop_words_count: stopWords.size,
+        dict_error: dictError,
+        stop_error: stopError,
+        env_url_defined: !!supabaseUrl,
+        env_key_defined: !!supabaseKey
       },
       timestamp: new Date().toISOString()
     };
