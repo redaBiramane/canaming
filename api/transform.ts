@@ -74,12 +74,22 @@ export default async function handler(req: any, res: any) {
 
   try {
     // 3. Fetch data
-    const [{ data: dictionary }, { data: stopWordsData }] = await Promise.all([
-      supabase.from('dictionnaire').select('*').eq('actif', true),
-      supabase.from('mots_creux').select('mot')
+    const [{ data: dictionary }, { data: stopWordsSetting }] = await Promise.all([
+      supabase.from('dictionary').select('*').eq('actif', true),
+      supabase.from('app_settings').select('value').eq('key', 'stop_words').single()
     ]);
 
-    const stopWords = new Set((stopWordsData || []).map(s => normalize(s.mot)));
+    let stopWordsArray: string[] = [];
+    if (stopWordsSetting?.value) {
+      try {
+        const parsed = JSON.parse(stopWordsSetting.value);
+        if (Array.isArray(parsed)) stopWordsArray = parsed;
+      } catch (e) {
+        console.error("Error parsing stop words", e);
+      }
+    }
+
+    const stopWords = new Set(stopWordsArray.map(w => normalize(w)));
     const dict = dictionary || [];
 
     // 4. Transform
