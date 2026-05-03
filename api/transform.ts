@@ -62,37 +62,41 @@ export default async function handler(req: any, res: any) {
     });
   }
 
-  // 2. Init Supabase
-  // Prefer SERVICE_ROLE_KEY to bypass RLS, fallback to PUBLISHABLE_KEY
+  // 2. Init Supabase — use SERVICE_ROLE_KEY to bypass RLS
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const publishableKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  const supabaseKey = serviceRoleKey || publishableKey;
-  const keySource = serviceRoleKey ? 'SERVICE_ROLE_KEY' : 'PUBLISHABLE_KEY';
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({ 
-      error: 'Server configuration error',
-      debug: {
-        url_defined: !!supabaseUrl,
-        service_key_defined: !!serviceRoleKey,
-        pub_key_defined: !!publishableKey,
-      }
-    });
+    return res.status(500).json({ error: 'Server configuration error' });
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
-    // 3. Fetch data — try without .eq filter first to check table access
-    const [dictRes, dictAllRes, stopRes] = await Promise.all([
-      supabase.from('dictionary').select('*').eq('actif', true),
-      supabase.from('dictionary').select('id, terme_source, abreviation').limit(3),
-      supabase.from('app_settings').select('value').eq('key', 'stop_words').maybeSingle()
-    ]);
+    // 3. Fetch ALL dictionary rows using pagination (Supabase limits to 1000/request)
+    const allRows: any[] = [];
+    let from = 0;
+    const pageSize = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from('dictionary')
+        .select('*')
+        .eq('actif', true)
+        .order('terme_source')
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      allRows.push(...data);
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
 
-    const dictionary = dictRes.data;
-    const stopWordsSetting = stopRes.data;
+    // Fetch stop words
+    const { data: stopWordsSetting } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'stop_words')
+      .maybeSingle();
 
     let stopWordsArray: string[] = [];
     if (stopWordsSetting?.value) {
@@ -105,7 +109,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const stopWords = new Set(stopWordsArray.map(w => normalize(w)));
-    const dict = dictionary || [];
+    const dict = allRows;
 
     // 4. Transform
     const words = splitWords(keyword);
@@ -129,17 +133,7 @@ export default async function handler(req: any, res: any) {
       original: keyword,
       transformed: mappings.map(m => m.transformed).join('_'),
       details: mappings,
-      _debug: {
-        key_source: keySource,
-        key_prefix: supabaseKey.substring(0, 10) + '...',
-        url: supabaseUrl,
-        dict_count: dict.length,
-        dict_error: dictRes.error,
-        dict_all_count: dictAllRes.data?.length ?? 0,
-        dict_all_error: dictAllRes.error,
-        dict_all_sample: dictAllRes.data?.slice(0, 2),
-        stop_words_count: stopWords.size,
-      },
+      dictionary_size: dict.length,
       timestamp: new Date().toISOString()
     };
 
