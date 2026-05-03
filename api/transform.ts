@@ -114,6 +114,10 @@ export default async function handler(req: any, res: any) {
       original: keyword,
       transformed: mappings.map(m => m.transformed).join('_'),
       details: mappings,
+      debug: {
+        dictionary_count: dict.length,
+        stop_words_count: stopWords.size,
+      },
       timestamp: new Date().toISOString()
     };
 
