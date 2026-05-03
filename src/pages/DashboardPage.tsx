@@ -16,7 +16,7 @@ const COLORS = ["hsl(152, 55%, 28%)", "hsl(38, 92%, 50%)", "hsl(0, 65%, 52%)", "
 
 export default function DashboardPage() {
   const { dictionary, history, signalements, transformationCount, unknownWordsCount } = useAppStore();
-  const { t } = useI18nStore();
+  const { t, lang } = useI18nStore();
   const { role } = useAuth();
   const isAdmin = role === "admin";
 
