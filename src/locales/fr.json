@@ -327,7 +327,15 @@
     "about_team": "Crédit Agricole — Équipe Data / BI",
     "toast_api_key_saved": "Clé API OpenAI sauvegardée",
     "toast_api_key_deleted": "Clé API supprimée",
-    "toast_no_api_key": "Saisissez une clé API"
+    "toast_no_api_key": "Saisissez une clé API",
+    "email_notif_title": "Emails de notification",
+    "email_notif_desc": "Recevez un email à chaque nouveau signalement de mot inconnu.",
+    "email_list_empty": "Aucun email configuré. Les notifications par email sont désactivées.",
+    "email_add_placeholder": "adresse@example.com",
+    "email_add_btn": "Ajouter",
+    "email_saved": "Liste d'emails mise à jour",
+    "email_invalid": "Adresse email invalide",
+    "email_exists": "Cette adresse existe déjà"
   },
   "auth": {
     "login_tab": "Connexion",

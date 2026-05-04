@@ -327,7 +327,15 @@
     "about_team": "Credit Agricole — Data / BI Team",
     "toast_api_key_saved": "OpenAI API Key saved",
     "toast_api_key_deleted": "API Key deleted",
-    "toast_no_api_key": "Enter an API key"
+    "toast_no_api_key": "Enter an API key",
+    "email_notif_title": "Notification Emails",
+    "email_notif_desc": "Receive an email for each new unknown word report.",
+    "email_list_empty": "No emails configured. Email notifications are disabled.",
+    "email_add_placeholder": "address@example.com",
+    "email_add_btn": "Add",
+    "email_saved": "Email list updated",
+    "email_invalid": "Invalid email address",
+    "email_exists": "This address already exists"
   },
   "auth": {
     "login_tab": "Login",

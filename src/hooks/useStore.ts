@@ -307,6 +307,17 @@ export function useAppStore() {
       }
     }
 
+    // Send email notification to configured addresses
+    try {
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mot, contexte, auteur }),
+      });
+    } catch (e) {
+      console.error("Email notification failed:", e);
+    }
+
     invalidateAll();
   };
 
