@@ -110,32 +110,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       </div>
     </div>
   `;
+  // Send emails individually (Resend testing mode only allows verified addresses)
+  const results: { email: string; success: boolean; error?: string }[] = [];
 
-  try {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${resendApiKey}`,
-      },
-      body: JSON.stringify({
-        from: "Naming Studio <onboarding@resend.dev>",
-        to: emails,
-        subject: `🚩 Signalement: "${mot}" — Naming Studio`,
-        html,
-      }),
-    });
+  for (const email of emails) {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${resendApiKey}`,
+        },
+        body: JSON.stringify({
+          from: "Naming Studio <notif@fieldmapper.space>",
+          to: [email],
+          subject: `🚩 Signalement: "${mot}" — Naming Studio`,
+          html,
+        }),
+      });
 
-    const result = await response.json();
+      const result = await response.json();
 
-    if (!response.ok) {
-      console.error("Resend error:", result);
-      return res.status(500).json({ sent: false, error: result });
+      if (!response.ok) {
+        console.error(`Resend error for ${email}:`, result);
+        results.push({ email, success: false, error: result.message || "Send failed" });
+      } else {
+        results.push({ email, success: true });
+      }
+    } catch (err: any) {
+      console.error(`Email send error for ${email}:`, err);
+      results.push({ email, success: false, error: err.message });
     }
-
-    return res.status(200).json({ sent: true, to: emails, id: result.id });
-  } catch (err: any) {
-    console.error("Email send error:", err);
-    return res.status(500).json({ sent: false, error: err.message });
   }
+
+  const sent = results.some(r => r.success);
+  return res.status(200).json({ sent, results });
 }
