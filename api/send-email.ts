@@ -62,9 +62,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       <!-- Body -->
       <div style="background: #fafbfc; padding: 28px 32px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
         <!-- Alert badge -->
-        <div style="background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px 16px; margin-bottom: 20px;">
-          <p style="margin: 0; font-size: 13px; color: #92400E;">
-            ⚠️ Un mot inconnu a été détecté et nécessite votre attention.
+        <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 10px 16px; margin-bottom: 20px;">
+          <p style="margin: 0; font-size: 13px; color: #065F46;">
+            ⚠️ Un mot absent du dictionnaire a été signalé et nécessite votre validation.
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               </td>
             </tr>
             <tr>
-              <td style="padding: 14px 20px; border-bottom: 1px solid #f0f0f0; color: #6B7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Contexte</td>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #f0f0f0; color: #6B7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Contexte de transformation</td>
               <td style="padding: 14px 20px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #374151;">
                 <code style="background: #F3F4F6; padding: 3px 10px; border-radius: 4px; font-family: 'Courier New', monospace;">${contexte || "—"}</code>
               </td>
