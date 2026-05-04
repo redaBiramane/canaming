@@ -109,16 +109,81 @@ export default async function handler(req: any, res: any) {
     }
 
     const stopWords = new Set(stopWordsArray.map(w => normalize(w)));
-    const dict = allRows;
 
-    // 4. Transform
+    // Build multi-word lookup map
+    const multiWordMap = new Map<string, any>();
+    let maxGroupLen = 1;
+    for (const entry of allRows) {
+      const normalized = normalize(entry.terme_source);
+      const wordCount = normalized.split(/\s+/).length;
+      if (wordCount > 1) {
+        multiWordMap.set(normalized, entry);
+        maxGroupLen = Math.max(maxGroupLen, wordCount);
+      }
+      // Check synonyms too
+      if (entry.synonymes) {
+        const syns = Array.isArray(entry.synonymes) ? entry.synonymes : [];
+        for (const syn of syns) {
+          const normSyn = normalize(syn);
+          const synWc = normSyn.split(/\s+/).length;
+          if (synWc > 1) {
+            multiWordMap.set(normSyn, entry);
+            maxGroupLen = Math.max(maxGroupLen, synWc);
+          }
+        }
+      }
+    }
+
+    // 4. Transform with greedy multi-word matching
     const words = splitWords(keyword);
     const mappings = [];
     
-    for (const word of words) {
-      if (stopWords.has(normalize(word))) continue;
+    let i = 0;
+    while (i < words.length) {
+      if (stopWords.has(normalize(words[i]))) { i++; continue; }
 
-      const { entry, alternatives, matchType } = findMatch(word, dict);
+      // Try longest group first
+      let matched = false;
+      for (let len = Math.min(maxGroupLen, words.length - i); len > 1; len--) {
+        const group = words.slice(i, i + len);
+        const groupNorm = group.map(w => normalize(w)).join(" ");
+
+        const multiEntry = multiWordMap.get(groupNorm);
+        if (multiEntry) {
+          mappings.push({
+            original: group.join("_"),
+            transformed: multiEntry.abreviation,
+            status: "ok",
+            match_type: "exact_multi",
+            meaning: multiEntry.terme_source
+          });
+          i += len;
+          matched = true;
+          break;
+        }
+
+        // Also check terme_source with underscores
+        const directMatch = allRows.find(
+          (e: any) => e.actif && normalize(e.terme_source).replace(/[_\s]+/g, " ") === groupNorm
+        );
+        if (directMatch) {
+          mappings.push({
+            original: group.join("_"),
+            transformed: directMatch.abreviation,
+            status: "ok",
+            match_type: "exact_multi",
+            meaning: directMatch.terme_source
+          });
+          i += len;
+          matched = true;
+          break;
+        }
+      }
+      if (matched) continue;
+
+      // Single word fallback
+      const word = words[i];
+      const { entry, alternatives, matchType } = findMatch(word, allRows);
 
       mappings.push({
         original: word,
@@ -127,6 +192,7 @@ export default async function handler(req: any, res: any) {
         match_type: matchType,
         meaning: entry ? entry.terme_source : null
       });
+      i++;
     }
 
     const result = {

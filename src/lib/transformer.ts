@@ -117,12 +117,75 @@ export function transformColumn(
   // Normalize stop words for comparison
   const normalizedStopWords = new Set(stopWords.map((w) => normalize(w)));
 
-  for (const word of words) {
-    // Skip stop words entirely
-    if (normalizedStopWords.has(normalize(word))) {
+  // Build a lookup map for multi-word matching (normalized terme_source → entry)
+  const multiWordMap = new Map<string, DictionaryEntry>();
+  let maxGroupLen = 1;
+  for (const entry of dictionary) {
+    if (!entry.actif) continue;
+    const normalized = normalize(entry.terme_source);
+    const wordCount = normalized.split(/\s+/).length;
+    if (wordCount > 1) {
+      multiWordMap.set(normalized, entry);
+      maxGroupLen = Math.max(maxGroupLen, wordCount);
+    }
+    // Also check synonyms for multi-word
+    for (const syn of entry.synonymes) {
+      const normSyn = normalize(syn);
+      const synWordCount = normSyn.split(/\s+/).length;
+      if (synWordCount > 1) {
+        multiWordMap.set(normSyn, entry);
+        maxGroupLen = Math.max(maxGroupLen, synWordCount);
+      }
+    }
+  }
+
+  let i = 0;
+  while (i < words.length) {
+    // Skip stop words
+    if (normalizedStopWords.has(normalize(words[i]))) {
+      i++;
       continue;
     }
 
+    // Try greedy multi-word matching: longest group first
+    let matched = false;
+    for (let len = Math.min(maxGroupLen, words.length - i); len > 1; len--) {
+      const group = words.slice(i, i + len);
+      const groupNormalized = group.map((w) => normalize(w)).join(" ");
+
+      // Check multi-word map
+      const multiEntry = multiWordMap.get(groupNormalized);
+      if (multiEntry) {
+        mappings.push({
+          original: group.join("_"),
+          transformed: multiEntry.abreviation,
+          status: "ok",
+        });
+        i += len;
+        matched = true;
+        break;
+      }
+
+      // Also check exact terme_source match (with underscores/spaces)
+      const directMatch = dictionary.find(
+        (e) => e.actif && normalize(e.terme_source).replace(/[_\s]+/g, " ") === groupNormalized
+      );
+      if (directMatch) {
+        mappings.push({
+          original: group.join("_"),
+          transformed: directMatch.abreviation,
+          status: "ok",
+        });
+        i += len;
+        matched = true;
+        break;
+      }
+    }
+
+    if (matched) continue;
+
+    // Single word matching (original logic)
+    const word = words[i];
     const { entry, alternatives, matchType } = findMatch(word, dictionary);
 
     if (matchType === "none") {
@@ -147,6 +210,7 @@ export function transformColumn(
         status: "ok",
       });
     }
+    i++;
   }
 
   const transformed = mappings.map((m) => m.transformed).join("_");
