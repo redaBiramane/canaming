@@ -747,8 +747,8 @@ export default function ExcelPastePage() {
                 </div>
               </div>
 
-              <div className="border rounded-lg overflow-auto max-h-[500px]">
-                <table className="w-full text-sm">
+              <div className="border rounded-lg overflow-x-auto max-h-[500px]">
+                <table className="ca-table-resizable text-sm">
                   <thead className="bg-muted sticky top-0">
                     <tr>
                       <th className="text-left p-3 font-medium text-muted-foreground">

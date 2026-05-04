@@ -161,8 +161,8 @@ export default function SqlPage() {
                 </Button>
               )}
             </div>
-            <div className="border rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="border rounded-lg overflow-x-auto">
+              <table className="ca-table-resizable text-sm">
                 <thead className="bg-muted">
                   <tr>
                     <th className="text-left p-3 font-medium text-muted-foreground">{t("analysis.col_original")}</th>

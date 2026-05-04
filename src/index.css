@@ -157,3 +157,41 @@
     @apply bg-warning/20 rounded px-0.5;
   }
 }
+
+/* Resizable transformation tables */
+.ca-table-resizable {
+  table-layout: auto;
+  width: 100%;
+}
+
+.ca-table-resizable th {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  resize: horizontal;
+  min-width: 80px;
+}
+
+.ca-table-resizable td {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+.ca-table-resizable td.ca-cell-wrap {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  max-width: none;
+}
+
+.ca-table-resizable td:hover {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: unset;
+  max-width: none;
+  position: relative;
+  z-index: 1;
+}
+
