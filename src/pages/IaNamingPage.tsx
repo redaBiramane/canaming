@@ -348,7 +348,7 @@ export default function IaNamingPage() {
                   </div>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="ca-table-resizable text-sm">
                     <thead>
                       <tr className="border-b bg-muted/20">
                         <th className="text-left p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">{t("analysis.original")}</th>
