@@ -62,8 +62,8 @@ export default function HistoryPage() {
           <p className="text-muted-foreground">{t("admin.no_history")}</p>
         </motion.div>
       ) : (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-hidden">
-          <table className="w-full text-sm">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-x-auto">
+          <table className="ca-table-resizable text-sm">
             <thead className="bg-muted">
               <tr>
                 <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_date") || "Date"}</th>
@@ -135,8 +135,8 @@ export default function HistoryPage() {
           </DialogHeader>
 
           {selectedEntry?.details && (
-            <div className="rounded-lg border overflow-hidden mt-4">
-              <table className="w-full text-sm">
+            <div className="rounded-lg border overflow-x-auto mt-4">
+              <table className="ca-table-resizable text-sm">
                 <thead className="bg-muted">
                   <tr>
                     <th className="text-left p-3 font-medium text-muted-foreground">{t("excel.col_original")}</th>
