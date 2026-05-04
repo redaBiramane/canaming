@@ -38,43 +38,74 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ sent: false, reason: "No notification emails configured" });
   }
 
-  // Build email HTML
+  // Build email HTML — Crédit Agricole brand colors
+  const now = new Date().toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
   const html = `
-    <div style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 24px 32px; border-radius: 12px 12px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 20px;">🚩 Nouveau signalement</h1>
-        <p style="color: rgba(255,255,255,0.8); margin: 4px 0 0; font-size: 14px;">Naming Studio — Alerte automatique</p>
-      </div>
-      <div style="background: #f8fafc; padding: 24px 32px; border: 1px solid #e2e8f0; border-top: none;">
-        <table style="width: 100%; border-collapse: collapse;">
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+      <!-- Header with CA Green -->
+      <div style="background: linear-gradient(135deg, #006A4E 0%, #1B6B37 50%, #2D8B4E 100%); padding: 28px 32px; border-radius: 12px 12px 0 0;">
+        <table style="width: 100%;" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 13px; width: 120px;">Mot signalé</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 15px; color: #1e293b;">
-              <code style="background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 4px;">${mot}</code>
+            <td>
+              <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">🚩 Nouveau signalement</h1>
+              <p style="color: rgba(255,255,255,0.75); margin: 6px 0 0; font-size: 13px; font-weight: 400;">Naming Studio — Alerte automatique</p>
             </td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 13px;">Contexte</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155;">
-              <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 3px;">${contexte || "—"}</code>
+            <td style="text-align: right; vertical-align: top;">
+              <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 6px 12px; display: inline-block;">
+                <span style="color: white; font-size: 11px; font-weight: 500;">${now}</span>
+              </div>
             </td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 0; color: #64748b; font-size: 13px;">Signalé par</td>
-            <td style="padding: 12px 0; font-size: 14px; color: #334155;">${auteur || "utilisateur"}</td>
           </tr>
         </table>
-        <div style="margin-top: 20px; text-align: center;">
+      </div>
+
+      <!-- Body -->
+      <div style="background: #fafbfc; padding: 28px 32px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+        <!-- Alert badge -->
+        <div style="background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px 16px; margin-bottom: 20px;">
+          <p style="margin: 0; font-size: 13px; color: #92400E;">
+            ⚠️ Un mot inconnu a été détecté et nécessite votre attention.
+          </p>
+        </div>
+
+        <!-- Details card -->
+        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #f0f0f0; color: #6B7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; width: 130px; font-weight: 600;">Mot signalé</td>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #f0f0f0;">
+                <code style="background: #FEE2E2; color: #DC2626; padding: 4px 12px; border-radius: 6px; font-size: 14px; font-weight: 700; letter-spacing: 0.3px;">${mot}</code>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #f0f0f0; color: #6B7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Contexte</td>
+              <td style="padding: 14px 20px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #374151;">
+                <code style="background: #F3F4F6; padding: 3px 10px; border-radius: 4px; font-family: 'Courier New', monospace;">${contexte || "—"}</code>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 14px 20px; color: #6B7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Signalé par</td>
+              <td style="padding: 14px 20px; font-size: 13px; color: #374151; font-weight: 500;">${auteur || "utilisateur"}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- CTA Button -->
+        <div style="margin-top: 24px; text-align: center;">
           <a href="https://fieldmapper.space/signalements" 
-             style="display: inline-block; background: #6366f1; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 500;">
+             style="display: inline-block; background: linear-gradient(135deg, #006A4E, #1B6B37); color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; letter-spacing: 0.2px; box-shadow: 0 2px 8px rgba(0,106,78,0.3);">
             Voir les signalements →
           </a>
         </div>
       </div>
-      <div style="padding: 16px 32px; text-align: center; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px; background: white;">
-        <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-          Cet email a été envoyé automatiquement par Naming Studio.<br/>
-          Gérez les destinataires dans Paramètres → Emails de notification.
+
+      <!-- Footer -->
+      <div style="padding: 18px 32px; text-align: center; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; background: #f9fafb;">
+        <p style="margin: 0 0 4px; font-size: 11px; color: #9CA3AF;">
+          Cet email a été envoyé automatiquement par <strong style="color: #006A4E;">Naming Studio</strong>
+        </p>
+        <p style="margin: 0; font-size: 11px; color: #9CA3AF;">
+          Gérez les destinataires dans Paramètres → Emails de notification
         </p>
       </div>
     </div>
