@@ -66,11 +66,11 @@ export default function HistoryPage() {
           <table className="ca-table-resizable text-sm">
             <thead className="bg-muted">
               <tr>
-                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_date") || "Date"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_action") || "Action"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Terme</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">{t("admin.col_details") || "Détail"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground">Auteur</th>
+                <th className="text-left p-3 font-medium text-muted-foreground w-40">{t("admin.col_date") || "Date"}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground w-32">{t("admin.col_action") || "Action"}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground min-w-[200px]">Terme</th>
+                <th className="text-left p-3 font-medium text-muted-foreground min-w-[300px]">{t("admin.col_details") || "Détail"}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground w-48">Auteur</th>
                 <th className="text-left p-3 font-medium text-muted-foreground w-12"></th>
               </tr>
             </thead>

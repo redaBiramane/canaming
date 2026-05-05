@@ -170,29 +170,38 @@
   position: relative;
   white-space: nowrap;
   resize: horizontal;
-  overflow: auto;
-  min-width: 100px;
-  max-width: 500px;
-  padding-right: 15px !important; /* Space for the resize handle */
+  overflow: hidden; /* back to hidden for stability */
+  min-width: 80px;
+  max-width: 600px;
+  padding-right: 20px !important;
 }
 
-/* Custom cursor on the right edge to indicate resizability */
+/* More visible and stable resize handle */
 .ca-table-resizable th::after {
-  content: "";
+  content: "⋮"; /* Visual gripper */
   position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 10px;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 14px;
   cursor: col-resize;
-  z-index: 10;
+  z-index: 20;
   transition: all 0.2s;
+  pointer-events: none; /* Let the underlying resize handle work */
 }
 
 .ca-table-resizable th:hover::after {
-  background: rgba(0, 106, 78, 0.1);
-  border-right: 2px solid #006A4E;
+  color: #006A4E;
+  background: rgba(0, 106, 78, 0.05);
+  border-radius: 4px;
 }
+
 
 .ca-table-resizable td {
   white-space: nowrap;
