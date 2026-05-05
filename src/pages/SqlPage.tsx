@@ -23,6 +23,9 @@ const EXAMPLE_SQL = `CREATE TABLE salaire_client (
     reference_operation VARCHAR(30)
 );`;
 
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
 export default function SqlPage() {
   const { dictionary, signalements, stopWords, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
   const { t, lang } = useI18nStore();
@@ -31,6 +34,7 @@ export default function SqlPage() {
   const [parsed, setParsed] = useSessionStorage<ParsedSql | null>("sql_parsed", null);
   const [results, setResults] = useSessionStorage<TransformResult[]>("sql_results", []);
   const [transformedSql, setTransformedSql] = useSessionStorage("sql_transformed", "");
+  const [asAlias, setAsAlias] = useSessionStorage("sql_as_alias", false);
 
   const analyze = () => {
     const input = sql.trim();
@@ -46,7 +50,7 @@ export default function SqlPage() {
     setParsed(p);
     const res = p.columns.map((c) => transformColumn(c.name, dictionary, stopWords));
     setResults(res);
-    setTransformedSql(generateTransformedSql(p, res));
+    setTransformedSql(generateTransformedSql(p, res, asAlias));
     const unknowns = res.filter((r) => r.status === "inconnu").length;
     incrementTransformations(res.length, unknowns);
     addHistoryEntry({
@@ -119,15 +123,25 @@ export default function SqlPage() {
           placeholder="CREATE TABLE ... ;\nou\nSELECT ... FROM ... ;"
           className="font-mono min-h-[200px] text-sm"
         />
-        <div className="flex gap-2">
-          <Button onClick={analyze} className="gap-2">
-            {t("analysis.analyze_btn")} <ArrowRight className="h-4 w-4" />
-          </Button>
-          {(parsed || sql) && (
-            <Button variant="outline" onClick={() => { setSql(""); setParsed(null); setResults([]); setTransformedSql(""); }} className="gap-2">
-              <RotateCcw className="h-4 w-4" /> {t("analysis.reset_btn")}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center space-x-2">
+            <Switch 
+              id="as-alias" 
+              checked={asAlias} 
+              onCheckedChange={setAsAlias} 
+            />
+            <Label htmlFor="as-alias" className="cursor-pointer">Option "AS alias" (ex: col AS mt_col)</Label>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={analyze} className="gap-2">
+              {t("analysis.analyze_btn")} <ArrowRight className="h-4 w-4" />
             </Button>
-          )}
+            {(parsed || sql) && (
+              <Button variant="outline" onClick={() => { setSql(""); setParsed(null); setResults([]); setTransformedSql(""); }} className="gap-2">
+                <RotateCcw className="h-4 w-4" /> {t("analysis.reset_btn")}
+              </Button>
+            )}
+          </div>
         </div>
       </motion.div>
 

@@ -402,7 +402,8 @@ export function parseSql(rawSql: string): ParsedSql | null {
  */
 export function generateTransformedSql(
   parsed: ParsedSql,
-  results: TransformResult[]
+  results: TransformResult[],
+  asAlias: boolean = false
 ): string {
   let output = parsed.originalSql;
 
@@ -413,10 +414,12 @@ export function generateTransformedSql(
     const result = results[i];
     if (!result || result.transformed === col.name) continue;
 
+    const replacement = asAlias ? `${col.name} AS ${result.transformed}` : result.transformed;
+
     if (parsed.statementType === "select") {
       // Global word boundary replacement for SELECT statements
       const regex = new RegExp(`\\b${escapeRegex(col.name)}\\b`, "gmi");
-      output = output.replace(regex, result.transformed);
+      output = output.replace(regex, replacement);
     } else {
       // Replace only the column definition name (word boundary match)
       // Match the column name that appears at the start of a line/after whitespace, followed by the type
@@ -424,7 +427,14 @@ export function generateTransformedSql(
         `(^|[\\s,(])${escapeRegex(col.name)}(\\s+${escapeRegex(col.type.split("(")[0])})`,
         "gmi"
       );
-      output = output.replace(regex, `$1${result.transformed}$2`);
+      
+      if (asAlias) {
+        // For CREATE statements with alias, we might want to keep the original but it's weird.
+        // But let's follow the user's request: replace with "original AS transformed"
+        output = output.replace(regex, `$1${replacement}$2`);
+      } else {
+        output = output.replace(regex, `$1${result.transformed}$2`);
+      }
     }
   }
 

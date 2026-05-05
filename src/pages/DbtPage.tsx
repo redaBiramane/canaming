@@ -13,6 +13,9 @@ import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useI18nStore } from "@/lib/i18n";
 
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
 export default function DbtPage() {
   const { dictionary, signalements, stopWords, incrementTransformations, signalerMot, addHistoryEntry } = useAppStore();
   const { t, lang } = useI18nStore();
@@ -21,6 +24,7 @@ export default function DbtPage() {
   const [parsed, setParsed] = useState<ParsedDbtModel | null>(null);
   const [results, setResults] = useState<TransformResult[]>([]);
   const [transformedModel, setTransformedModel] = useState("");
+  const [asAlias, setAsAlias] = useState(false);
 
   const analyze = () => {
     const input = dbtModel.trim();
@@ -36,7 +40,7 @@ export default function DbtPage() {
     setParsed(p);
     const res = transformDbtColumns(p, dictionary, stopWords);
     setResults(res);
-    setTransformedModel(generateTransformedDbtModel(p, res));
+    setTransformedModel(generateTransformedDbtModel(p, res, asAlias));
     const unknowns = res.filter((r) => r.status === "inconnu").length;
     incrementTransformations(res.length, unknowns);
     addHistoryEntry({
@@ -115,15 +119,25 @@ export default function DbtPage() {
           placeholder={`{{ config(materialized='table') }}\n\nSELECT\n    code_client,\n    nom_client,\n    date_naissance\nFROM {{ ref('stg_source') }}`}
           className="font-mono min-h-[250px] text-sm"
         />
-        <div className="flex gap-2">
-          <Button onClick={analyze} className="gap-2">
-            {t("analysis.analyze_btn")} <ArrowRight className="h-4 w-4" />
-          </Button>
-          {(parsed || dbtModel) && (
-            <Button variant="outline" onClick={resetAll} className="gap-2">
-              <RotateCcw className="h-4 w-4" /> {t("analysis.reset_btn")}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center space-x-2">
+            <Switch 
+              id="as-alias" 
+              checked={asAlias} 
+              onCheckedChange={setAsAlias} 
+            />
+            <Label htmlFor="as-alias" className="cursor-pointer">Option "AS alias" (ex: col AS mt_col)</Label>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={analyze} className="gap-2">
+              {t("analysis.analyze_btn")} <ArrowRight className="h-4 w-4" />
             </Button>
-          )}
+            {(parsed || dbtModel) && (
+              <Button variant="outline" onClick={resetAll} className="gap-2">
+                <RotateCcw className="h-4 w-4" /> {t("analysis.reset_btn")}
+              </Button>
+            )}
+          </div>
         </div>
       </motion.div>
 

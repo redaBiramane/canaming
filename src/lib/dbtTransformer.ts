@@ -229,7 +229,8 @@ export function transformDbtColumns(
  */
 export function generateTransformedDbtModel(
   parsed: ParsedDbtModel,
-  results: TransformResult[]
+  results: TransformResult[],
+  asAlias: boolean = false
 ): string {
   let output = parsed.originalModel;
   
@@ -246,14 +247,16 @@ export function generateTransformedDbtModel(
   
   // Apply replacements using word boundary matching
   for (const { original, transformed } of replacements) {
+    const replacement = asAlias ? `${original} AS ${transformed}` : transformed;
+
     // Replace AS alias patterns first (most specific)
     const asRegex = new RegExp(`(\\bAS\\s+)${escapeRegex(original)}\\b`, 'gi');
-    output = output.replace(asRegex, `$1${transformed}`);
+    output = output.replace(asRegex, `$1${transformed}`); // Even with asAlias, if it's already an alias, just replace the alias
     
     // Replace standalone column references (with optional table prefix)
-    // Only replace if it appears as a column reference, not inside strings or Jinja
     const colRegex = new RegExp(`(^|[\\s,.(])${escapeRegex(original)}(\\s*[,\\s\\n)]|\\s*$)`, 'gm');
-    output = output.replace(colRegex, `$1${transformed}$2`);
+    // If it was already replaced by the AS regex, it might not match here anymore, which is good.
+    output = output.replace(colRegex, `$1${replacement}$2`);
   }
   
   return output;
