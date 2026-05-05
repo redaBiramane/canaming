@@ -52,6 +52,24 @@ function findMatch(word: string, dictionary: any[]) {
 }
 
 export default async function handler(req: any, res: any) {
+  // CORS Configuration
+  const allowedOrigins = [
+    "https://fieldmapper.space",
+    "https://www.fieldmapper.space",
+    "http://localhost:5173",
+    "http://localhost:4173"
+  ];
+  const origin = req.headers.origin || "";
+
+  if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "https://fieldmapper.space");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.status(200).end();
+
   // 1. Get input
   const keyword = req.query.keyword || req.body?.keyword;
 
