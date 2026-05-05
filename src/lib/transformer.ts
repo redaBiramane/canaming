@@ -245,16 +245,16 @@ export function parseSql(rawSql: string): ParsedSql | null {
   // Clean SAS PROC SQL wrappers
   let sql = rawSql.replace(/^\s*PROC\s+SQL\s*;/i, "").replace(/QUIT\s*;\s*$/i, "").trim();
 
-  // Check if it's a CTAS (CREATE TABLE AS SELECT)
-  const ctasMatch = sql.match(/^\s*CREATE\s+(?:OR\s+REPLACE\s+)?(?:(?:LOCAL|GLOBAL)\s+TEMPORARY\s+|TEMP\s+|VOLATILE\s+|TRANSIENT\s+|SECURE\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s+AS\s+(SELECT\b[\s\S]*)/i);
+  // Check if it's a CTAS or CVAS (CREATE VIEW AS SELECT)
+  const ctasMatch = sql.match(/^\s*CREATE\s+(?:OR\s+REPLACE\s+)?(?:(?:LOCAL|GLOBAL)\s+TEMPORARY\s+|TEMP\s+|VOLATILE\s+|TRANSIENT\s+|SECURE\s+)?(TABLE|VIEW)\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s+AS\s+(SELECT\b[\s\S]*)/i);
 
-  // Check if it's a SELECT statement or CTAS
+  // Check if it's a SELECT statement or CTAS/CVAS
   if (ctasMatch || /^\s*SELECT\b/i.test(sql)) {
     let selectString = sql;
     let tableName = "requete_select";
     if (ctasMatch) {
-      tableName = ctasMatch[1].replace(/"/g, "");
-      selectString = ctasMatch[2];
+      tableName = ctasMatch[2].replace(/"/g, "");
+      selectString = ctasMatch[3];
     }
 
     // Extract everything between SELECT and FROM
@@ -318,9 +318,9 @@ export function parseSql(rawSql: string): ParsedSql | null {
     return { statementType: "select", tableName, columns, originalSql: rawSql };
   }
 
-  // Match CREATE TABLE with optional Snowflake/Teradata modifiers
+  // Match CREATE TABLE/VIEW with optional Snowflake/Teradata modifiers
   const headerMatch = sql.match(
-    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:(?:LOCAL|GLOBAL)\s+TEMPORARY\s+|TEMP\s+|VOLATILE\s+|TRANSIENT\s+|SECURE\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s*\(/i
+    /CREATE\s+(?:OR\s+REPLACE\s+)?(?:(?:LOCAL|GLOBAL)\s+TEMPORARY\s+|TEMP\s+|VOLATILE\s+|TRANSIENT\s+|SECURE\s+)?(TABLE|VIEW)\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+(?:\.[\w."]+)*)\s*\(/i
   );
   
   let tableName: string;
@@ -328,7 +328,7 @@ export function parseSql(rawSql: string): ParsedSql | null {
   
   if (headerMatch) {
     // Clean up quoted identifiers
-    tableName = headerMatch[1].replace(/"/g, "");
+    tableName = headerMatch[2].replace(/"/g, "");
     // Extract body: everything after the opening ( up to the last )
     const startIdx = headerMatch.index! + headerMatch[0].length;
     const remaining = sql.substring(startIdx);
