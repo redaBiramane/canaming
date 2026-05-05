@@ -8,8 +8,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { parseDbtModel, transformDbtColumns, generateTransformedDbtModel, EXAMPLE_DBT_MODEL, type ParsedDbtModel } from "@/lib/dbtTransformer";
 import { TransformResult } from "@/lib/dictionary";
 import { toast } from "sonner";
-import { TransformResult } from "@/lib/dictionary";
-import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useI18nStore } from "@/lib/i18n";
 
