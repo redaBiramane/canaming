@@ -66,12 +66,12 @@ export default function HistoryPage() {
           <table className="ca-table-resizable text-sm">
             <thead className="bg-muted">
               <tr>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'15%'}}>{t("admin.col_date") || "Date"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'12%'}}>{t("admin.col_action") || "Action"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'25%'}}>Terme</th>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'30%'}}>{t("admin.col_details") || "Détail"}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'14%'}}>{t("admin.col_date") || "Date"}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'11%'}}>{t("admin.col_action") || "Action"}</th>
+                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'23%'}}>Terme</th>
+                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'27%'}}>{t("admin.col_details") || "Détail"}</th>
                 <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'15%'}}>Auteur</th>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'3%'}}></th>
+                <th className="text-center p-3 font-medium text-muted-foreground" style={{width:'10%'}}>Actions</th>
               </tr>
             </thead>
             <tbody>
