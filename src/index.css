@@ -162,21 +162,43 @@
 .ca-table-resizable {
   table-layout: auto;
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .ca-table-resizable th {
   position: relative;
   white-space: nowrap;
   resize: horizontal;
-  overflow: hidden;
-  min-width: 60px;
+  overflow: auto;
+  min-width: 100px;
+  max-width: 500px;
+  padding-right: 15px !important; /* Space for the resize handle */
+}
+
+/* Custom cursor on the right edge to indicate resizability */
+.ca-table-resizable th::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: col-resize;
+  z-index: 10;
+  transition: all 0.2s;
+}
+
+.ca-table-resizable th:hover::after {
+  background: rgba(0, 106, 78, 0.1);
+  border-right: 2px solid #006A4E;
 }
 
 .ca-table-resizable td {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 12px 12px;
 }
 
 /* Detail column with badges can wrap */
@@ -191,6 +213,8 @@
   white-space: normal;
   text-overflow: unset;
   position: relative;
-  z-index: 1;
+  z-index: 10;
+  background: inherit;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
