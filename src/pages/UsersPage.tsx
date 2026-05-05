@@ -75,10 +75,13 @@ export default function UsersPage() {
       return;
     }
 
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action supprimera son profil.")) return;
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action supprimera son profil et son rôle.")) return;
 
-    const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
+    // Delete role first (child), then profile (parent)
+    const { error: roleError } = await supabase.from("user_roles").delete().eq("user_id", userId);
+    const { error: profileError } = await supabase.from("profiles").delete().eq("user_id", userId);
 
+    const error = roleError || profileError;
     if (error) {
       toast.error(t("admin.toast_error") + " : " + error.message);
     } else {
