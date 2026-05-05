@@ -160,7 +160,7 @@
 
 /* Auto-fit transformation tables */
 .ca-table-resizable {
-  table-layout: auto;
+  table-layout: fixed;
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -170,15 +170,14 @@
   position: relative;
   white-space: nowrap;
   resize: horizontal;
-  overflow: hidden; /* back to hidden for stability */
+  overflow: hidden;
   min-width: 80px;
-  max-width: 600px;
   padding-right: 20px !important;
 }
 
 /* More visible and stable resize handle */
 .ca-table-resizable th::after {
-  content: "⋮"; /* Visual gripper */
+  content: "⋮";
   position: absolute;
   right: 2px;
   top: 50%;
@@ -193,7 +192,7 @@
   cursor: col-resize;
   z-index: 20;
   transition: all 0.2s;
-  pointer-events: none; /* Let the underlying resize handle work */
+  pointer-events: none;
 }
 
 .ca-table-resizable th:hover::after {
@@ -202,11 +201,11 @@
   border-radius: 4px;
 }
 
-
 .ca-table-resizable td {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 0; /* Forces ellipsis to work with table-layout:fixed */
   padding: 12px 12px;
 }
 
