@@ -295,7 +295,6 @@ export function useAppStore() {
     const { data: adminIds } = await supabase.rpc("get_admin_user_ids");
     if (adminIds && adminIds.length > 0) {
       const notifications = (adminIds as string[])
-        .filter((id) => id !== user?.id) // Don't notify yourself
         .map((id) => ({
           user_id: id,
           title: "Nouveau signalement 🚩",
