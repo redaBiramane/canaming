@@ -13,6 +13,7 @@ interface UserWithRole {
   email: string | null;
   display_name: string | null;
   role: "admin" | "user";
+  is_blocked?: boolean;
 }
 
 export default function UsersPage() {
@@ -24,14 +25,23 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data: profiles } = await supabase.from("profiles").select("user_id, email, display_name");
-    const { data: roles } = await supabase.from("user_roles").select("user_id, role");
-    if (profiles && roles) {
-      const roleMap = new Map(roles.map(r => [r.user_id, r.role as "admin" | "user"]));
-      setUsersWithRoles(profiles.map(p => ({
-        ...p,
-        role: roleMap.get(p.user_id) || "user",
-      })));
+    try {
+      const { data: profiles } = await supabase.from("profiles").select("user_id, email, display_name");
+      const { data: roles } = await supabase.from("user_roles").select("user_id, role, is_blocked");
+      
+      if (profiles && roles) {
+        const roleMap = new Map(roles.map(r => [r.user_id, { role: r.role as "admin" | "user", is_blocked: r.is_blocked }]));
+        setUsersWithRoles(profiles.map(p => {
+          const userRole = roleMap.get(p.user_id);
+          return {
+            ...p,
+            role: userRole?.role || "user",
+            is_blocked: userRole?.is_blocked || false,
+          };
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
     }
     setLoading(false);
   };
@@ -39,6 +49,43 @@ export default function UsersPage() {
   useEffect(() => {
     if (isAdmin) fetchUsers();
   }, [isAdmin]);
+
+  const toggleBlock = async (userId: string, currentStatus: boolean) => {
+    if (userId === user?.id) {
+      toast.error(t("admin.cannot_block_self") || "Vous ne pouvez pas vous bloquer vous-même");
+      return;
+    }
+    
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ is_blocked: !currentStatus })
+      .eq("user_id", userId);
+
+    if (error) {
+      toast.error(t("admin.toast_error") + " : " + error.message);
+    } else {
+      toast.success(!currentStatus ? "Utilisateur bloqué" : "Utilisateur débloqué");
+      fetchUsers();
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (userId === user?.id) {
+      toast.error(t("admin.cannot_delete_self") || "Vous ne pouvez pas vous supprimer vous-même");
+      return;
+    }
+
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action supprimera son profil.")) return;
+
+    const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
+
+    if (error) {
+      toast.error(t("admin.toast_error") + " : " + error.message);
+    } else {
+      toast.success("Utilisateur supprimé de la base");
+      fetchUsers();
+    }
+  };
 
   const toggleRole = async (userId: string, currentRole: "admin" | "user") => {
     const newRole = currentRole === "admin" ? "user" : "admin";
@@ -103,24 +150,49 @@ export default function UsersPage() {
                   </td>
                   <td className="p-3 text-muted-foreground">{u.email}</td>
                   <td className="p-3">
-                    <Badge variant={u.role === "admin" ? "default" : "secondary"} className="gap-1">
-                      {u.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                      {u.role === "admin" ? "Admin" : t("dashboard.subtitle_user").split(' ')[0] || "User"}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge variant={u.role === "admin" ? "default" : "secondary"} className="gap-1 w-fit">
+                        {u.role === "admin" ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
+                        {u.role === "admin" ? "Admin" : t("dashboard.subtitle_user").split(' ')[0] || "User"}
+                      </Badge>
+                      {u.is_blocked && (
+                        <Badge variant="destructive" className="gap-1 w-fit">
+                          <Ban className="h-3 w-3" /> Bloqué
+                        </Badge>
+                      )}
+                    </div>
                   </td>
                   <td className="p-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toggleRole(u.user_id, u.role)}
-                      className="gap-1"
-                    >
-                      {u.role === "admin" ? (
-                        <><User className="h-3.5 w-3.5" /> {t("admin.demote")}</>
-                      ) : (
-                        <><Shield className="h-3.5 w-3.5" /> {t("admin.promote")}</>
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleRole(u.user_id, u.role)}
+                        title={u.role === "admin" ? t("admin.demote") : t("admin.promote")}
+                      >
+                        {u.role === "admin" ? <User className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
+                      </Button>
+
+                      <Button
+                        variant={u.is_blocked ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => toggleBlock(u.user_id, u.is_blocked || false)}
+                        className={u.is_blocked ? "bg-orange-500 hover:bg-orange-600 text-white" : "text-orange-500 hover:text-orange-600"}
+                        title={u.is_blocked ? "Débloquer" : "Bloquer"}
+                      >
+                        {u.is_blocked ? <CheckCircle className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteUser(u.user_id)}
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

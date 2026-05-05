@@ -23,9 +23,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchRole = async (userId: string) => {
     const { data } = await supabase
       .from("user_roles")
-      .select("role")
+      .select("role, is_blocked")
       .eq("user_id", userId)
       .single();
+    
+    if (data?.is_blocked) {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setRole(null);
+      alert("Votre compte a été suspendu par un administrateur.");
+      return;
+    }
+    
     setRole((data?.role as "admin" | "user") || "user");
   };
 
