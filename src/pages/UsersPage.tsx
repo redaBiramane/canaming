@@ -168,9 +168,13 @@ export default function UsersPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => toggleRole(u.user_id, u.role)}
-                        title={u.role === "admin" ? t("admin.demote") : t("admin.promote")}
+                        className="gap-1.5 min-w-[120px]"
                       >
-                        {u.role === "admin" ? <User className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
+                        {u.role === "admin" ? (
+                          <><User className="h-3.5 w-3.5" /> {t("admin.demote")}</>
+                        ) : (
+                          <><Shield className="h-3.5 w-3.5" /> {t("admin.promote")}</>
+                        )}
                       </Button>
 
                       <Button
