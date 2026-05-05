@@ -199,7 +199,7 @@ export default async function handler(req: any, res: any) {
       original: keyword,
       transformed: mappings.map(m => m.transformed).join('_'),
       details: mappings,
-      dictionary_size: dict.length,
+      dictionary_size: allRows.length,
       timestamp: new Date().toISOString()
     };
 
