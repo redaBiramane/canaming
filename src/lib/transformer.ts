@@ -407,6 +407,17 @@ export function generateTransformedSql(
 ): string {
   let output = parsed.originalSql;
 
+  // If the user wants "AS alias" but provided a pure DDL CREATE TABLE (not a SELECT),
+  // generate a CREATE VIEW AS SELECT statement to map the columns.
+  if (asAlias && parsed.statementType === "create") {
+    const selectLines = parsed.columns.map((col, i) => {
+      const res = results[i];
+      const transformedName = res ? res.transformed : col.name;
+      return `    ${col.name} AS ${transformedName}`;
+    });
+    return `CREATE OR REPLACE VIEW ${parsed.tableName}_v AS\nSELECT\n${selectLines.join(",\n")}\nFROM ${parsed.tableName};`;
+  }
+
   // Replace each column name in the original SQL
   // We go in reverse order of appearance to avoid index shifting
   for (let i = parsed.columns.length - 1; i >= 0; i--) {
