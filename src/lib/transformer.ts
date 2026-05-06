@@ -236,6 +236,7 @@ export interface SqlColumn {
 
 export interface ParsedSql {
   statementType: "create" | "select" | "unknown";
+  createType?: "TABLE" | "VIEW";
   tableName: string;
   columns: SqlColumn[];
   originalSql: string;
@@ -392,7 +393,12 @@ export function parseSql(rawSql: string): ParsedSql | null {
     }
   }
 
-  return { statementType: "create", tableName, columns, originalSql: rawSql };
+  let createType: "TABLE" | "VIEW" = "TABLE";
+  if (headerMatch) {
+    createType = headerMatch[1].toUpperCase() as "TABLE" | "VIEW";
+  }
+
+  return { statementType: "create", createType, tableName, columns, originalSql: rawSql };
 }
 
 /**
@@ -415,7 +421,8 @@ export function generateTransformedSql(
       const transformedName = res ? res.transformed : col.name;
       return `    ${col.name} AS ${transformedName}`;
     });
-    return `CREATE OR REPLACE VIEW ${parsed.tableName}_v AS\nSELECT\n${selectLines.join(",\n")}\nFROM ${parsed.tableName};`;
+    const type = parsed.createType || "VIEW";
+    return `CREATE OR REPLACE ${type} ${parsed.tableName}_v AS\nSELECT\n${selectLines.join(",\n")}\nFROM ${parsed.tableName};`;
   }
 
   // Replace each column name in the original SQL
