@@ -427,14 +427,8 @@ export function generateTransformedSql(
         `(^|[\\s,(])${escapeRegex(col.name)}(\\s+${escapeRegex(col.type.split("(")[0])})`,
         "gmi"
       );
-      
-      if (asAlias) {
-        // For CREATE statements with alias, we might want to keep the original but it's weird.
-        // But let's follow the user's request: replace with "original AS transformed"
-        output = output.replace(regex, `$1${replacement}$2`);
-      } else {
-        output = output.replace(regex, `$1${result.transformed}$2`);
-      }
+      // Never use alias for CREATE TABLE column definitions, as it creates invalid SQL
+      output = output.replace(regex, `$1${result.transformed}$2`);
     }
   }
 
