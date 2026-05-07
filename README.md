@@ -1,73 +1,108 @@
-# Welcome to your Lovable project
+# canaming
 
-## Project info
+A modern web application built with **Vite**, **React**, **TypeScript**, **shadcn-ui**, and **Tailwind CSS**.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+🌐 **Live demo**: [https://redaBiramane.github.io/canaming/](https://redaBiramane.github.io/canaming/)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Technologies
 
-**Use Lovable**
+- [Vite](https://vitejs.dev/) – lightning-fast build tool
+- [React 18](https://react.dev/) – UI library
+- [TypeScript](https://www.typescriptlang.org/) – static typing
+- [shadcn/ui](https://ui.shadcn.com/) – accessible component library
+- [Tailwind CSS](https://tailwindcss.com/) – utility-first CSS
+- [Supabase](https://supabase.com/) – backend-as-a-service (auth, database)
+- [TanStack Query](https://tanstack.com/query) – data fetching & caching
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## Local development
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Node.js ≥ 20** (use [nvm](https://github.com/nvm-sh/nvm) to manage versions)
+- **npm ≥ 9** (comes with Node.js)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Steps
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# 1. Clone the repository
+git clone https://github.com/redaBiramane/canaming.git
+cd canaming
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 2. Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. Start the development server (hot-reload on http://localhost:8080)
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Other useful commands
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+| Command | Description |
+|---|---|
+| `npm run build` | Production build → output in `dist/` |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run unit tests (Vitest) |
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Hosting & deployment
 
-## What technologies are used for this project?
+### GitHub Pages (automated – recommended)
 
-This project is built with:
+A GitHub Actions workflow (`.github/workflows/deploy-pages.yml`) is included. It automatically builds and deploys the app to GitHub Pages on every push to `main`.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+**One-time setup:**
 
-## How can I deploy this project?
+1. Go to your repository on GitHub → **Settings** → **Pages**.
+2. Under **Source**, select **GitHub Actions**.
+3. Push to `main` (or trigger the workflow manually from the **Actions** tab).
+4. Your site will be live at: `https://redaBiramane.github.io/canaming/`
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Vercel
 
-## Can I connect a custom domain to my Lovable project?
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/redaBiramane/canaming)
 
-Yes, you can!
+1. Import the repository on [Vercel](https://vercel.com/new).
+2. Vercel detects Vite automatically.
+3. Leave **Build Command** as `npm run build` and **Output Directory** as `dist`.
+4. Click **Deploy**.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+> **Note:** When deploying to Vercel or Netlify (where the app is served at the root `/`), no extra configuration is needed – `DEPLOY_BASE` defaults to `/`. The `/canaming/` subpath is only set when deploying via the included GitHub Actions workflow.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Netlify
+
+1. Connect the repository on [Netlify](https://app.netlify.com/).
+2. **Build command**: `npm run build`
+3. **Publish directory**: `dist`
+4. Click **Deploy site**.
+
+---
+
+## Environment variables
+
+If the app uses Supabase, create a `.env` file at the project root (copy from `.env.example` if present):
+
+```env
+VITE_SUPABASE_URL=https://<your-project>.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
+```
+
+> All Vite environment variables must be prefixed with `VITE_` to be exposed to the browser.
+> For GitHub Pages, add these as **repository secrets** in Settings → Secrets → Actions, then reference them in the workflow if needed.
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| `npm install` fails | Make sure you are using **Node.js ≥ 20**. Run `node -v` to check. |
+| Blank page on GitHub Pages | Ensure **Settings → Pages → Source** is set to **GitHub Actions**, not a branch. |
+| Assets 404 on GitHub Pages | The `base: '/canaming/'` option in `vite.config.ts` handles this automatically for production builds. |
+| Supabase calls fail | Double-check that `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set correctly. |
+| Port already in use | Change the port: `npm run dev -- --port 3000` |
