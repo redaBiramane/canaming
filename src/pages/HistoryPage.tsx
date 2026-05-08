@@ -45,34 +45,48 @@ export default function HistoryPage() {
   const { t } = useI18nStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filters, setFilters] = useState({
-    date: "",
+    date: "all",
     action: "all",
     term: "",
     detail: "",
-    author: ""
+    author: "all"
   });
+
+  const authors = useMemo(() => {
+    const set = new Set(history.map(h => h.auteur).filter(Boolean));
+    return Array.from(set).sort();
+  }, [history]);
+
+  const dates = useMemo(() => {
+    const set = new Set(history.map(h => new Date(h.date).toLocaleDateString("fr-FR")).filter(Boolean));
+    return Array.from(set).sort((a, b) => {
+      const dateA = a.split('/').reverse().join('');
+      const dateB = b.split('/').reverse().join('');
+      return dateB.localeCompare(dateA);
+    });
+  }, [history]);
 
   const filteredHistory = useMemo(() => {
     let base = role === "admin" ? history : history.filter((h) => h.auteur === user?.email);
     
     return base.filter(h => {
-      const dateStr = new Date(h.date).toLocaleString("fr-FR").toLowerCase();
-      const matchDate = !filters.date || dateStr.includes(filters.date.toLowerCase());
+      const dateStr = new Date(h.date).toLocaleDateString("fr-FR");
+      const matchDate = filters.date === "all" || dateStr === filters.date;
       const matchAction = filters.action === "all" || h.action === filters.action;
       const matchTerm = !filters.term || (h.terme || "").toLowerCase().includes(filters.term.toLowerCase());
       const matchDetail = !filters.detail || 
         ((h.ancienne_valeur || "").toLowerCase().includes(filters.detail.toLowerCase()) || 
          (h.nouvelle_valeur || "").toLowerCase().includes(filters.detail.toLowerCase()) ||
          (h.champ || "").toLowerCase().includes(filters.detail.toLowerCase()));
-      const matchAuthor = !filters.author || (h.auteur || "").toLowerCase().includes(filters.author.toLowerCase());
+      const matchAuthor = filters.author === "all" || h.auteur === filters.author;
       
       return matchDate && matchAction && matchTerm && matchDetail && matchAuthor;
     });
   }, [history, role, user?.email, filters]);
 
-  const hasActiveFilters = filters.date !== "" || filters.action !== "all" || filters.term !== "" || filters.detail !== "" || filters.author !== "";
+  const hasActiveFilters = filters.date !== "all" || filters.action !== "all" || filters.term !== "" || filters.detail !== "" || filters.author !== "all";
 
-  const clearFilters = () => setFilters({ date: "", action: "all", term: "", detail: "", author: "" });
+  const clearFilters = () => setFilters({ date: "all", action: "all", term: "", detail: "", author: "all" });
 
   const selectedEntry = filteredHistory.find((h) => h.id === selectedId);
 
@@ -130,13 +144,16 @@ export default function HistoryPage() {
                   <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'14%'}}>
                     <div className="flex flex-col gap-2">
                       <span>{t("admin.col_date") || "Date"}</span>
-                      <Input 
-                        size={1}
+                      <select 
                         value={filters.date}
                         onChange={(e) => setFilters({...filters, date: e.target.value})}
-                        className="h-7 text-[10px] px-2 bg-background border-muted-foreground/10"
-                        placeholder="Filtrer..."
-                      />
+                        className="h-7 text-[10px] px-1 bg-background border border-muted-foreground/10 rounded-md outline-none focus:border-primary"
+                      >
+                        <option value="all">Toutes</option>
+                        {dates.map(d => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
                     </div>
                   </th>
                   <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'11%'}}>
@@ -179,12 +196,16 @@ export default function HistoryPage() {
                   <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'15%'}}>
                     <div className="flex flex-col gap-2">
                       <span>Auteur</span>
-                      <Input 
+                      <select 
                         value={filters.author}
                         onChange={(e) => setFilters({...filters, author: e.target.value})}
-                        className="h-7 text-[10px] px-2 bg-background border-muted-foreground/10"
-                        placeholder="Filtrer..."
-                      />
+                        className="h-7 text-[10px] px-1 bg-background border border-muted-foreground/10 rounded-md outline-none focus:border-primary"
+                      >
+                        <option value="all">Tous</option>
+                        {authors.map(a => (
+                          <option key={a} value={a}>{a}</option>
+                        ))}
+                      </select>
                     </div>
                   </th>
                   <th className="text-center p-3 font-medium text-muted-foreground" style={{width:'10%'}}>
