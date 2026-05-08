@@ -2,8 +2,11 @@ import { Fragment, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/hooks/useStore";
 import { useAuth } from "@/hooks/useAuth";
-import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, Eye, X, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
+import { Clock, Edit, Plus, Trash2, Upload, ArrowRight, Code2, Flag, Eye, X, CheckCircle2, AlertTriangle, HelpCircle, Search, Filter, RotateCcw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { useI18nStore } from "@/lib/i18n";
 
 const actionIcons: Record<string, JSX.Element> = {
@@ -41,25 +44,115 @@ export default function HistoryPage() {
   const { user, role } = useAuth();
   const { t } = useI18nStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [actionFilter, setActionFilter] = useState<string>("all");
 
   const filteredHistory = useMemo(() => {
-    if (role === "admin") return history;
-    return history.filter((h) => h.auteur === user?.email);
-  }, [history, role, user?.email]);
+    let base = role === "admin" ? history : history.filter((h) => h.auteur === user?.email);
+    
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      base = base.filter(h => 
+        (h.terme || "").toLowerCase().includes(q) || 
+        (h.auteur || "").toLowerCase().includes(q) ||
+        (h.action || "").toLowerCase().includes(q) ||
+        (h.ancienne_valeur || "").toLowerCase().includes(q) ||
+        (h.nouvelle_valeur || "").toLowerCase().includes(q) ||
+        (h.champ || "").toLowerCase().includes(q)
+      );
+    }
+    
+    if (actionFilter && actionFilter !== "all") {
+      base = base.filter(h => h.action === actionFilter);
+    }
+
+    return base;
+  }, [history, role, user?.email, searchQuery, actionFilter]);
 
   const selectedEntry = filteredHistory.find((h) => h.id === selectedId);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("admin.history_title")}</h1>
-        <p className="text-muted-foreground mt-1">{t("admin.history_desc")}</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{t("admin.history_title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("admin.history_desc")}</p>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Rechercher..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-background/50 border-muted-foreground/20 focus:border-primary transition-all"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          <Select value={actionFilter} onValueChange={setActionFilter}>
+            <SelectTrigger className="w-[180px] bg-background/50 border-muted-foreground/20">
+              <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="Action" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les actions</SelectItem>
+              {Object.entries(actionLabels).map(([key, label]) => (
+                <SelectItem key={key} value={key}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {(searchQuery || actionFilter !== "all") && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => { setSearchQuery(""); setActionFilter("all"); }}
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+              Réinitialiser
+            </Button>
+          )}
+        </div>
       </div>
 
       {filteredHistory.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="ca-card p-12 text-center">
-          <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">{t("admin.no_history")}</p>
+          <div className="bg-muted/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            {searchQuery || actionFilter !== "all" ? (
+              <Search className="h-8 w-8 text-muted-foreground" />
+            ) : (
+              <Clock className="h-8 w-8 text-muted-foreground" />
+            )}
+          </div>
+          <h3 className="text-lg font-medium text-foreground mb-1">
+            {searchQuery || actionFilter !== "all" ? "Aucun résultat trouvé" : t("admin.no_history")}
+          </h3>
+          <p className="text-muted-foreground max-w-sm mx-auto">
+            {searchQuery || actionFilter !== "all" 
+              ? "Essayez d'ajuster vos filtres ou votre recherche pour trouver ce que vous cherchez."
+              : "L'historique des transformations apparaîtra ici une fois que vous aurez effectué des actions."}
+          </p>
+          {(searchQuery || actionFilter !== "all") && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setSearchQuery(""); setActionFilter("all"); }}
+              className="mt-6"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-2" />
+              Effacer les filtres
+            </Button>
+          )}
         </motion.div>
       ) : (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-x-auto">
