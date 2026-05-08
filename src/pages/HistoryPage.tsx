@@ -77,6 +77,7 @@ export default function HistoryPage() {
   const selectedEntry = filteredHistory.find((h) => h.id === selectedId);
 
   return (
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t("admin.history_title")}</h1>
@@ -235,8 +236,9 @@ export default function HistoryPage() {
               ))}
             </tbody>
           </table>
-        </motion.div>
-      )}
+        </div>
+      </motion.div>
+    )}
 
       {/* Detail Dialog */}
       <Dialog open={!!selectedEntry} onOpenChange={() => setSelectedId(null)}>
