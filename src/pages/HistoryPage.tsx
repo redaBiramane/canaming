@@ -44,130 +44,154 @@ export default function HistoryPage() {
   const { user, role } = useAuth();
   const { t } = useI18nStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [actionFilter, setActionFilter] = useState<string>("all");
+  const [filters, setFilters] = useState({
+    date: "",
+    action: "all",
+    term: "",
+    detail: "",
+    author: ""
+  });
 
   const filteredHistory = useMemo(() => {
     let base = role === "admin" ? history : history.filter((h) => h.auteur === user?.email);
     
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      base = base.filter(h => 
-        (h.terme || "").toLowerCase().includes(q) || 
-        (h.auteur || "").toLowerCase().includes(q) ||
-        (h.action || "").toLowerCase().includes(q) ||
-        (h.ancienne_valeur || "").toLowerCase().includes(q) ||
-        (h.nouvelle_valeur || "").toLowerCase().includes(q) ||
-        (h.champ || "").toLowerCase().includes(q)
-      );
-    }
-    
-    if (actionFilter && actionFilter !== "all") {
-      base = base.filter(h => h.action === actionFilter);
-    }
+    return base.filter(h => {
+      const dateStr = new Date(h.date).toLocaleString("fr-FR").toLowerCase();
+      const matchDate = !filters.date || dateStr.includes(filters.date.toLowerCase());
+      const matchAction = filters.action === "all" || h.action === filters.action;
+      const matchTerm = !filters.term || (h.terme || "").toLowerCase().includes(filters.term.toLowerCase());
+      const matchDetail = !filters.detail || 
+        ((h.ancienne_valeur || "").toLowerCase().includes(filters.detail.toLowerCase()) || 
+         (h.nouvelle_valeur || "").toLowerCase().includes(filters.detail.toLowerCase()) ||
+         (h.champ || "").toLowerCase().includes(filters.detail.toLowerCase()));
+      const matchAuthor = !filters.author || (h.auteur || "").toLowerCase().includes(filters.author.toLowerCase());
+      
+      return matchDate && matchAction && matchTerm && matchDetail && matchAuthor;
+    });
+  }, [history, role, user?.email, filters]);
 
-    return base;
-  }, [history, role, user?.email, searchQuery, actionFilter]);
+  const hasActiveFilters = filters.date !== "" || filters.action !== "all" || filters.term !== "" || filters.detail !== "" || filters.author !== "";
+
+  const clearFilters = () => setFilters({ date: "", action: "all", term: "", detail: "", author: "" });
 
   const selectedEntry = filteredHistory.find((h) => h.id === selectedId);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{t("admin.history_title")}</h1>
           <p className="text-muted-foreground mt-1">{t("admin.history_desc")}</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[240px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Rechercher..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-background/50 border-muted-foreground/20 focus:border-primary transition-all"
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-
-          <Select value={actionFilter} onValueChange={setActionFilter}>
-            <SelectTrigger className="w-[180px] bg-background/50 border-muted-foreground/20">
-              <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="Action" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Toutes les actions</SelectItem>
-              {Object.entries(actionLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {(searchQuery || actionFilter !== "all") && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => { setSearchQuery(""); setActionFilter("all"); }}
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-              Réinitialiser
-            </Button>
-          )}
-        </div>
+        {hasActiveFilters && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={clearFilters}
+            className="text-muted-foreground hover:text-primary border-dashed"
+          >
+            <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+            Réinitialiser les filtres
+          </Button>
+        )}
       </div>
 
       {filteredHistory.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="ca-card p-12 text-center">
           <div className="bg-muted/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            {searchQuery || actionFilter !== "all" ? (
+            {hasActiveFilters ? (
               <Search className="h-8 w-8 text-muted-foreground" />
             ) : (
               <Clock className="h-8 w-8 text-muted-foreground" />
             )}
           </div>
           <h3 className="text-lg font-medium text-foreground mb-1">
-            {searchQuery || actionFilter !== "all" ? "Aucun résultat trouvé" : t("admin.no_history")}
+            {hasActiveFilters ? "Aucun résultat trouvé" : t("admin.no_history")}
           </h3>
           <p className="text-muted-foreground max-w-sm mx-auto">
-            {searchQuery || actionFilter !== "all" 
-              ? "Essayez d'ajuster vos filtres ou votre recherche pour trouver ce que vous cherchez."
+            {hasActiveFilters 
+              ? "Ajustez vos filtres par colonne pour trouver ce que vous cherchez."
               : "L'historique des transformations apparaîtra ici une fois que vous aurez effectué des actions."}
           </p>
-          {(searchQuery || actionFilter !== "all") && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => { setSearchQuery(""); setActionFilter("all"); }}
-              className="mt-6"
-            >
+          {hasActiveFilters && (
+            <Button variant="outline" size="sm" onClick={clearFilters} className="mt-6">
               <RotateCcw className="h-3.5 w-3.5 mr-2" />
               Effacer les filtres
             </Button>
           )}
         </motion.div>
       ) : (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-x-auto">
-          <table className="ca-table-resizable text-sm">
-            <thead className="bg-muted">
-              <tr>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'14%'}}>{t("admin.col_date") || "Date"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'11%'}}>{t("admin.col_action") || "Action"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'23%'}}>Terme</th>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'27%'}}>{t("admin.col_details") || "Détail"}</th>
-                <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'15%'}}>Auteur</th>
-                <th className="text-center p-3 font-medium text-muted-foreground" style={{width:'10%'}}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ca-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="ca-table-resizable text-sm">
+              <thead className="bg-muted/50 border-b">
+                <tr>
+                  <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'14%'}}>
+                    <div className="flex flex-col gap-2">
+                      <span>{t("admin.col_date") || "Date"}</span>
+                      <Input 
+                        size={1}
+                        value={filters.date}
+                        onChange={(e) => setFilters({...filters, date: e.target.value})}
+                        className="h-7 text-[10px] px-2 bg-background border-muted-foreground/10"
+                        placeholder="Filtrer..."
+                      />
+                    </div>
+                  </th>
+                  <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'11%'}}>
+                    <div className="flex flex-col gap-2">
+                      <span>{t("admin.col_action") || "Action"}</span>
+                      <select 
+                        value={filters.action}
+                        onChange={(e) => setFilters({...filters, action: e.target.value})}
+                        className="h-7 text-[10px] px-1 bg-background border border-muted-foreground/10 rounded-md outline-none focus:border-primary"
+                      >
+                        <option value="all">Toutes</option>
+                        {Object.entries(actionLabels).map(([key, label]) => (
+                          <option key={key} value={key}>{label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </th>
+                  <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'23%'}}>
+                    <div className="flex flex-col gap-2">
+                      <span>Terme</span>
+                      <Input 
+                        value={filters.term}
+                        onChange={(e) => setFilters({...filters, term: e.target.value})}
+                        className="h-7 text-[10px] px-2 bg-background border-muted-foreground/10"
+                        placeholder="Filtrer..."
+                      />
+                    </div>
+                  </th>
+                  <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'27%'}}>
+                    <div className="flex flex-col gap-2">
+                      <span>{t("admin.col_details") || "Détail"}</span>
+                      <Input 
+                        value={filters.detail}
+                        onChange={(e) => setFilters({...filters, detail: e.target.value})}
+                        className="h-7 text-[10px] px-2 bg-background border-muted-foreground/10"
+                        placeholder="Filtrer..."
+                      />
+                    </div>
+                  </th>
+                  <th className="text-left p-3 font-medium text-muted-foreground" style={{width:'15%'}}>
+                    <div className="flex flex-col gap-2">
+                      <span>Auteur</span>
+                      <Input 
+                        value={filters.author}
+                        onChange={(e) => setFilters({...filters, author: e.target.value})}
+                        className="h-7 text-[10px] px-2 bg-background border-muted-foreground/10"
+                        placeholder="Filtrer..."
+                      />
+                    </div>
+                  </th>
+                  <th className="text-center p-3 font-medium text-muted-foreground" style={{width:'10%'}}>
+                    <span>Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
               {filteredHistory.map((h) => (
                 <tr key={h.id} className="border-t hover:bg-muted/50 transition-colors">
                   <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">
